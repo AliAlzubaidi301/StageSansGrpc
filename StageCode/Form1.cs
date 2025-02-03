@@ -12,8 +12,7 @@ namespace StageCode
         public static int Langue = 1; // 1 = English, 2 = Chinese, 3 = German, 4 = French, 5 = Lithuanian
         private Form1 frm;
 
-        // a faire
-        //CButton
+        //A corriger
         //ORthoAD
 
         public Form1()
@@ -557,8 +556,11 @@ namespace StageCode
 
         private void button2_Click(object sender, EventArgs e)
         {
-            CButton a = new CButton();
+            OrthoCMDLib a = new OrthoCMDLib();
             this.Controls.Add(a);
+
+            string b= a.WriteFile();
+            MessageBox.Show(b);
         }
     }
 }
