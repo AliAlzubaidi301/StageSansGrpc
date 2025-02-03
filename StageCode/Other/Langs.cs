@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace StageCode.Other
 {
-    public sealed class Languages
+    public class Languages
     {
         public delegate void LanguageChangedEventHandler(AvailableLanguage NewLanguage);
 
