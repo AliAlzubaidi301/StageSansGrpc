@@ -11,7 +11,7 @@ using System.Xml.Linq;
 
 namespace StageCode
 {
-    public partial class AM601 : UserControl
+    public partial class AM60 : UserControl
     {
         #region "Orthodyne Data"
         private int _LevelVisible = 0;
@@ -28,11 +28,11 @@ namespace StageCode
         public event EventHandler VisibilityChanged;
 
         #region "Read/Write on .syn file"
-        public AM601 ReadFileXML(string xmlText)
+        public AM60 ReadFileXML(string xmlText)
         {
             XElement xml = XElement.Parse(xmlText);
 
-            AM601 am60Control = new AM601();
+            AM60 am60Control = new AM60();
 
             string type = xml.Attribute("type")?.Value;
             am60Control.Name = xml.Attribute("name")?.Value;
@@ -52,7 +52,7 @@ namespace StageCode
             // Return the populated AM60 object
             return am60Control;
         }
-        public AM601 ReadFile(string[] splitPvirgule, string comment, string file, bool fromCopy)
+        public AM60 ReadFile(string[] splitPvirgule, string comment, string file, bool fromCopy)
         {
             this._comment = comment;
             this.Name = splitPvirgule[1];
@@ -370,7 +370,7 @@ namespace StageCode
             return this.GetType();
         }
 
-        public AM601()
+        public AM60()
         {
             InitializeComponent();
         }

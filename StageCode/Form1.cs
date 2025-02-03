@@ -1,6 +1,4 @@
-﻿using CButtonLib;
-using CONT1Lib;
-using ReticuleLib;
+﻿using StageCode.LIB;
 using System;
 using System.Text;
 using System.Windows.Forms;
@@ -20,8 +18,6 @@ namespace StageCode
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            var a = new AM601();
-
             string tmp = Application.ProductVersion[0].ToString();
             tmp += Application.ProductVersion[1].ToString();
             tmp += Application.ProductVersion[2].ToString();
@@ -157,9 +153,9 @@ namespace StageCode
 
         private void ExportControlToXml(Control control, StringBuilder xmlContent)
         {
-            if (control is AM601 am60Control)
+            if (control is AM60 am60Control)
             {
-                AM601 am60 = am60Control as AM601;
+                AM60 am60 = am60Control as AM60;
 
                 xmlContent.Append(am60.WriteFileXML());
             }
@@ -377,7 +373,7 @@ namespace StageCode
 
                     if (type == "AM60")
                     {
-                        AM601 am60Control = new AM601();
+                        AM60 am60Control = new AM60();
                         am60Control = am60Control.ReadFileXML(component.ToString());  
 
                         Controls.Add(am60Control);
@@ -553,10 +549,5 @@ namespace StageCode
         }
 
         #endregion
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }

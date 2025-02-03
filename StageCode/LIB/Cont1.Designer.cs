@@ -1,6 +1,6 @@
-﻿namespace StageCode
+﻿namespace StageCode.LIB
 {
-    partial class AM60
+    partial class CONT1
     {
         /// <summary>
         /// Required designer variable.
@@ -30,15 +30,13 @@
         {
             SuspendLayout();
             // 
-            // AM60
+            // CONT1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Black;
-            Margin = new Padding(4, 3, 4, 3);
-            Name = "AM60";
-            Size = new Size(175, 173);
-            Load += AM60_Load;
+            Name = "CONT1";
+            Load += Cont1_Load;
             ResumeLayout(false);
         }
 
