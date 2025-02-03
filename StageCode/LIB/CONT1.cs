@@ -24,6 +24,7 @@ namespace StageCode.LIB
 
         public CONT1()
         {
+            InitializeComponent();
             ControlUtils.RegisterControl(this, () => Visibility, h => VisibilityChanging += h, h => VisibilityChanged += h);
         }
 

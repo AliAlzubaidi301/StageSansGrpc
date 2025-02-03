@@ -11,6 +11,10 @@ namespace StageCode
         public static int Langue = 1; // 1 = English, 2 = Chinese, 3 = German, 4 = French, 5 = Lithuanian
         private Form1 frm;
 
+        // a faire
+        //OrthoAd 
+        //CButton
+
         public Form1()
         {
             InitializeComponent();
@@ -374,7 +378,7 @@ namespace StageCode
                     if (type == "AM60")
                     {
                         AM60 am60Control = new AM60();
-                        am60Control = am60Control.ReadFileXML(component.ToString());  
+                        am60Control = am60Control.ReadFileXML(component.ToString());
 
                         Controls.Add(am60Control);
                     }
@@ -549,5 +553,12 @@ namespace StageCode
         }
 
         #endregion
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            INTEG a = new INTEG();
+            a.LevelVisible = 3;
+            this.Controls.Add(a);
+        }
     }
 }

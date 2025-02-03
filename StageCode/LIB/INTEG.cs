@@ -7,62 +7,90 @@ namespace StageCode
 {
     public sealed partial class INTEG : UserControl
     {
-        #region Données Orthodyn
-        private int _levelVisible;
-        private int _levelEnabled;
-        private string _comment = string.Empty;
+        #region "Orthodyn Data"
+        private int _LevelVisible = 0; // Niveau d'accès minimum pour rendre l'objet visible
+        private int _LevelEnabled = 0; // Niveau d'accès minimum pour rendre l'objet accessible
+        private string _comment = ""; // Commentaire sur le contrôle
         private string _visibility = "1";
         #endregion
 
-        #region Données du contrôle
-        private string _detecteur = string.Empty;
+        #region "Control Data"
+        private string _Detecteur;
         #endregion
 
-        // Événements pour la gestion de la visibilité
         public event EventHandler VisibilityChanging;
         public event EventHandler VisibilityChanged;
 
-        // Constructeur
         public INTEG()
         {
+            // Cet appel est requis par le Concepteur Windows Form.
             InitializeComponent();
+
+            // Ajoutez une initialisation quelconque après l'appel InitializeComponent().
+            ControlUtils.RegisterControl(this, () => Visibility,
+                            (h) => VisibilityChanging += h,
+                            (h) => VisibilityChanged += h);
         }
 
-        #region Propriétés du contrôle
-        [Category("Orthodyne"), Description("Nom du détecteur associé au graph")]
-        public string Detecteur
+        #region "Read/Write on .syn file"
+        public INTEG ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
         {
-            get => _detecteur;
-            set => _detecteur = value ?? string.Empty;
+            this._comment = comment;
+            this.Name = splitPvirgule[1];
+            this.Size = new Size(int.Parse(splitPvirgule[3]), int.Parse(splitPvirgule[2]));
+            this.Location = FromCopy ? new Point(int.Parse(splitPvirgule[5]) + 10, int.Parse(splitPvirgule[4]) + 10) : new Point(int.Parse(splitPvirgule[5]), int.Parse(splitPvirgule[4]));
+            this.LevelVisible = int.Parse(splitPvirgule[7]);
+            this.LevelEnabled = int.Parse(splitPvirgule[8]);
+            this.Detecteur = splitPvirgule[6];
+            if (splitPvirgule.Length >= 10)
+            {
+                this.Visibility = splitPvirgule[9];
+            }
+            return this;
+        }
+
+        public string WriteFile()
+        {
+            return "INTEG;" + this.Name + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() +
+                   ";" + this.Detecteur + ";" + this.LevelVisible.ToString() + ";" + this.LevelEnabled.ToString() + ";" + this.Visibility;
         }
         #endregion
 
-        #region Propriétés Orthodyne
+        #region "Control Properties"
+        [Category("Orthodyne"), Description("Nom du détecteur associé au graph")]
+        public string Detecteur
+        {
+            get { return _Detecteur; }
+            set { _Detecteur = value; }
+        }
+        #endregion
+
+        #region "Orthodyne Properties"
         [Category("Orthodyne"), Browsable(false), Description("Commentaire sur l'objet")]
         public string Comment
         {
-            get => _comment;
-            set => _comment = value ?? string.Empty;
+            get { return _comment; }
+            set { _comment = value; }
         }
 
         [Category("Orthodyne"), Description("Niveau minimum pour rendre l'objet visible (si 0, toujours visible)")]
         public int LevelVisible
         {
-            get => _levelVisible;
-            set => _levelVisible = Math.Max(0, value);
+            get { return _LevelVisible; }
+            set { _LevelVisible = value; }
         }
 
         [Category("Orthodyne"), Description("Niveau minimum pour rendre l'objet accessible (si 0, toujours accessible)")]
         public int LevelEnabled
         {
-            get => _levelEnabled;
-            set => _levelEnabled = Math.Max(0, value);
+            get { return _LevelEnabled; }
+            set { _LevelEnabled = value; }
         }
 
-        [Category("Orthodyne"), Description("Si 0, l'objet sera caché. Si #VarName, la visibilité dépendra de la valeur de la variable.")]
+        [Category("Orthodyne"), Description("If 0 or will be hidden, if #VarName will depend on variable value")]
         public string Visibility
         {
-            get => _visibility;
+            get { return _visibility; }
             set
             {
                 VisibilityChanging?.Invoke(this, EventArgs.Empty);
@@ -72,157 +100,254 @@ namespace StageCode
         }
         #endregion
 
-        #region Lecture/Écriture du fichier .syn
-        public INTEG ReadFile(string[] splitPvirgule, string comment, string file, bool fromCopy)
+        #region "Hiding useless Properties"
+        [Browsable(false)]
+        public new Color BackColor
         {
-            if (splitPvirgule == null || splitPvirgule.Length < 9)
-            {
-                throw new ArgumentException("Le fichier est mal formé ou incomplet.", nameof(splitPvirgule));
-            }
-
-            try
-            {
-                this.Comment = comment;
-                this.Name = splitPvirgule[1];
-                this.Size = new Size(int.Parse(splitPvirgule[3]), int.Parse(splitPvirgule[2]));
-                this.Location = new Point(
-                    int.Parse(splitPvirgule[5]) + (fromCopy ? 10 : 0),
-                    int.Parse(splitPvirgule[4]) + (fromCopy ? 10 : 0)
-                );
-                this.LevelVisible = int.Parse(splitPvirgule[7]);
-                this.LevelEnabled = int.Parse(splitPvirgule[8]);
-                this.Detecteur = splitPvirgule[6];
-
-                if (splitPvirgule.Length >= 10)
-                {
-                    this.Visibility = splitPvirgule[9];
-                }
-            }
-            catch (FormatException ex)
-            {
-                throw new ArgumentException("Les données du fichier contiennent des valeurs invalides.", nameof(splitPvirgule), ex);
-            }
-
-            return this;
+            get { return base.BackColor; }
+            set { base.BackColor = value; }
         }
 
-        public string WriteFile()
+        [Browsable(false)]
+        public new Color ForeColor
         {
-            return $"INTEG;{this.Name};{this.Size.Height};{this.Size.Width};{this.Location.Y};{this.Location.X};{this.Detecteur};{this.LevelVisible};{this.LevelEnabled};{this.Visibility}";
+            get { return base.ForeColor; }
+            set { base.ForeColor = value; }
+        }
+
+        [Browsable(false)]
+        public new Font Font
+        {
+            get { return base.Font; }
+            set { base.Font = value; }
+        }
+
+        [Browsable(false)]
+        public new AccessibleRole AccessibleRole
+        {
+            get { return base.AccessibleRole; }
+            set { base.AccessibleRole = value; }
+        }
+
+        [Browsable(false)]
+        public new string AccessibleDescription
+        {
+            get { return base.AccessibleDescription; }
+            set { base.AccessibleDescription = value; }
+        }
+
+        [Browsable(false)]
+        public new string AccessibleName
+        {
+            get { return base.AccessibleName; }
+            set { base.AccessibleName = value; }
+        }
+
+        [Browsable(false)]
+        public new Image BackgroundImage
+        {
+            get { return base.BackgroundImage; }
+            set { base.BackgroundImage = value; }
+        }
+
+        [Browsable(false)]
+        public new ImageLayout BackgroundImageLayout
+        {
+            get { return base.BackgroundImageLayout; }
+            set { base.BackgroundImageLayout = value; }
+        }
+
+        [Browsable(false)]
+        public new BorderStyle BorderStyle
+        {
+            get { return base.BorderStyle; }
+            set { base.BorderStyle = value; }
+        }
+
+        [Browsable(false)]
+        public new Cursor Cursor
+        {
+            get { return base.Cursor; }
+            set { base.Cursor = value; }
+        }
+
+        [Browsable(false)]
+        public new RightToLeft RightToLeft
+        {
+            get { return base.RightToLeft; }
+            set { base.RightToLeft = value; }
+        }
+
+        [Browsable(false)]
+        public new bool UseWaitCursor
+        {
+            get { return base.UseWaitCursor; }
+            set { base.UseWaitCursor = value; }
+        }
+
+        [Browsable(false)]
+        public new bool AllowDrop
+        {
+            get { return base.AllowDrop; }
+            set { base.AllowDrop = value; }
+        }
+
+        [Browsable(false)]
+        public new AutoValidate AutoValidate
+        {
+            get { return base.AutoValidate; }
+            set { base.AutoValidate = value; }
+        }
+
+        [Browsable(false)]
+        public new ContextMenuStrip ContextMenuStrip
+        {
+            get { return base.ContextMenuStrip; }
+            set { base.ContextMenuStrip = value; }
+        }
+
+        [Browsable(false)]
+        public new bool Enabled
+        {
+            get { return base.Enabled; }
+            set { base.Enabled = value; }
+        }
+
+        [Browsable(false)]
+        public new ImeMode ImeMode
+        {
+            get { return base.ImeMode; }
+            set { base.ImeMode = value; }
+        }
+
+        [Browsable(false)]
+        public new int TabIndex
+        {
+            get { return base.TabIndex; }
+            set { base.TabIndex = value; }
+        }
+
+        [Browsable(false)]
+        public new bool TabStop
+        {
+            get { return base.TabStop; }
+            set { base.TabStop = value; }
+        }
+
+        [Browsable(false)]
+        public new bool Visible
+        {
+            get { return base.Visible; }
+            set { base.Visible = value; }
+        }
+
+        [Browsable(false)]
+        public new AnchorStyles Anchor
+        {
+            get { return base.Anchor; }
+            set { base.Anchor = value; }
+        }
+
+        [Browsable(false)]
+        public new bool AutoScroll
+        {
+            get { return base.AutoScroll; }
+            set { base.AutoScroll = value; }
+        }
+
+        [Browsable(false)]
+        public new Size AutoScrollMargin
+        {
+            get { return base.AutoScrollMargin; }
+            set { base.AutoScrollMargin = value; }
+        }
+
+        [Browsable(false)]
+        public new Size AutoScrollMinSize
+        {
+            get { return base.AutoScrollMinSize; }
+            set { base.AutoScrollMinSize = value; }
+        }
+
+        [Browsable(false)]
+        public new bool AutoSize
+        {
+            get { return base.AutoSize; }
+            set { base.AutoSize = value; }
+        }
+
+        [Browsable(false)]
+        public new AutoSizeMode AutoSizeMode
+        {
+            get { return base.AutoSizeMode; }
+            set { base.AutoSizeMode = value; }
+        }
+
+        [Browsable(false)]
+        public new DockStyle Dock
+        {
+            get { return base.Dock; }
+            set { base.Dock = value; }
+        }
+
+        [Browsable(false)]
+        public new Padding Margin
+        {
+            get { return base.Margin; }
+            set { base.Margin = value; }
+        }
+
+        [Browsable(false)]
+        public new Size MaximumSize
+        {
+            get { return base.MaximumSize; }
+            set { base.MaximumSize = value; }
+        }
+
+        [Browsable(false)]
+        public new Size MinimumSize
+        {
+            get { return base.MinimumSize; }
+            set { base.MinimumSize = value; }
+        }
+
+        [Browsable(false)]
+        public new Padding Padding
+        {
+            get { return base.Padding; }
+            set { base.Padding = value; }
+        }
+
+        [Browsable(false)]
+        public new ControlBindingsCollection DataBindings
+        {
+            get { return base.DataBindings; }
+        }
+
+        [Browsable(false)]
+        public new object Tag
+        {
+            get { return base.Tag; }
+            set { base.Tag = value; }
+        }
+
+        [Browsable(false)]
+        public new bool CausesValidation
+        {
+            get { return base.CausesValidation; }
+            set { base.CausesValidation = value; }
         }
         #endregion
 
-        #region Gestion des événements
-        private void INTEG_Load(object sender, EventArgs e)
-        {
-        }
-        #endregion
-
-        #region Masquage des propriétés inutilisées
-        [Browsable(false)]
-        public new Color BackColor { get; set; }
-
-        [Browsable(false)]
-        public new Color ForeColor { get; set; }
-
-        [Browsable(false)]
-        public new Font Font { get; set; }
-
-        [Browsable(false)]
-        public new AccessibleRole AccessibleRole { get; set; }
-
-        [Browsable(false)]
-        public new string AccessibleDescription { get; set; }
-
-        [Browsable(false)]
-        public new string AccessibleName { get; set; }
-
-        [Browsable(false)]
-        public new Image BackgroundImage { get; set; }
-
-        [Browsable(false)]
-        public new ImageLayout BackgroundImageLayout { get; set; }
-
-        [Browsable(false)]
-        public new BorderStyle BorderStyle { get; set; }
-
-        [Browsable(false)]
-        public new Cursor Cursor { get; set; }
-
-        [Browsable(false)]
-        public new RightToLeft RightToLeft { get; set; }
-
-        [Browsable(false)]
-        public new bool UseWaitCursor { get; set; }
-
-        [Browsable(false)]
-        public new bool AllowDrop { get; set; }
-
-        [Browsable(false)]
-        public new AutoValidate AutoValidate { get; set; }
-
-        [Browsable(false)]
-        public new ContextMenuStrip ContextMenuStrip { get; set; }
-
-        [Browsable(false)]
-        public new bool Enabled { get; set; }
-
-        [Browsable(false)]
-        public new ImeMode ImeMode { get; set; }
-
-        [Browsable(false)]
-        public new int TabIndex { get; set; }
-
-        [Browsable(false)]
-        public new bool TabStop { get; set; }
-
-        [Browsable(false)]
-        public new bool Visible { get; set; }
-
-        [Browsable(false)]
-        public new AnchorStyles Anchor { get; set; }
-
-        [Browsable(false)]
-        public new bool AutoScroll { get; set; }
-
-        [Browsable(false)]
-        public new Size AutoScrollMargin { get; set; }
-
-        [Browsable(false)]
-        public new Size AutoScrollMinSize { get; set; }
-
-        [Browsable(false)]
-        public new bool AutoSize { get; set; }
-
-        [Browsable(false)]
-        public new AutoSizeMode AutoSizeMode { get; set; }
-
-        [Browsable(false)]
-        public new DockStyle Dock { get; set; }
-
-        [Browsable(false)]
-        public new Padding Margin { get; set; }
-
-        [Browsable(false)]
-        public new Size MaximumSize { get; set; }
-
-        [Browsable(false)]
-        public new Size MinimumSize { get; set; }
-
-        [Browsable(false)]
-        public new Padding Padding { get; set; }
-
-        [Browsable(false)]
-        public new object Tag { get; set; }
-
-        [Browsable(false)]
-        public new bool CausesValidation { get; set; } 
-        #endregion
-
-        // Propriétés supplémentaires
         public string Type => "INTEG";
+
         public string SType => "INTEG";
 
         public Type GType() => this.GetType();
+
+        private void INTEG_Load(object sender, EventArgs e)
+        {
+            // Logique de chargement
+        }
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace StageCode
+﻿namespace StageCode.LIB
 {
-    partial class INTEG
+    partial class OrthoAD
     {
         /// <summary>
         /// Required designer variable.
@@ -28,32 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            label1 = new Label();
             SuspendLayout();
             // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(40, 51);
-            label1.Name = "label1";
-            label1.Size = new Size(38, 15);
-            label1.TabIndex = 0;
-            label1.Text = "label1";
-            // 
-            // INTEG
+            // OrthoAD
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.Black;
-            Controls.Add(label1);
-            Name = "INTEG";
-            Load += INTEG_Load;
+            ClientSize = new Size(800, 450);
+            Name = "OrthoAD";
+            Text = "OrthoAD";
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
-
-        private Label label1;
     }
 }
