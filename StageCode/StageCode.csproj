@@ -69,4 +69,8 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ContentAlignment\" />
+  </ItemGroup>
+
 </Project>

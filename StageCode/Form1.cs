@@ -1,4 +1,5 @@
 ﻿using StageCode.LIB;
+using StageCode.Other;
 using System;
 using System.Text;
 using System.Windows.Forms;
@@ -12,8 +13,8 @@ namespace StageCode
         private Form1 frm;
 
         // a faire
-        //OrthoAd 
         //CButton
+        //ORthoAD
 
         public Form1()
         {
@@ -556,8 +557,7 @@ namespace StageCode
 
         private void button2_Click(object sender, EventArgs e)
         {
-            INTEG a = new INTEG();
-            a.LevelVisible = 3;
+            CButton a = new CButton();
             this.Controls.Add(a);
         }
     }
