@@ -1,0 +1,72 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="CButtonLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\CButtonLib.dll</HintPath>
+    </Reference>
+    <Reference Include="ComponentEditors">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\ComponentEditors.dll</HintPath>
+    </Reference>
+    <Reference Include="CONT1Lib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\CONT1Lib.dll</HintPath>
+    </Reference>
+    <Reference Include="INTEGLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\INTEGLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoADLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoADLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoAlaLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoAlaLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoCMDLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoCMDLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoComboLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoComboLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoDILib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoDILib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoEditLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoEditLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoImageLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoImageLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoLabelLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoLabelLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoPbarLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoPbarLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoRelLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoRelLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoResultLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoResultLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoTabNameLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoTabNameLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OrthoVarnameLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoVarnameLib.dll</HintPath>
+    </Reference>
+    <Reference Include="ReticuleLib">
+      <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\ReticuleLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
