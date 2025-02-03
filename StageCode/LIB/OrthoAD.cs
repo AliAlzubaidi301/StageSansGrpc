@@ -215,7 +215,7 @@ namespace StageCode.LIB
             set
             {
                 _captionValues = value;
-                LanguageChangedEventHandler(Languages.CurrentLanguage);
+                LanguageChangedEventHandler(Langs.CurrentLanguage);
             }
         }
 
