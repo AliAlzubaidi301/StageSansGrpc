@@ -752,6 +752,78 @@ namespace StageCode
                 // Ajouter la gestion du dessin des bordures pointillées
                 frame.Paint += Frame_Paint;
                 frame.Invalidate(); // Cela va déclencher l'événement Paint pour redessiner
+
+                // Si un contrôle est sélectionné, afficher ses propriétés dans le PropertyGrid
+                if (controle is AM60 am60Control)
+                {
+                    // Mettre à jour le PropertyGrid avec l'objet AM60 sélectionné
+                    propertyGrid1.SelectedObject = am60Control;
+                }
+                else if (controle is CONT1 cont1Control)
+                {
+                    propertyGrid1.SelectedObject = cont1Control;
+                }
+                else if (controle is INTEG integControl)
+                {
+                    propertyGrid1.SelectedObject = integControl;
+                }
+                else if (controle is OrthoAD orthoADControl)
+                {
+                    propertyGrid1.SelectedObject = orthoADControl;
+                }
+                else if (controle is OrthoAla orthoAlaControl)
+                {
+                    propertyGrid1.SelectedObject = orthoAlaControl;
+                }
+                else if (controle is OrthoCMDLib orthoCMDLibControl)
+                {
+                    propertyGrid1.SelectedObject = orthoCMDLibControl;
+                }
+                else if (controle is OrthoCombo orthoComboControl)
+                {
+                    propertyGrid1.SelectedObject = orthoComboControl;
+                }
+                else if (controle is OrthoDI orthoDIControl)
+                {
+                    propertyGrid1.SelectedObject = orthoDIControl;
+                }
+                else if (controle is OrthoEdit orthoEditControl)
+                {
+                    propertyGrid1.SelectedObject = orthoEditControl;
+                }
+                else if (controle is OrthoImage orthoImageControl)
+                {
+                    propertyGrid1.SelectedObject = orthoImageControl;
+                }
+                else if (controle is OrthoLabel orthoLabelControl)
+                {
+                    propertyGrid1.SelectedObject = orthoLabelControl;
+                }
+                else if (controle is OrthoPbar orthoPbarControl)
+                {
+                    propertyGrid1.SelectedObject = orthoPbarControl;
+                }
+                else if (controle is OrthoRel orthoRelControl)
+                {
+                    propertyGrid1.SelectedObject = orthoRelControl;
+                }
+                else if (controle is OrthoResult orthoResultControl)
+                {
+                    propertyGrid1.SelectedObject = orthoResultControl;
+                }
+                else if (controle is OrthoVarname orthoVarnameControl)
+                {
+                    propertyGrid1.SelectedObject = orthoVarnameControl;
+                }
+                else if (controle is Reticule reticuleControl)
+                {
+                    propertyGrid1.SelectedObject = reticuleControl;
+                }
+
+                // Ajouter des vérifications pour les autres types de contrôles
+
+                // Réinitialiser le curseur
+                this.Cursor = Cursors.Default;
             }
         }
 
@@ -882,6 +954,114 @@ namespace StageCode
                 {
                     pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot; // Bordure en pointillés
                     e.Graphics.DrawRectangle(pen, 0, 0, frame.Width - 1, frame.Height - 1);
+                }
+            }
+        }
+
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveAs();
+        }
+
+        private void SaveAs()
+        {
+            // Ouvrir un SaveFileDialog pour choisir l'emplacement et le nom du fichier .syn
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn"; // Filtrer les fichiers pour .syn
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Créer un StringBuilder pour accumuler le texte de tous les contrôles
+                    StringBuilder accumulatedText = new StringBuilder();
+
+                    // Parcours tous les contrôles dans le panneau ou le conteneur (ici pnlViewHost)
+                    foreach (Control controle in pnlViewHost.Controls)
+                    {
+                        // Vérifier si le contrôle est une PictureBox
+                        if (controle is PictureBox pictureBox)
+                        {
+                            // Parcourir les contrôles enfants de la PictureBox
+                            foreach (Control childControl in pictureBox.Controls)
+                            {
+                                // Vérifier le type de contrôle enfant et appeler la méthode WriteFile correspondante
+                                if (childControl is AM60 am60Control)
+                                {
+                                    accumulatedText.AppendLine(am60Control.WriteFileXML());
+                                }
+                                else if (childControl is CONT1 cont1Control)
+                                {
+                                    accumulatedText.AppendLine(cont1Control.WriteFile());
+                                }
+                                else if (childControl is INTEG integControl)
+                                {
+                                    accumulatedText.AppendLine(integControl.WriteFile());
+                                }
+                                else if (childControl is OrthoAD orthoADControl)
+                                {
+                                    accumulatedText.AppendLine(orthoADControl.WriteFile());
+                                }
+                                else if (childControl is OrthoAla orthoAlaControl)
+                                {
+                                    accumulatedText.AppendLine(orthoAlaControl.WriteFile());
+                                }
+                                else if (childControl is OrthoCMDLib orthoCMDLibControl)
+                                {
+                                    accumulatedText.AppendLine(orthoCMDLibControl.WriteFile());
+                                }
+                                else if (childControl is OrthoCombo orthoComboControl)
+                                {
+                                    accumulatedText.AppendLine(orthoComboControl.WriteFile());
+                                }
+                                else if (childControl is OrthoDI orthoDIControl)
+                                {
+                                    accumulatedText.AppendLine(orthoDIControl.WriteFile());
+                                }
+                                else if (childControl is OrthoEdit orthoEditControl)
+                                {
+                                    accumulatedText.AppendLine(orthoEditControl.WriteFile());
+                                }
+                                else if (childControl is OrthoImage orthoImageControl)
+                                {
+                                    accumulatedText.AppendLine(orthoImageControl.WriteFile());
+                                }
+                                else if (childControl is OrthoLabel orthoLabelControl)
+                                {
+                                    accumulatedText.AppendLine(orthoLabelControl.WriteFile());
+                                }
+                                else if (childControl is OrthoPbar orthoPbarControl)
+                                {
+                                    accumulatedText.AppendLine(orthoPbarControl.WriteFile());
+                                }
+                                else if (childControl is OrthoRel orthoRelControl)
+                                {
+                                    accumulatedText.AppendLine(orthoRelControl.WriteFile());
+                                }
+                                else if (childControl is OrthoResult orthoResultControl)
+                                {
+                                    accumulatedText.AppendLine(orthoResultControl.WriteFile());
+                                }
+                                else if (childControl is OrthoVarname orthoVarnameControl)
+                                {
+                                    accumulatedText.AppendLine(orthoVarnameControl.WriteFile());
+                                }
+                                else if (childControl is Reticule reticuleControl)
+                                {
+                                    accumulatedText.AppendLine(reticuleControl.WriteFile());
+                                }
+                            }
+                        }
+                    }
+
+                    // Ouvrir un stream pour écrire dans le fichier choisi
+                    using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
+                    {
+                        MessageBox.Show(accumulatedText.ToString());
+                        // Écrire le texte accumulé dans le fichier
+                        writer.Write(accumulatedText.ToString());
+                    }
+
+                    // Message de confirmation
+                    MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
