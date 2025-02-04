@@ -13,7 +13,7 @@ namespace StageCode
         private Form1 frm;
 
         //A corriger
-        //ORthoAD et CButton
+        //ORthoAD et CButton TabName a faire
 
         public Form1()
         {
@@ -556,7 +556,7 @@ namespace StageCode
 
         private void button2_Click(object sender, EventArgs e)
         {
-            OrthoResult a = new OrthoResult();
+            OrthoVarname a = new OrthoVarname();
             a.Location= new Point(this.Width/2,this.Height/2);
             this.Controls.Add(a);
         }
