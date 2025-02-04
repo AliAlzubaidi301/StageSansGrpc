@@ -556,7 +556,7 @@ namespace StageCode
 
         private void button2_Click(object sender, EventArgs e)
         {
-            OrthoImage a = new OrthoImage();
+            OrthoLabel a = new OrthoLabel();
             a.Location= new Point(this.Width/2,this.Height/2);
             this.Controls.Add(a);
         }
