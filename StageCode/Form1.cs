@@ -775,6 +775,9 @@ namespace StageCode
                     isMoving = true;
                     mouseOffset = e.Location;
                     frame.Cursor = Cursors.SizeAll; // Curseur pour déplacer
+
+                    // Afficher un message box pour indiquer que l'on est en mode déplacement
+                    MessageBox.Show("Mode Déplacement activé ! Cliquez et déplacez la PictureBox.", "Déplacement", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
@@ -816,6 +819,17 @@ namespace StageCode
                 // Déplacer la PictureBox en fonction du mouvement de la souris
                 frame.Left += deltaX;
                 frame.Top += deltaY;
+
+                // Afficher un message chaque fois que l'on déplace la PictureBox
+                MessageBox.Show("Déplacement en cours...", "Déplacement", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Mettre à jour la position de l'objet enfant (si nécessaire)
+                if (frame.Controls.Count > 0)
+                {
+                    Control child = frame.Controls[0];
+                    child.Left += deltaX;
+                    child.Top += deltaY;
+                }
 
                 // Mise à jour de la position de la souris pour les futurs calculs
                 mouseOffset = e.Location;
@@ -871,5 +885,6 @@ namespace StageCode
                 }
             }
         }
+
     }
 }
