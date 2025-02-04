@@ -40,9 +40,11 @@
             controlCommentToolStripMenuItem = new ToolStripMenuItem();
             aboutToolStripMenuItem = new ToolStripMenuItem();
             btnVersion = new ToolStripMenuItem();
-            openFileDialog1 = new OpenFileDialog();
+            openFileDialog = new OpenFileDialog();
             saveFileDialog1 = new SaveFileDialog();
-            button2 = new Button();
+            pnlViewHost = new Panel();
+            lstToolbox = new ListBox();
+            propertyGrid1 = new PropertyGrid();
             MainMenu.SuspendLayout();
             SuspendLayout();
             // 
@@ -127,26 +129,43 @@
             btnVersion.Size = new Size(29, 20);
             btnVersion.Text = "V ";
             // 
-            // openFileDialog1
+            // openFileDialog
             // 
-            openFileDialog1.FileName = "openFileDialog1";
+            openFileDialog.FileName = "openFileDialog";
             // 
-            // button2
+            // pnlViewHost
             // 
-            button2.Location = new Point(662, 258);
-            button2.Name = "button2";
-            button2.Size = new Size(75, 23);
-            button2.TabIndex = 1;
-            button2.Text = "button2";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
+            pnlViewHost.BackColor = Color.White;
+            pnlViewHost.Location = new Point(0, 31);
+            pnlViewHost.Name = "pnlViewHost";
+            pnlViewHost.Size = new Size(590, 419);
+            pnlViewHost.TabIndex = 1;
+            // 
+            // lstToolbox
+            // 
+            lstToolbox.FormattingEnabled = true;
+            lstToolbox.ItemHeight = 15;
+            lstToolbox.Location = new Point(596, 31);
+            lstToolbox.Name = "lstToolbox";
+            lstToolbox.Size = new Size(204, 229);
+            lstToolbox.TabIndex = 2;
+            lstToolbox.SelectedIndexChanged += lstToolbox_SelectedIndexChanged;
+            // 
+            // propertyGrid1
+            // 
+            propertyGrid1.Location = new Point(596, 267);
+            propertyGrid1.Name = "propertyGrid1";
+            propertyGrid1.Size = new Size(204, 183);
+            propertyGrid1.TabIndex = 3;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(button2);
+            Controls.Add(propertyGrid1);
+            Controls.Add(lstToolbox);
+            Controls.Add(pnlViewHost);
             Controls.Add(MainMenu);
             MainMenuStrip = MainMenu;
             Name = "Form1";
@@ -166,7 +185,7 @@
         private ToolStripMenuItem btnView;
         private ToolStripMenuItem btnInfos;
         private ToolStripMenuItem btnVersion;
-        private OpenFileDialog openFileDialog1;
+        private OpenFileDialog openFileDialog;
         private ToolStripMenuItem newToolStripMenuItem;
         private ToolStripMenuItem openToolStripMenuItem;
         private ToolStripMenuItem saveToolStripMenuItem;
@@ -175,6 +194,8 @@
         private ToolStripMenuItem controlCommentToolStripMenuItem;
         private ToolStripMenuItem aboutToolStripMenuItem;
         private Button button1;
-        private Button button2;
+        private Panel pnlViewHost;
+        private ListBox lstToolbox;
+        private PropertyGrid propertyGrid1;
     }
 }

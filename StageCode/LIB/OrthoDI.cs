@@ -938,5 +938,10 @@ namespace StageCode.LIB
         {
 
         }
+
+        private void OrthoDI_Load_1(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -1,8 +1,19 @@
 ﻿using StageCode.LIB;
-using StageCode.Other;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.Design;
+using System.ComponentModel.Design.Serialization;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Design;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 using System.Xml.Linq;
 
 namespace StageCode
@@ -12,12 +23,21 @@ namespace StageCode
         public static int Langue = 1; // 1 = English, 2 = Chinese, 3 = German, 4 = French, 5 = Lithuanian
         private Form1 frm;
 
+        private Control selectedFrame = null; // Stocke la PictureBox sélectionnée
+        private bool isResizings = false;
+        private Point lastMousePosition;
+
+        private string selectedControl = "";
+
         //A corriger
         //ORthoAD et CButton TabName a faire
 
         public Form1()
         {
             InitializeComponent();
+
+            this.ClientSizeChanged += Form1_ClientSizeChanged;
+            pnlViewHost.MouseClick += pnlViewHost_Click;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -35,7 +55,10 @@ namespace StageCode
             AjouterMenuVew();
             AppliquerLangue();
 
-            this.ClientSizeChanged += Form1_ClientSizeChanged;
+            Initialize();
+
+
+            //this.WindowState = FormWindowState.Maximized;
         }
 
         #region Ajouter Menu File
@@ -554,11 +577,299 @@ namespace StageCode
 
         #endregion
 
-        private void button2_Click(object sender, EventArgs e)
+        private void Initialize()
         {
-            Reticule a = new Reticule();
-            a.Location= new Point(this.Width/2,this.Height/2);
-            this.Controls.Add(a);
+            lstToolbox.Items.Clear();
+            lstToolbox.Items.AddRange(new string[]
+            {
+                "AM60",
+                "Cont1",
+                "INTEG",
+                "OrthoAD",
+                "OrthoAla",
+                "OrthoCMDLib",
+                "OrthoCombo",
+                "OrthoDl",
+                "OrthoEdit",
+                "Ortholmage",
+                "OrthoLabel",
+                "OrthoPbar",
+                "OrthoRel",
+                "OrthoResult",
+                "OrthoVarname",
+                "Reticule"
+            });
+
+        }
+
+        private void lstToolbox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lstToolbox.SelectedItem != null)
+            {
+                selectedControl = lstToolbox.SelectedItem.ToString();
+
+                this.Cursor = Cursors.Cross;
+            }
+        }
+
+        private void pnlViewHost_Click(object sender, MouseEventArgs e)
+        {
+            // Si le curseur est dans son état par défaut, on désactive les bordures pointillées sur toutes les PictureBox
+            if (this.Cursor == DefaultCursor)
+            {
+                // Parcours toutes les PictureBox dans le pnlViewHost et supprime les bordures pointillées
+                foreach (Control control in pnlViewHost.Controls)
+                {
+                    if (control is PictureBox frame)
+                    {
+                        // Supprimer le handler d'événement Paint pour ne plus dessiner la bordure
+                        frame.Paint -= Frame_Paint;
+
+                        frame.Invalidate();
+                    }
+                }
+                return; // Sortir de la méthode si le curseur est par défaut
+            }
+
+            // Si un contrôle est sélectionné, on procède à l'ajout
+            Control newControl = null;
+
+            // Vérifier si un contrôle est sélectionné avant de créer un nouveau contrôle
+            switch (selectedControl)
+            {
+                case "AM60":
+                    newControl = new AM60();
+                    break;
+
+                case "Cont1":
+                    newControl = new CONT1();
+                    break;
+
+                case "INTEG":
+                    newControl = new INTEG();
+                    break;
+
+                case "OrthoAD":
+                    newControl = new OrthoAD();
+                    break;
+
+                case "OrthoAla":
+                    newControl = new OrthoAla();
+                    break;
+
+                case "OrthoCMDLib":
+                    newControl = new OrthoCMDLib();
+                    break;
+
+                case "OrthoCombo":
+                    newControl = new OrthoCombo();
+                    break;
+
+                case "OrthoDI":
+                    newControl = new OrthoDI();
+                    break;
+
+                case "OrthoEdit":
+                    newControl = new OrthoEdit();
+                    break;
+
+                case "Ortholmage":
+                    newControl = new OrthoImage();
+                    break;
+
+                case "OrthoLabel":
+                    newControl = new OrthoLabel();
+                    break;
+
+                case "OrthoPbar":
+                    newControl = new OrthoPbar();
+                    break;
+
+                case "OrthoRel":
+                    newControl = new OrthoRel();
+                    break;
+
+                case "OrthoResult":
+                    newControl = new OrthoResult();
+                    break;
+
+                case "OrthoVarname":
+                    newControl = new OrthoVarname();
+                    break;
+
+                case "Reticule":
+                    newControl = new Reticule();
+                    break;
+
+                default:
+                    return;
+            }
+
+            if (newControl != null)
+            {
+                // Création de la PictureBox qui servira de cadre
+                PictureBox frame = new PictureBox
+                {
+                    Size = new Size(newControl.Width + 10, newControl.Height + 10), // Ajuste la taille
+                    Location = new Point(e.X - 5, e.Y - 5) // Position ajustée par rapport au clic
+                };
+
+                // Gérer le dessin personnalisé pour la bordure en pointillés
+                frame.Paint += Frame_Paint;
+
+                // Ajouter le contrôle à l'intérieur de la PictureBox
+                newControl.Location = new Point(5, 5);
+                frame.Controls.Add(newControl);
+
+                // Ajouter la PictureBox au conteneur principal
+                pnlViewHost.Controls.Add(frame);
+
+                // Réinitialiser le curseur
+                this.Cursor = DefaultCursor;
+
+                newControl.Click += NewControl_Click;
+            }
+        }
+        private PictureBox resizingFrame = null;
+        private Point mouseOffset;
+        private bool isResizing = false;
+        private bool isMoving = false;
+
+        private void NewControl_Click(object? sender, EventArgs e)
+        {
+            Control controle = sender as Control;
+
+            // Vérifier si le contrôle est un contrôle enfant d'une PictureBox
+            PictureBox frame = controle?.Parent as PictureBox;
+
+            if (frame != null)
+            {
+                // Ajouter des gestionnaires d'événements pour déplacer ou redimensionner
+                frame.MouseDown += Frame_MouseDown;
+                frame.MouseMove += Frame_MouseMove;
+                frame.MouseUp += Frame_MouseUp;
+
+                // Ajouter la gestion du dessin des bordures pointillées
+                frame.Paint += Frame_Paint;
+                frame.Invalidate(); // Cela va déclencher l'événement Paint pour redessiner
+            }
+        }
+
+        private void Frame_MouseDown(object sender, MouseEventArgs e)
+        {
+            PictureBox frame = sender as PictureBox;
+
+            if (frame != null)
+            {
+                // Détecter si on clique sur une bordure pour le redimensionnement
+                if (IsNearBorder(e.Location, frame))
+                {
+                    resizingFrame = frame;
+                    mouseOffset = e.Location;
+                    isResizing = true;
+                    frame.Cursor = Cursors.SizeNWSE; // Curseur de redimensionnement
+                }
+                else
+                {
+                    // Si on clique à l'intérieur de la PictureBox, commencer à déplacer la PictureBox elle-même
+                    isMoving = true;
+                    mouseOffset = e.Location;
+                    frame.Cursor = Cursors.SizeAll; // Curseur pour déplacer
+                }
+            }
+        }
+
+        private void Frame_MouseMove(object sender, MouseEventArgs e)
+        {
+            PictureBox frame = sender as PictureBox;
+
+            if (isResizing && resizingFrame != null)
+            {
+                // Si on redimensionne, ajuster la taille de la PictureBox
+                int deltaX = e.X - mouseOffset.X;
+                int deltaY = e.Y - mouseOffset.Y;
+
+                // Ajuster la taille de la PictureBox en fonction du mouvement de la souris
+                resizingFrame.Width = Math.Max(10, resizingFrame.Width + deltaX);
+                resizingFrame.Height = Math.Max(10, resizingFrame.Height + deltaY);
+
+                // Redimensionner l'objet à l'intérieur de la PictureBox pour qu'il prenne toute la taille
+                if (resizingFrame.Controls.Count > 0)
+                {
+                    Control child = resizingFrame.Controls[0];
+                    child.Width = resizingFrame.Width;
+                    child.Height = resizingFrame.Height;
+                }
+
+                // Mise à jour de la position de la souris
+                mouseOffset = e.Location;
+
+                // Redessiner la bordure de la PictureBox
+                resizingFrame.Invalidate();
+            }
+            else if (isMoving && frame != null)
+            {
+                // Si on déplace la PictureBox, ajuster la position de la PictureBox elle-même
+                int deltaX = e.X - mouseOffset.X;
+                int deltaY = e.Y - mouseOffset.Y;
+
+                // Déplacer la PictureBox en fonction du mouvement de la souris
+                frame.Left += deltaX;
+                frame.Top += deltaY;
+
+                // Mise à jour de la position de la souris pour les futurs calculs
+                mouseOffset = e.Location;
+            }
+            else
+            {
+                // Modifier le curseur en fonction de la position de la souris
+                if (frame != null && IsNearBorder(e.Location, frame))
+                {
+                    frame.Cursor = Cursors.SizeNWSE; // Curseur de redimensionnement
+                }
+                else
+                {
+                    frame.Cursor = Cursors.Default; // Curseur par défaut
+                }
+            }
+        }
+
+        private void Frame_MouseUp(object sender, MouseEventArgs e)
+        {
+            // Réinitialiser les indicateurs de redimensionnement et déplacement
+            resizingFrame = null;
+            isResizing = false;
+            isMoving = false;
+
+            PictureBox frame = sender as PictureBox;
+            if (frame != null)
+            {
+                frame.Cursor = Cursors.Default; // Remettre le curseur par défaut
+            }
+        }
+
+        private bool IsNearBorder(Point mousePosition, PictureBox frame)
+        {
+            // Vérifier si la souris est proche des bords de la PictureBox
+            int borderDistance = 10; // Distance de la bordure pour le redimensionnement
+            return mousePosition.X >= frame.Width - borderDistance ||
+                   mousePosition.X <= borderDistance ||
+                   mousePosition.Y >= frame.Height - borderDistance ||
+                   mousePosition.Y <= borderDistance;
+        }
+
+        // Méthode pour dessiner les bordures pointillées sur les PictureBox
+        private void Frame_Paint(object sender, PaintEventArgs e)
+        {
+            PictureBox frame = sender as PictureBox;
+            if (frame != null)
+            {
+                using (Pen pen = new Pen(Color.Black))
+                {
+                    pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot; // Bordure en pointillés
+                    e.Graphics.DrawRectangle(pen, 0, 0, frame.Width - 1, frame.Height - 1);
+                }
+            }
         }
     }
 }
