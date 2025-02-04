@@ -1,6 +1,6 @@
 ﻿namespace StageCode.LIB
 {
-    partial class OrthoAD
+    partial class OrthoImage
     {
         /// <summary>
         /// Required designer variable.
@@ -28,19 +28,32 @@
         /// </summary>
         private void InitializeComponent()
         {
+            PictureBox1 = new PictureBox();
+            ((System.ComponentModel.ISupportInitialize)PictureBox1).BeginInit();
             SuspendLayout();
             // 
-            // OrthoAD
+            // PictureBox1
+            // 
+            PictureBox1.Location = new Point(0, 0);
+            PictureBox1.Name = "PictureBox1";
+            PictureBox1.Size = new Size(133, 97);
+            PictureBox1.TabIndex = 0;
+            PictureBox1.TabStop = false;
+            // 
+            // OrthoImage
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.Control;
-            Name = "OrthoAD";
-            Size = new Size(800, 450);
-            Load += OrthoAD_Load;
+            Controls.Add(PictureBox1);
+            Name = "OrthoImage";
+            Size = new Size(137, 103);
+            Load += OrthoImage_Load;
+            ((System.ComponentModel.ISupportInitialize)PictureBox1).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
+
+        private PictureBox PictureBox1;
     }
 }

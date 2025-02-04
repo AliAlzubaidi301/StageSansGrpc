@@ -34,9 +34,9 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            BackColor = SystemColors.Control;
             Name = "OrthoAla";
-            Text = "OrthoAla";
+            Size = new Size(800, 450);
             Load += OrthoAla_Load;
             ResumeLayout(false);
         }

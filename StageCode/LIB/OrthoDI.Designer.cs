@@ -1,6 +1,6 @@
 ﻿namespace StageCode.LIB
 {
-    partial class OrthoAD
+    partial class OrthoDI
     {
         /// <summary>
         /// Required designer variable.
@@ -28,17 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            SuspendLayout();
-            // 
-            // OrthoAD
-            // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.Control;
-            Name = "OrthoAD";
-            Size = new Size(800, 450);
-            Load += OrthoAD_Load;
-            ResumeLayout(false);
+            this.components = new System.ComponentModel.Container();
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Text = "OrthoDI";
         }
 
         #endregion

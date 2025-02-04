@@ -13,7 +13,7 @@ namespace StageCode
         private Form1 frm;
 
         //A corriger
-        //ORthoAD
+        //ORthoAD et CButton
 
         public Form1()
         {
@@ -556,11 +556,9 @@ namespace StageCode
 
         private void button2_Click(object sender, EventArgs e)
         {
-            OrthoCMDLib a = new OrthoCMDLib();
+            OrthoImage a = new OrthoImage();
+            a.Location= new Point(this.Width/2,this.Height/2);
             this.Controls.Add(a);
-
-            string b= a.WriteFile();
-            MessageBox.Show(b);
         }
     }
 }

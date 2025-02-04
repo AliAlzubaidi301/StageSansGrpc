@@ -1,108 +1,69 @@
-﻿using StageCode.Other;
+﻿using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Globalization;
+using System.Drawing.Design;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static StageCode.LIB.OrthoAD;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace StageCode.LIB
 {
-    public partial class OrthoAla :UserControl
+    public partial class OrthoCombo : UserControl
     {
         private int _LevelVisible = 0; // Niveau d'accès minimum pour rendre l'objet visible
         private int _LevelEnabled = 0; // Niveau d'accès minimum pour rendre l'objet accessible
         private Color _ColorOn = Color.Lime; // Couleur du contrôle lorsqu'il est actif
         private Color _ColorOff = Color.Red; // Couleur du contrôle lorsqu'il est inactif
         private Color _ColorErr = Color.FromArgb(207, 192, 192); // Couleur du contrôle lorsqu'il est en erreur
-        private TDesign _TypeDesign = TDesign.Bouton; // Type d'entrée du champ (cf. Classe TDesign)
+        private TDesign _TypeDesign; // Type d'entrée du champ (cf. Classe TDesign)
         private string _Format; // Format de la variable (précision)
         private string _comment = ""; // Commentaire sur le contrôle
-        private int _BorderW;
-        private string _captionValues = "OrthoAla";
-        private string _visibility = "1";
+        private int _BorderW = 0;
 
-        private CButton btn = new CButton();
-        private string _Commande; // Commande executée lors du clic sur le bouton
-        private string _job = ""; // Nom du job a démarrer par la commande STARTJOB 
-        private string _VarLink9;
-        private string _VarLink2;
-        private string _Etat = ""; // Nom de la Variable qui donne l'état de l'alarme
-                                   // Private _VarClign As String = "" 'Nom de la Variable qui détermine le mode clignotant
-        private string _NomFichier = ""; // Nom du fichier a charger lors du clic
+        private string _Variable; // Nom de la variable
+        private string _Values; // Valeurs de la combobox
+        private HorizontalAlignment _TextAlign;
+        public System.Windows.Forms.ComboBox ComboBox;
+        private string _visibility = "1";
         /// <summary>
         /// Param non utilisé mais visible au cas où
         /// </summary>
         private string[] _VL = new string[9];
+        private string Det;
 
         public event EventHandler VisibilityChanging;
         public event EventHandler VisibilityChanged;
-        public OrthoAla()
+
+        public OrthoCombo()
         {
-            // Initialisation de l'interface graphique
             InitializeComponent();
-
-            // Configuration du bouton
-            btn.Text = Name;
-            btn.FillType = CButton.eFillType.Solid;
-            btn.BackColor = Color.Transparent;
-            btn.Shape = CButton.eShape.Rectangle;
-            btn.Corners.All = 0;
-
-            Button a = new Button();
-
-            // Ajout du bouton au formulaire
-            this.Controls.Add(btn);
-
-            // Paramètres du formulaire
-            this.BackColor = Color.Transparent;
-
-            // Abonnement aux événements
-            Langs.LanguageChanged += LanguageChangedEventHandler;
-
-            // Initialisation de la langue courante
-            LanguageChangedEventHandler(Langs.CurrentLanguage);
-
-            // Gestion de la visibilité avec ControlUtils
-            ControlUtils.RegisterControl(
-                btn,
-                () => Visibility,
-                h => VisibilityChanging += h,
-                h => VisibilityChanged += h
-            );
-
-            this.Resize += OrthoAla_Resize;
-            this.Load += OrthoAla_Load;
+            System.Windows.Forms.ComboBox ComboBox = ComboBox1;
+            AutoSize = false;
+            ComboBox1.FlatStyle = FlatStyle.Flat;
+            ComboBox1.FormattingEnabled = true;
+            ControlUtils.RegisterControl(ComboBox1, () => Visibility, h => VisibilityChanging += h, h => VisibilityChanged += h);
+            base.Resize += OrthoCombo_Resize;
         }
-
-        private void LanguageChangedEventHandler(AvailableLanguage NewLanguage)
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
+        private const int CB_ERR = -1;
+        private const int CB_SETITEMHEIGHT = 0x153;
+        private bool SetComboBoxEditHeight(System.Windows.Forms.ComboBox ComboBox, int Height)
         {
-            if ((bool)(NewLanguage == null))
-            {
-                return; // Sécurité contre les valeurs nulles
-            }
-
-            if (!string.IsNullOrEmpty(_captionValues) && _captionValues.Contains("|"))
-            {
-                string[] str = _captionValues.Split('|'); // Utilisation correcte de Split()
-                int idx = NewLanguage.LanguageID;
-
-                btn.Text = (idx >= 0 && idx < str.Length) ? str[idx] : str[0];
-            }
-            else
-            {
-                btn.Text = _captionValues;
-            }
+            return SendMessage(ComboBox.Handle, CB_SETITEMHEIGHT, new IntPtr(-1), new IntPtr(Height)) != new IntPtr(CB_ERR);
+            ComboBox.Refresh();
         }
-
-        private void OrthoAla_Resize(object sender, EventArgs e)
+        private void OrthoCombo_Resize(object sender, EventArgs e)
         {
-            btn.Size = this.Size;
+            ComboBox1.Size = this.Size;
+            SetComboBoxEditHeight(ComboBox1, this.Height - 6);
         }
 
         /// <summary>
@@ -117,7 +78,7 @@ namespace StageCode.LIB
             {
                 return Color.Transparent;
             }
-            return ColorTranslator.FromOle(int.Parse(DataIn)) ;
+            return ColorTranslator.FromOle(int.Parse(DataIn));
         }
 
         /// <summary>
@@ -134,113 +95,211 @@ namespace StageCode.LIB
             return ColorTranslator.ToOle(Datain).ToString();
         }
 
-
-
-
-
         #region Read/Write on .syn file
         public object ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
         {
-            if (splitPvirgule == null || splitPvirgule.Length < 34)
-            {
-                throw new ArgumentException("Le tableau splitPvirgule est null ou ne contient pas assez d'éléments.");
-            }
-
             var StyleText = FontStyle.Regular;
 
-            if (bool.TryParse(splitPvirgule[9], out bool isStrikeout) && isStrikeout)
+            if (splitPvirgule[9] == "True")
             {
                 StyleText |= FontStyle.Strikeout;
             }
-            if (bool.TryParse(splitPvirgule[10], out bool isUnderline) && isUnderline)
+            if (splitPvirgule[10] == "True")
             {
                 StyleText |= FontStyle.Underline;
             }
-            if (bool.TryParse(splitPvirgule[11], out bool isBold) && isBold)
+            if (splitPvirgule[11] == "True")
             {
                 StyleText |= FontStyle.Bold;
             }
-            if (bool.TryParse(splitPvirgule[12], out bool isItalic) && isItalic)
+            if (splitPvirgule[12] == "True")
             {
                 StyleText |= FontStyle.Italic;
             }
 
-            Name = $"{splitPvirgule[1]}_{splitPvirgule[2]}";
-            Caption = splitPvirgule[2];
-            Precision = splitPvirgule[4];
-
-            if (float.TryParse(splitPvirgule[8], NumberStyles.Float, CultureInfo.InvariantCulture, out float fontSize))
+            this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
+            Format = splitPvirgule[4];
+            Font = new Font(splitPvirgule[7], int.Parse(splitPvirgule[8]), StyleText);
+            this.Text = splitPvirgule[2];
+            TextAlign = (HorizontalAlignment)int.Parse(splitPvirgule[3]);
+            try
             {
-                Font = new Font(splitPvirgule[7], fontSize, StyleText);
+                BackColor = FromOle(splitPvirgule[5]);
             }
-
-            BackColor = FromOle(splitPvirgule[5]);
-            ForeColor = FromOle(splitPvirgule[6]);
-
-            if (Enum.TryParse(splitPvirgule[13], out TDesign typeDesign))
+            catch
             {
-                TypeDesign = typeDesign;
             }
-
-            if (int.TryParse(splitPvirgule[14], out int borderWidth))
+            try
             {
-                BorderWidth = borderWidth;
+                ForeColor = FromOle(splitPvirgule[6]);
             }
-
-            if (int.TryParse(splitPvirgule[16], out int width) && int.TryParse(splitPvirgule[15], out int height))
+            catch
             {
-                Size = new Size(width, height);
             }
-
-            if (int.TryParse(splitPvirgule[18], out int x) && int.TryParse(splitPvirgule[17], out int y))
-            {
-                Location = FromCopy ? new Point(x + 10, y + 10) : new Point(x, y);
-            }
-
+            TypeDesign = (TDesign)int.Parse(splitPvirgule[13]);
+            BorderWidth = int.Parse(splitPvirgule[14]);
+            this.Size = new Size(int.Parse(splitPvirgule[16]), int.Parse(splitPvirgule[15]));
+            this.Location = new Point(int.Parse(splitPvirgule[18]), int.Parse(splitPvirgule[17]));
+            ColorOn = FromOle(splitPvirgule[28]);
+            ColorOff = FromOle(splitPvirgule[29]);
+            ColorErr = FromOle(splitPvirgule[30]);
+            LevelVisible = int.Parse(splitPvirgule[31]);
+            LevelEnabled = int.Parse(splitPvirgule[32]);
             this.comment = comment;
-            Etat = splitPvirgule[19];
-            VarLink2 = splitPvirgule[20];
-            NomFichier = splitPvirgule[21];
+            if (FromCopy)
+            {
+                this.Location = new Point((int)Math.Round(Double.Parse(splitPvirgule[18]) + 10d), (int)Math.Round(Double.Parse(splitPvirgule[17]) + 10d));
+            }
+            else
+            {
+                this.Location = new Point(int.Parse(splitPvirgule[18]), int.Parse(splitPvirgule[17]));
+            }
+            this.Size = new Size(int.Parse(splitPvirgule[16]), int.Parse(splitPvirgule[15]));
 
+            Variable = splitPvirgule[19];
+            Value = splitPvirgule[20];
+            _VL[2] = splitPvirgule[21];
             _VL[3] = splitPvirgule[22];
             _VL[4] = splitPvirgule[23];
             _VL[5] = splitPvirgule[24];
             _VL[6] = splitPvirgule[25];
-
-            Commande = splitPvirgule[26];
-            VarLink9 = splitPvirgule[27];
-
-            ColorOn = FromOle(splitPvirgule[28]);
-            ColorOff = FromOle(splitPvirgule[29]);
-            ColorErr = FromOle(splitPvirgule[30]);
-
-            if (int.TryParse(splitPvirgule[31], out int levelVisible))
-            {
-                LevelVisible = levelVisible;
-            }
-
-            if (int.TryParse(splitPvirgule[32], out int levelEnabled))
-            {
-                LevelEnabled = levelEnabled;
-            }
+            _VL[7] = splitPvirgule[26];
+            Det = splitPvirgule[27];
 
             if (splitPvirgule.Length >= 34)
             {
                 Visibility = splitPvirgule[33];
             }
-
             return this;
         }
 
         public string WriteFile()
         {
-            return "ORTHO;ALA;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Etat + ";" + VarLink2 + ";" + NomFichier + ";" + _VL[3] + ";" + _VL[4] + ";" + _VL[5] + ";" + _VL[6] + ";" + Commande + ";" + VarLink9 + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+            return "ORTHO;COMBO;" + Text + ";" +TextAlign.ToString() + ";" + Format + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Variable + ";" + Value + ";" + _VL[2] + ";" + _VL[3] + ";" + _VL[4] + ";" + _VL[5] + ";" + _VL[6] + ";" + _VL[7] + ";" + Det + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+
+
+
+
+
+
+
         }
         #endregion
 
+        #region ComboBox Properties
+        [Category("Apparence")]
+        [Description("Indique la façon dont le texte doit être aligné dans le contrôle d'édition.")]
+        public HorizontalAlignment TextAlign
+        {
+            get
+            {
+                return _TextAlign;
+            }
+            set
+            {
+                _TextAlign = value;
+            }
+        }
+        [Category("Apparence")]
+        [Description("La couleur d'arrière plan du contrôle.")]
+        public Color BackColor
+        {
+            get
+            {
+                return ComboBox1.BackColor;
+            }
+            set
+            {
+                ComboBox1.BackColor = value;
+            }
+        }
+        [Category("Apparence")]
+        [ShowOnProtectedMode()]
+        [Description("La couleur d'arrière plan du contrôle.")]
+        public Font Font
+        {
+            get
+            {
+                return ComboBox1.Font;
+            }
+            set
+            {
+                ComboBox1.Font = value;
+            }
+        }
+        [Category("Apparence")]
+        [Description("La couleur d'arrière plan du contrôle.")]
+        public Color ForeColor
+        {
+            get
+            {
+                return ComboBox1.ForeColor;
+            }
+            set
+            {
+                ComboBox1.ForeColor = value;
+            }
+        }
+        #endregion
 
+        #region Control properties
+        [Category("Orthodyne")]
+        [Description("Nom de la variable")]
+        public string Variable
+        {
+            get
+            {
+                return _Variable;
+            }
+            set
+            {
+                _Variable = value;
+            }
+        }
+        [Category("Orthodyne")]
+        [ShowOnProtectedMode()]
+        [Description("Les valeurs de la combo séparées par des '|'")]
+        public string Value
+        {
+            get
+            {
+                return _Values;
+            }
+            set
+            {
+                _Values = value;
+            }
+        }
 
-        #region Control Properties
+        [Category("Orthodyne")]
+        [Description("Indiquer IDX pour retourner l'index de la sélection dans la variable au lieu du texte")]
+        public string ReturnIndex
+        {
+            get
+            {
+                return _VL[2];
+            }
+            set
+            {
+                _VL[2] = value;
+            }
+        }
+        #endregion
+
+        #region Orthodyne Properties
+        [Category("Not assigned")]
+        [Description("Variable interne non utilisé actuellement")]
+        public string VarLink3
+        {
+            get
+            {
+                return _VL[2];
+            }
+            set
+            {
+                _VL[2] = value;
+            }
+        }
         [Category("Not assigned")]
         [Description("Variable interne non utilisé actuellement")]
         public string VarLink4
@@ -293,153 +352,34 @@ namespace StageCode.LIB
                 _VL[6] = value;
             }
         }
-        [Category("Orthodyne")]
-        [Description("Variable qui donne l'état de l'alarme")]
-        public string Etat
+        [Category("Not assigned")]
+        [Description("Variable interne non utilisé actuellement")]
+        public string VarLink8
         {
             get
             {
-                return _Etat;
+                return _VL[7];
             }
             set
             {
-                _Etat = value;
+                _VL[7] = value;
             }
         }
         [Category("Orthodyne")]
-        [Description("Nom du fichier a charger si clic sur l'alarme (optionnel)")]
-        public string NomFichier
+        [Description("Nom ou numéro du détecteur")]
+        public string Detecteur
         {
             get
             {
-                return _NomFichier;
+                return Det;
             }
             set
             {
-                _NomFichier = value;
+                Det = value;
             }
         }
         [Category("Apparence")]
-        [Description("Alignement du texte")]
-        public ContentAlignment TextAlign
-        {
-            get
-            {
-                return btn.TextAlign;
-            }
-            set
-            {
-                btn.TextAlign = value;
-            }
-        }
-        [Category("Apparence")]
-        [Description("Caption du bouton")]
-        [ShowOnProtectedMode()]
-        public string Caption
-        {
-            get
-            {
-                return _captionValues;
-            }
-            set
-            {
-                _captionValues = value;
-                LanguageChangedEventHandler(Langs.CurrentLanguage);
-            }
-        }
-        [Category("Apparence")]
-        [ShowOnProtectedMode()]
-        public Font Font
-        {
-            get
-            {
-                return btn.Font;
-            }
-            set
-            {
-                btn.Font = value;
-            }
-        }
-        // Supprimé car complètement redondant avec Property Caption...
-        // <Category("Apparence"), Description("Caption du bouton"), Editor(GetType(OrthoMultiLanguageEditor), GetType(UITypeEditor))> _
-        // Overrides Property Text() As String
-        // Get
-        // Return _captionValues
-        // End Get
-        // Set(ByVal value As String)
-        // _captionValues = value
-        // LanguageChangedEventHandler(Langs.CurrentLanguage)
-        // End Set
-        // End Property
-        public Color BackColor
-        {
-            get
-            {
-                return btn.ColorFillSolid;
-            }
-            set
-            {
-                btn.ColorFillSolid = value;
-            }
-        }
-        public Color ForeColor
-        {
-            get
-            {
-                return btn.ForeColor;
-            }
-            set
-            {
-                btn.ForeColor = value;
-            }
-        }
-        [Category("Orthodyne")]
-        [Description("Option n°2 dépendant des autres valeurs")]
-        public string VarLink2
-        {
-            get
-            {
-                return _VarLink2;
-            }
-            set
-            {
-                _VarLink2 = value;
-            }
-        }
-        [Category("Orthodyne")]
-        [Description("Commande envoyée lors du clic sur le bouton")]
-        [DefaultValue("")]
-        public string Commande
-        {
-            get
-            {
-                return _Commande;
-            }
-            set
-            {
-                _Commande = value;
-            }
-        }
-        [Category("Orthodyne")]
-        [Description("utilisation variant selon d'autre params")]
-        public string VarLink9
-        {
-            get
-            {
-                return _VarLink9;
-            }
-            set
-            {
-                _VarLink9 = value;
-            }
-        }
-        #endregion
-
-
-
-        #region Orthodyne Properties
-        [Category("Apparence")]
-        [Description("Largeur de la bordure du contrôle")]
+        [Description("Taille de la bordure du contrôle")]
         public int BorderWidth
         {
             get
@@ -449,21 +389,6 @@ namespace StageCode.LIB
             set
             {
                 _BorderW = value;
-            }
-        }
-        [Category("Orthodyne")]
-        [Description("Indique la précision requise")]
-        [DisplayName("Format")]
-        [DefaultValue("")]
-        public string Precision
-        {
-            get
-            {
-                return _Format;
-            }
-            set
-            {
-                _Format = value;
             }
         }
         [Category("Orthodyne")]
@@ -481,6 +406,20 @@ namespace StageCode.LIB
             }
         }
         [Category("Orthodyne")]
+        [Description("Indique la précision requise")]
+        [DefaultValue("")]
+        public string Format
+        {
+            get
+            {
+                return _Format;
+            }
+            set
+            {
+                _Format = value;
+            }
+        }
+        [Category("Orthodyne")]
         [Description("Indique quel type de design utiliser")]
         public TDesign TypeDesign
         {
@@ -491,32 +430,6 @@ namespace StageCode.LIB
             set
             {
                 _TypeDesign = value;
-                switch (value)
-                {
-                    case var @case when @case == TDesign.Bouton:
-                        {
-                            btn.Shape = CButton.eShape.Rectangle;
-                            btn.Corners.All = 0;
-                            break;
-                        }
-                    case var case1 when case1 == TDesign.Arrondi:
-                        {
-                            btn.Shape = CButton.eShape.Rectangle;
-                            btn.Corners.All = 6;
-                            break;
-                        }
-                    case var case2 when case2 == TDesign.Rectangle:
-                        {
-                            btn.Shape = CButton.eShape.Rectangle;
-                            btn.Corners.All = 0;
-                            break;
-                        }
-                    case var case3 when case3 == TDesign.Cercle:
-                        {
-                            btn.Shape = CButton.eShape.Ellipse;
-                            break;
-                        }
-                }
             }
         }
         [Category("Orthodyne")]
@@ -989,7 +902,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return "ALA";
+                return "COMBO";
             }
         }
 
@@ -997,23 +910,17 @@ namespace StageCode.LIB
         {
             return GetType();
         }
-        public string _name;
 
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                _name = value;
-            }
-        }
-
-        private void OrthoAla_Load(object sender, EventArgs e)
+        private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
+
+        private void OrthoCombo_Load(object sender, EventArgs e)
+        {
+
+        }
+
+
     }
 }

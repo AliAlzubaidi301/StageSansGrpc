@@ -1,6 +1,6 @@
 ﻿namespace StageCode.LIB
 {
-    partial class OrthoAD
+    partial class OrthoEdit
     {
         /// <summary>
         /// Required designer variable.
@@ -28,19 +28,30 @@
         /// </summary>
         private void InitializeComponent()
         {
+            TextBox1 = new TextBox();
             SuspendLayout();
             // 
-            // OrthoAD
+            // TextBox1
+            // 
+            TextBox1.Location = new Point(0, 0);
+            TextBox1.Name = "TextBox1";
+            TextBox1.Size = new Size(100, 23);
+            TextBox1.TabIndex = 0;
+            // 
+            // OrthoEdit
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.Control;
-            Name = "OrthoAD";
-            Size = new Size(800, 450);
-            Load += OrthoAD_Load;
+            Controls.Add(TextBox1);
+            Name = "OrthoEdit";
+            Size = new Size(101, 25);
+            Load += OrthoEdit_Load;
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
+
+        private TextBox TextBox1;
     }
 }

@@ -1,10 +1,11 @@
-﻿using StageCode.Other;
+﻿using Microsoft.VisualBasic;
+using StageCode.Other;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Globalization;
+using System.Drawing.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,86 +14,59 @@ using static StageCode.LIB.OrthoAD;
 
 namespace StageCode.LIB
 {
-    public partial class OrthoAla :UserControl
+    public partial class OrthoDI : UserControl
     {
+        public OrthoDI()
+        {
+            InitializeComponent();
+            this.Controls.Add(btn);
+            btn.Text = this.Name;
+            BackColor = Color.Transparent;
+            btn.FillType = CButton.eFillType.Solid;
+            btn.Shape = CButton.eShape.Ellipse;
+            // Ajoutez une initialisation quelconque après l'appel InitializeComponent().
+
+            Langs.LanguageChanged += LanguageChangedEventHandler;
+
+            ControlUtils.RegisterControl(btn, () => Visibility, h => VisibilityChanging += h, h => VisibilityChanged += h);
+            base.Resize += OrthoDI_Resize;
+            base.Load += OrthoDI_Load;
+        }
         private int _LevelVisible = 0; // Niveau d'accès minimum pour rendre l'objet visible
         private int _LevelEnabled = 0; // Niveau d'accès minimum pour rendre l'objet accessible
         private Color _ColorOn = Color.Lime; // Couleur du contrôle lorsqu'il est actif
         private Color _ColorOff = Color.Red; // Couleur du contrôle lorsqu'il est inactif
         private Color _ColorErr = Color.FromArgb(207, 192, 192); // Couleur du contrôle lorsqu'il est en erreur
-        private TDesign _TypeDesign = TDesign.Bouton; // Type d'entrée du champ (cf. Classe TDesign)
+        private TDesign _TypeDesign = TDesign.Cercle; // Type d'entrée du champ (cf. Classe TDesign)
         private string _Format; // Format de la variable (précision)
         private string _comment = ""; // Commentaire sur le contrôle
         private int _BorderW;
-        private string _captionValues = "OrthoAla";
         private string _visibility = "1";
-
-        private CButton btn = new CButton();
-        private string _Commande; // Commande executée lors du clic sur le bouton
-        private string _job = ""; // Nom du job a démarrer par la commande STARTJOB 
-        private string _VarLink9;
-        private string _VarLink2;
-        private string _Etat = ""; // Nom de la Variable qui donne l'état de l'alarme
-                                   // Private _VarClign As String = "" 'Nom de la Variable qui détermine le mode clignotant
-        private string _NomFichier = ""; // Nom du fichier a charger lors du clic
         /// <summary>
         /// Param non utilisé mais visible au cas où
         /// </summary>
         private string[] _VL = new string[9];
 
+        private string _captionValues = "OrthoDI";
+        private CButton btn = new CButton();
+
         public event EventHandler VisibilityChanging;
         public event EventHandler VisibilityChanged;
-        public OrthoAla()
-        {
-            // Initialisation de l'interface graphique
-            InitializeComponent();
-
-            // Configuration du bouton
-            btn.Text = Name;
-            btn.FillType = CButton.eFillType.Solid;
-            btn.BackColor = Color.Transparent;
-            btn.Shape = CButton.eShape.Rectangle;
-            btn.Corners.All = 0;
-
-            Button a = new Button();
-
-            // Ajout du bouton au formulaire
-            this.Controls.Add(btn);
-
-            // Paramètres du formulaire
-            this.BackColor = Color.Transparent;
-
-            // Abonnement aux événements
-            Langs.LanguageChanged += LanguageChangedEventHandler;
-
-            // Initialisation de la langue courante
-            LanguageChangedEventHandler(Langs.CurrentLanguage);
-
-            // Gestion de la visibilité avec ControlUtils
-            ControlUtils.RegisterControl(
-                btn,
-                () => Visibility,
-                h => VisibilityChanging += h,
-                h => VisibilityChanged += h
-            );
-
-            this.Resize += OrthoAla_Resize;
-            this.Load += OrthoAla_Load;
-        }
 
         private void LanguageChangedEventHandler(AvailableLanguage NewLanguage)
         {
-            if ((bool)(NewLanguage == null))
+            if (_captionValues.Contains("|"))
             {
-                return; // Sécurité contre les valeurs nulles
-            }
-
-            if (!string.IsNullOrEmpty(_captionValues) && _captionValues.Contains("|"))
-            {
-                string[] str = _captionValues.Split('|'); // Utilisation correcte de Split()
-                int idx = NewLanguage.LanguageID;
-
-                btn.Text = (idx >= 0 && idx < str.Length) ? str[idx] : str[0];
+                string[] str = _captionValues.Split("|");
+                var idx = NewLanguage.LanguageID;
+                if (str.Length > idx)
+                {
+                    btn.Text = str[idx];
+                }
+                else
+                {
+                    btn.Text = str[0];
+                }
             }
             else
             {
@@ -100,9 +74,17 @@ namespace StageCode.LIB
             }
         }
 
-        private void OrthoAla_Resize(object sender, EventArgs e)
+        private void OrthoDI_Resize(object sender, EventArgs e)
         {
-            btn.Size = this.Size;
+            if (btn.Shape == CButton.eShape.Ellipse)
+            {
+                btn.Size = new Size(this.Height, this.Height);
+                this.Size = new Size(this.Height, this.Height);
+            }
+            else
+            {
+                btn.Size = this.Size;
+            }
         }
 
         /// <summary>
@@ -117,7 +99,7 @@ namespace StageCode.LIB
             {
                 return Color.Transparent;
             }
-            return ColorTranslator.FromOle(int.Parse(DataIn)) ;
+            return ColorTranslator.FromOle(int.Parse(DataIn));
         }
 
         /// <summary>
@@ -134,19 +116,12 @@ namespace StageCode.LIB
             return ColorTranslator.ToOle(Datain).ToString();
         }
 
-
-
-
-
         #region Read/Write on .syn file
         public object ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
         {
-            if (splitPvirgule == null || splitPvirgule.Length < 34)
-            {
-                throw new ArgumentException("Le tableau splitPvirgule est null ou ne contient pas assez d'éléments.");
-            }
-
             var StyleText = FontStyle.Regular;
+
+            TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(splitPvirgule[3]));
 
             if (bool.TryParse(splitPvirgule[9], out bool isStrikeout) && isStrikeout)
             {
@@ -165,82 +140,166 @@ namespace StageCode.LIB
                 StyleText |= FontStyle.Italic;
             }
 
-            Name = $"{splitPvirgule[1]}_{splitPvirgule[2]}";
-            Caption = splitPvirgule[2];
+            this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
             Precision = splitPvirgule[4];
-
-            if (float.TryParse(splitPvirgule[8], NumberStyles.Float, CultureInfo.InvariantCulture, out float fontSize))
-            {
-                Font = new Font(splitPvirgule[7], fontSize, StyleText);
-            }
-
+            Font = new Font(splitPvirgule[7], float.Parse(splitPvirgule[8]), StyleText);
+            // LBO 2012 03 19 Correction
+            // Me.Text = splitPvirgule(2)
+            Caption = splitPvirgule[2];
             BackColor = FromOle(splitPvirgule[5]);
             ForeColor = FromOle(splitPvirgule[6]);
-
-            if (Enum.TryParse(splitPvirgule[13], out TDesign typeDesign))
+            TypeDesign = (TDesign)Enum.Parse(typeof(TDesign), splitPvirgule[13]);
+            BorderWidth = int.Parse(splitPvirgule[14]);
+            this.Size = new Size(int.Parse(splitPvirgule[16]), int.Parse(splitPvirgule[15]));
+            if (FromCopy)
             {
-                TypeDesign = typeDesign;
+                this.Location = new Point((int)Math.Round(Double.Parse(splitPvirgule[18]) + 10d), (int)Math.Round(Double.Parse(splitPvirgule[17]) + 10d));
             }
-
-            if (int.TryParse(splitPvirgule[14], out int borderWidth))
+            else
             {
-                BorderWidth = borderWidth;
+                this.Location = new Point(int.Parse(splitPvirgule[18]), int.Parse(splitPvirgule[17]));
             }
-
-            if (int.TryParse(splitPvirgule[16], out int width) && int.TryParse(splitPvirgule[15], out int height))
-            {
-                Size = new Size(width, height);
-            }
-
-            if (int.TryParse(splitPvirgule[18], out int x) && int.TryParse(splitPvirgule[17], out int y))
-            {
-                Location = FromCopy ? new Point(x + 10, y + 10) : new Point(x, y);
-            }
-
-            this.comment = comment;
-            Etat = splitPvirgule[19];
-            VarLink2 = splitPvirgule[20];
-            NomFichier = splitPvirgule[21];
-
+            _VL[0] = splitPvirgule[19];
+            _VL[1] = splitPvirgule[20];
+            _VL[2] = splitPvirgule[21];
             _VL[3] = splitPvirgule[22];
             _VL[4] = splitPvirgule[23];
             _VL[5] = splitPvirgule[24];
             _VL[6] = splitPvirgule[25];
-
-            Commande = splitPvirgule[26];
-            VarLink9 = splitPvirgule[27];
-
+            _VL[7] = splitPvirgule[26];
+            _VL[8] = splitPvirgule[27];
             ColorOn = FromOle(splitPvirgule[28]);
             ColorOff = FromOle(splitPvirgule[29]);
             ColorErr = FromOle(splitPvirgule[30]);
-
-            if (int.TryParse(splitPvirgule[31], out int levelVisible))
-            {
-                LevelVisible = levelVisible;
-            }
-
-            if (int.TryParse(splitPvirgule[32], out int levelEnabled))
-            {
-                LevelEnabled = levelEnabled;
-            }
+            LevelVisible = int.Parse(splitPvirgule[31]);
+            LevelEnabled = int.Parse(splitPvirgule[32]);
+            this.comment = comment;
 
             if (splitPvirgule.Length >= 34)
             {
                 Visibility = splitPvirgule[33];
             }
-
             return this;
         }
 
         public string WriteFile()
         {
-            return "ORTHO;ALA;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Etat + ";" + VarLink2 + ";" + NomFichier + ";" + _VL[3] + ";" + _VL[4] + ";" + _VL[5] + ";" + _VL[6] + ";" + Commande + ";" + VarLink9 + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+            return "ORTHO;DI;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + _VL[0] + ";" + _VL[1] + ";" + _VL[2] + ";" + _VL[3] + ";" + _VL[4] + ";" + _VL[5] + ";" + _VL[6] + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+
+
+
+
+
+
+
         }
         #endregion
 
-
-
         #region Control Properties
+        [Category("Apparence")]
+        [Description("Alignement du texte")]
+        public ContentAlignment TextAlign
+        {
+            get
+            {
+                return btn.TextAlign;
+            }
+            set
+            {
+                btn.TextAlign = value;
+            }
+        }
+        [Category("Apparence")]
+        [Description("Caption du bouton")]
+        [ShowOnProtectedMode()]
+        public string Caption
+        {
+            get
+            {
+                return _captionValues;
+            }
+            set
+            {
+                _captionValues = value;
+                LanguageChangedEventHandler(Langs.CurrentLanguage);
+            }
+        }
+        [ShowOnProtectedMode()]
+        public Font Font
+        {
+            get
+            {
+                return btn.Font;
+            }
+            set
+            {
+                btn.Font = value;
+            }
+        }
+        public Color BackColor
+        {
+            get
+            {
+                return btn.BackColor;
+            }
+            set
+            {
+                btn.BackColor = value;
+            }
+        }
+        public Color ForeColor
+        {
+            get
+            {
+                return btn.ForeColor;
+            }
+            set
+            {
+                btn.ForeColor = value;
+            }
+        }
+        #endregion
+
+        #region Orthodyne Properties
+        [Category("Not assigned")]
+        [Description("Variable interne non utilisé actuellement")]
+        public string VarLink1
+        {
+            get
+            {
+                return _VL[0];
+            }
+            set
+            {
+                _VL[0] = value;
+            }
+        }
+        [Category("Not assigned")]
+        [Description("Variable interne non utilisé actuellement")]
+        public string VarLink2
+        {
+            get
+            {
+                return _VL[1];
+            }
+            set
+            {
+                _VL[1] = value;
+            }
+        }
+        [Category("Not assigned")]
+        [Description("Variable interne non utilisé actuellement")]
+        public string VarLink3
+        {
+            get
+            {
+                return _VL[2];
+            }
+            set
+            {
+                _VL[2] = value;
+            }
+        }
         [Category("Not assigned")]
         [Description("Variable interne non utilisé actuellement")]
         public string VarLink4
@@ -293,151 +352,32 @@ namespace StageCode.LIB
                 _VL[6] = value;
             }
         }
-        [Category("Orthodyne")]
-        [Description("Variable qui donne l'état de l'alarme")]
-        public string Etat
+        [Category("Not assigned")]
+        [Description("Variable interne non utilisé actuellement")]
+        public string VarLink8
         {
             get
             {
-                return _Etat;
+                return _VL[7];
             }
             set
             {
-                _Etat = value;
+                _VL[7] = value;
             }
         }
-        [Category("Orthodyne")]
-        [Description("Nom du fichier a charger si clic sur l'alarme (optionnel)")]
-        public string NomFichier
-        {
-            get
-            {
-                return _NomFichier;
-            }
-            set
-            {
-                _NomFichier = value;
-            }
-        }
-        [Category("Apparence")]
-        [Description("Alignement du texte")]
-        public ContentAlignment TextAlign
-        {
-            get
-            {
-                return btn.TextAlign;
-            }
-            set
-            {
-                btn.TextAlign = value;
-            }
-        }
-        [Category("Apparence")]
-        [Description("Caption du bouton")]
-        [ShowOnProtectedMode()]
-        public string Caption
-        {
-            get
-            {
-                return _captionValues;
-            }
-            set
-            {
-                _captionValues = value;
-                LanguageChangedEventHandler(Langs.CurrentLanguage);
-            }
-        }
-        [Category("Apparence")]
-        [ShowOnProtectedMode()]
-        public Font Font
-        {
-            get
-            {
-                return btn.Font;
-            }
-            set
-            {
-                btn.Font = value;
-            }
-        }
-        // Supprimé car complètement redondant avec Property Caption...
-        // <Category("Apparence"), Description("Caption du bouton"), Editor(GetType(OrthoMultiLanguageEditor), GetType(UITypeEditor))> _
-        // Overrides Property Text() As String
-        // Get
-        // Return _captionValues
-        // End Get
-        // Set(ByVal value As String)
-        // _captionValues = value
-        // LanguageChangedEventHandler(Langs.CurrentLanguage)
-        // End Set
-        // End Property
-        public Color BackColor
-        {
-            get
-            {
-                return btn.ColorFillSolid;
-            }
-            set
-            {
-                btn.ColorFillSolid = value;
-            }
-        }
-        public Color ForeColor
-        {
-            get
-            {
-                return btn.ForeColor;
-            }
-            set
-            {
-                btn.ForeColor = value;
-            }
-        }
-        [Category("Orthodyne")]
-        [Description("Option n°2 dépendant des autres valeurs")]
-        public string VarLink2
-        {
-            get
-            {
-                return _VarLink2;
-            }
-            set
-            {
-                _VarLink2 = value;
-            }
-        }
-        [Category("Orthodyne")]
-        [Description("Commande envoyée lors du clic sur le bouton")]
-        [DefaultValue("")]
-        public string Commande
-        {
-            get
-            {
-                return _Commande;
-            }
-            set
-            {
-                _Commande = value;
-            }
-        }
-        [Category("Orthodyne")]
-        [Description("utilisation variant selon d'autre params")]
+        [Category("Not assigned")]
+        [Description("Variable interne non utilisé actuellement")]
         public string VarLink9
         {
             get
             {
-                return _VarLink9;
+                return _VL[8];
             }
             set
             {
-                _VarLink9 = value;
+                _VL[8] = value;
             }
         }
-        #endregion
-
-
-
-        #region Orthodyne Properties
         [Category("Apparence")]
         [Description("Largeur de la bordure du contrôle")]
         public int BorderWidth
@@ -514,6 +454,8 @@ namespace StageCode.LIB
                     case var case3 when case3 == TDesign.Cercle:
                         {
                             btn.Shape = CButton.eShape.Ellipse;
+                            btn.Size = new Size(this.Height, this.Height);
+                            this.Size = btn.Size;
                             break;
                         }
                 }
@@ -668,17 +610,12 @@ namespace StageCode.LIB
             }
         }
         [Browsable(false)]
-        public BorderStyle BorderStyle
+        public new BorderStyle BorderStyle
         {
-            get
-            {
-                return base.BorderStyle;
-            }
-            set
-            {
-                base.BorderStyle = value;
-            }
+            get => base.BorderStyle;
+            set => base.BorderStyle = value;
         }
+
         [Browsable(false)]
         public Cursor Cursor
         {
@@ -976,7 +913,6 @@ namespace StageCode.LIB
             }
         }
         #endregion
-
         public string Type
         {
             get
@@ -989,7 +925,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return "ALA";
+                return "DI";
             }
         }
 
@@ -997,21 +933,8 @@ namespace StageCode.LIB
         {
             return GetType();
         }
-        public string _name;
 
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                _name = value;
-            }
-        }
-
-        private void OrthoAla_Load(object sender, EventArgs e)
+        private void OrthoDI_Load(object sender, EventArgs e)
         {
 
         }

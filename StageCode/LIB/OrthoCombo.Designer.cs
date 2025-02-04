@@ -1,6 +1,6 @@
 ﻿namespace StageCode.LIB
 {
-    partial class OrthoAD
+    partial class OrthoCombo
     {
         /// <summary>
         /// Required designer variable.
@@ -28,19 +28,30 @@
         /// </summary>
         private void InitializeComponent()
         {
+            ComboBox1 = new ComboBox();
             SuspendLayout();
             // 
-            // OrthoAD
+            // ComboBox1
+            // 
+            ComboBox1.FormattingEnabled = true;
+            ComboBox1.Location = new Point(3, 3);
+            ComboBox1.Name = "ComboBox1";
+            ComboBox1.Size = new Size(121, 23);
+            ComboBox1.TabIndex = 0;
+            // 
+            // OrthoCombo
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.Control;
-            Name = "OrthoAD";
-            Size = new Size(800, 450);
-            Load += OrthoAD_Load;
+            Controls.Add(ComboBox1);
+            Name = "OrthoCombo";
+            Size = new Size(126, 29);
+            Load += OrthoCombo_Load;
             ResumeLayout(false);
         }
 
         #endregion
+
+        private ComboBox ComboBox1;
     }
 }
