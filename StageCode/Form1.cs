@@ -556,7 +556,7 @@ namespace StageCode
 
         private void button2_Click(object sender, EventArgs e)
         {
-            OrthoRel a = new OrthoRel();
+            OrthoResult a = new OrthoResult();
             a.Location= new Point(this.Width/2,this.Height/2);
             this.Controls.Add(a);
         }
