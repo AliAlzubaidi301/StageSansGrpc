@@ -55,19 +55,25 @@ namespace StageCode.LIB
         {
             var xmlContent = new StringBuilder();
 
-            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
-            xmlContent.AppendLine("  <Apparence>");
-            xmlContent.AppendLine($"    <SizeHeight>{Size.Height}</SizeHeight>");
-            xmlContent.AppendLine($"    <SizeWidth>{Size.Width}</SizeWidth>");
-            xmlContent.AppendLine($"    <LocationY>{Location.Y}</LocationY>");
-            xmlContent.AppendLine($"    <LocationX>{Location.X}</LocationX>");
-            xmlContent.AppendLine($"    <Detecteur>{Detecteur}</Detecteur>");
-            xmlContent.AppendLine($"    <LevelVisible>{LevelVisible}</LevelVisible>");
-            xmlContent.AppendLine($"    <LevelEnabled>{LevelEnabled}</LevelEnabled>");
-            xmlContent.AppendLine($"    <Visibility>{Visibility}</Visibility>");
-            xmlContent.AppendLine("  </Apparence>");
-            xmlContent.AppendLine("</Component>");
+            // Début du composant spécifique
+            xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
 
+            // Section Apparence
+            xmlContent.AppendLine("      <Apparence>");
+            xmlContent.AppendLine($"        <SizeHeight>{Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"        <SizeWidth>{Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"        <LocationY>{Location.Y}</LocationY>");
+            xmlContent.AppendLine($"        <LocationX>{Location.X}</LocationX>");
+            xmlContent.AppendLine($"        <Detecteur>{Detecteur}</Detecteur>");
+            xmlContent.AppendLine($"        <LevelVisible>{LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"        <LevelEnabled>{LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"        <Visibility>{Visibility}</Visibility>");
+            xmlContent.AppendLine("      </Apparence>");
+
+            // Fermeture du composant
+            xmlContent.AppendLine("    </Component>");
+
+            // Retourner le contenu XML généré
             return xmlContent.ToString();
         }
 

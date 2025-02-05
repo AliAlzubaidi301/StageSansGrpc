@@ -166,33 +166,6 @@ namespace StageCode
 
         #region Méthodes Utilitaires
 
-        public void ExportFormToXml(Form form, string filePath)
-        {
-            StringBuilder xmlContent = new StringBuilder();
-
-            xmlContent.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-            xmlContent.AppendLine("<Syno name=\"settings\">");
-
-            foreach (Control control in form.Controls)
-            {
-                ExportControlToXml(control, xmlContent);
-            }
-
-            xmlContent.AppendLine("</Syno>");
-
-            File.WriteAllText(filePath, xmlContent.ToString());
-        }
-
-        private void ExportControlToXml(Control control, StringBuilder xmlContent)
-        {
-            if (control is AM60 am60Control)
-            {
-                AM60 am60 = am60Control as AM60;
-
-                xmlContent.Append(am60.WriteFileXML());
-            }
-        }
-
         private ToolStripMenuItem CreerMenuItem(string text, Keys? shortcutKeys, EventHandler? clickEvent)
         {
             ToolStripMenuItem menuItem = new ToolStripMenuItem(text);
@@ -208,45 +181,136 @@ namespace StageCode
         #endregion
 
         #region Actions des menus
+        public void ExportFormToXml()
+        {
+            // Créer un StringBuilder pour accumuler le texte de tous les contrôles
+            StringBuilder xmlContent = new StringBuilder();
+
+            // Début du fichier XML
+            xmlContent.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+            xmlContent.AppendLine("<Syno name=\"settings\">");
+
+            xmlContent.AppendLine("  <Controls>");
+
+            // Appeler la méthode SaveAs pour accumuler tous les contrôles dans xmlContent
+            StringBuilder accumulatedText = SaveAs(); // Récupère le texte accumulé des contrôles
+
+            // Ajouter le texte accumulé (contenu des contrôles) dans le XML
+            xmlContent.AppendLine(accumulatedText.ToString());  // Ajouter le contenu des contrôles au XML
+            xmlContent.AppendLine("  </Controls>");
+
+            // Clôturer l'élément principal <Syno>
+            xmlContent.AppendLine("</Syno>");
+
+            // Ouvrir un SaveFileDialog pour choisir l'emplacement et le nom du fichier .syn
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn"; // Filtrer les fichiers pour .syn
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Ouvrir un stream pour écrire dans le fichier choisi
+                    using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
+                    {
+                        // Écrire le texte XML accumulé dans le fichier
+                        writer.Write(xmlContent.ToString());
+                    }
+
+                    // Message de confirmation
+                    MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+        }
+
+        private StringBuilder SaveAs()
+        {
+            // Créer un StringBuilder pour accumuler le texte de tous les contrôles
+            StringBuilder accumulatedText = new StringBuilder();
+
+            // Parcours tous les contrôles dans le panneau ou le conteneur (ici pnlViewHost)
+            foreach (Control controle in pnlViewHost.Controls)
+            {
+                // Vérifier si le contrôle est une PictureBox
+                if (controle is PictureBox pictureBox)
+                {
+                    // Parcourir les contrôles enfants de la PictureBox
+                    foreach (Control childControl in pictureBox.Controls)
+                    {
+                        // Vérifier le type de contrôle enfant et appeler la méthode WriteFile correspondante
+                        if (childControl is AM60 am60Control)
+                        {
+                            accumulatedText.AppendLine(" "+ " " + am60Control.WriteFileXML());
+                        }
+                        else if (childControl is CONT1 cont1Control)
+                        {
+                            accumulatedText.AppendLine(cont1Control.WriteFileXML());
+                        }
+                        else if (childControl is INTEG integControl)
+                        {
+                            accumulatedText.AppendLine(integControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoAD orthoADControl)
+                        {
+                            accumulatedText.AppendLine(orthoADControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoAla orthoAlaControl)
+                        {
+                            accumulatedText.AppendLine(orthoAlaControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoCMDLib orthoCMDLibControl)
+                        {
+                            accumulatedText.AppendLine(orthoCMDLibControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoCombo orthoComboControl)
+                        {
+                            accumulatedText.AppendLine(orthoComboControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoDI orthoDIControl)
+                        {
+                            accumulatedText.AppendLine(orthoDIControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoEdit orthoEditControl)
+                        {
+                            accumulatedText.AppendLine(orthoEditControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoImage orthoImageControl)
+                        {
+                            accumulatedText.AppendLine(orthoImageControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoLabel orthoLabelControl)
+                        {
+                            accumulatedText.AppendLine(orthoLabelControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoPbar orthoPbarControl)
+                        {
+                            accumulatedText.AppendLine(orthoPbarControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoRel orthoRelControl)
+                        {
+                            accumulatedText.AppendLine(orthoRelControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoResult orthoResultControl)
+                        {
+                            accumulatedText.AppendLine(orthoResultControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoVarname orthoVarnameControl)
+                        {
+                            accumulatedText.AppendLine(orthoVarnameControl.WriteFileXML());
+                        }
+                        else if (childControl is Reticule reticuleControl)
+                        {
+                            accumulatedText.AppendLine(reticuleControl.WriteFileXML());
+                        }
+                    }
+                }
+            }
+
+            return accumulatedText;
+        }
+
+
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string message = "";
-            string title = "";
 
-            switch (Langue)
-            {
-                case 1: // English
-                    message = "Save the changes?";
-                    title = "Save";
-                    break;
-                case 2: // Chinese
-                    message = "保存更改？";
-                    title = "保存";
-                    break;
-                case 3: // German
-                    message = "Änderungen speichern?";
-                    title = "Speichern";
-                    break;
-                case 4: // French
-                    message = "Enregistrer les modifications ?";
-                    title = "Enregistrer";
-                    break;
-                case 5: // Lithuanian
-                    message = "Išsaugoti pakeitimus?";
-                    title = "Išsaugoti";
-                    break;
-            }
-
-            DialogResult r = MessageBox.Show(message, title, MessageBoxButtons.YesNoCancel);
-
-            if (r == DialogResult.Yes)
-            {
-                ExportFormToXml(this, "A.txt");
-            }
-            else if (r == DialogResult.No)
-            {
-
-            }
         }
         private void Couper(object sender, EventArgs e)
         {
@@ -395,28 +459,93 @@ namespace StageCode
 
         private void RecupererContenuXML(string xmlContent)
         {
-            try
-            {
-                XElement xml = XElement.Parse(xmlContent);
+            //try
+            //{
+            //    XElement xml = XElement.Parse(xmlContent);
 
-                foreach (XElement component in xml.Elements("Component"))
-                {
-                    string? type = component.Attribute("type")?.Value;
+            //    // Parcourir tous les éléments <Component> du XML
+            //    foreach (XElement component in xml.Elements("Component"))
+            //    {
+            //        string? type = component.Attribute("type")?.Value;
 
-                    if (type == "AM60")
-                    {
-                        AM60 am60Control = new AM60();
-                        am60Control = am60Control.ReadFileXML(component.ToString());
-
-                        Controls.Add(am60Control);
-                    }
-
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Une erreur est survenue lors du traitement du fichier XML : {ex.Message}", "Erreur");
-            }
+            //        if (type == "AM60")
+            //        {
+            //            AM60 am60Control = new AM60();
+            //            am60Control = am60Control.ReadFileXML(component.ToString());
+            //            Controls.Add(am60Control);
+            //        }
+            //        else if (type == "CONT1")
+            //        {
+            //            CONT1 reticuleControl = new CONT1();
+            //            reticuleControl = reticuleControl.ReadFileXML(component.ToString());
+            //            Controls.Add(reticuleControl);
+            //        }
+            //        else if (type == "INTEG")
+            //        {
+            //            ProgressBar pbarControl = new ProgressBar();
+            //            pbarControl = pbarControl.ReadFileXML(component.ToString());
+            //            Controls.Add(pbarControl);
+            //        }
+            //        else if (type == "RESULT")
+            //        {
+            //            Result resultControl = new Result();
+            //            resultControl = resultControl.ReadFileXML(component.ToString());
+            //            Controls.Add(resultControl);
+            //        }
+            //        else if (type == "VARNAME")
+            //        {
+            //            VarName varNameControl = new VarName();
+            //            varNameControl = varNameControl.ReadFileXML(component.ToString());
+            //            Controls.Add(varNameControl);
+            //        }
+            //        else if (type == "REL")
+            //        {
+            //            Relais relaisControl = new Relais();
+            //            relaisControl = relaisControl.ReadFileXML(component.ToString());
+            //            Controls.Add(relaisControl);
+            //        }
+            //        else if (type == "RESULT")
+            //        {
+            //            Result resultControl = new Result();
+            //            resultControl = resultControl.ReadFileXML(component.ToString());
+            //            Controls.Add(resultControl);
+            //        }
+            //        else if (type == "LABEL")
+            //        {
+            //            LabelControl labelControl = new LabelControl();
+            //            labelControl = labelControl.ReadFileXML(component.ToString());
+            //            Controls.Add(labelControl);
+            //        }
+            //        else if (type == "DI")
+            //        {
+            //            DiControl diControl = new DiControl();
+            //            diControl = diControl.ReadFileXML(component.ToString());
+            //            Controls.Add(diControl);
+            //        }
+            //        else if (type == "COMBO")
+            //        {
+            //            ComboBoxControl comboBoxControl = new ComboBoxControl();
+            //            comboBoxControl = comboBoxControl.ReadFileXML(component.ToString());
+            //            Controls.Add(comboBoxControl);
+            //        }
+            //        else if (type == "EDIT")
+            //        {
+            //            EditControl editControl = new EditControl();
+            //            editControl = editControl.ReadFileXML(component.ToString());
+            //            Controls.Add(editControl);
+            //        }
+            //        else if (type == "IMAGE")
+            //        {
+            //            ImageControl imageControl = new ImageControl();
+            //            imageControl = imageControl.ReadFileXML(component.ToString());
+            //            Controls.Add(imageControl);
+            //        }
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show($"Une erreur est survenue lors du traitement du fichier XML : {ex.Message}", "Erreur");
+            //}
         }
 
         #endregion
@@ -964,108 +1093,41 @@ namespace StageCode
             SaveAs();
         }
 
-        private void SaveAs()
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // Ouvrir un SaveFileDialog pour choisir l'emplacement et le nom du fichier .syn
-            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            string message = "";
+            string title = "";
+
+            switch (Langue)
             {
-                saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn"; // Filtrer les fichiers pour .syn
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    // Créer un StringBuilder pour accumuler le texte de tous les contrôles
-                    StringBuilder accumulatedText = new StringBuilder();
+                case 1: // English
+                    message = "Save the changes?";
+                    title = "Save";
+                    break;
+                case 2: // Chinese
+                    message = "保存更改？";
+                    title = "保存";
+                    break;
+                case 3: // German
+                    message = "Änderungen speichern?";
+                    title = "Speichern";
+                    break;
+                case 4: // French
+                    message = "Enregistrer les modifications ?";
+                    title = "Enregistrer";
+                    break;
+                case 5: // Lithuanian
+                    message = "Išsaugoti pakeitimus?";
+                    title = "Išsaugoti";
+                    break;
+            }
 
-                    // Parcours tous les contrôles dans le panneau ou le conteneur (ici pnlViewHost)
-                    foreach (Control controle in pnlViewHost.Controls)
-                    {
-                        // Vérifier si le contrôle est une PictureBox
-                        if (controle is PictureBox pictureBox)
-                        {
-                            // Parcourir les contrôles enfants de la PictureBox
-                            foreach (Control childControl in pictureBox.Controls)
-                            {
-                                // Vérifier le type de contrôle enfant et appeler la méthode WriteFile correspondante
-                                if (childControl is AM60 am60Control)
-                                {
-                                    accumulatedText.AppendLine(am60Control.WriteFileXML());
-                                }
-                                else if (childControl is CONT1 cont1Control)
-                                {
-                                    accumulatedText.AppendLine(cont1Control.WriteFileXML());
-                                }
-                                else if (childControl is INTEG integControl)
-                                {
-                                    accumulatedText.AppendLine(integControl.WriteFileXML());
-                                }
-                                else if (childControl is OrthoAD orthoADControl)
-                                {
-                                    accumulatedText.AppendLine(orthoADControl.WriteFileXML());
-                                }
-                                else if (childControl is OrthoAla orthoAlaControl)
-                                {
-                                    accumulatedText.AppendLine(orthoAlaControl.WriteFileXML());
-                                }
-                                else if (childControl is OrthoCMDLib orthoCMDLibControl)
-                                {
-                                    accumulatedText.AppendLine(orthoCMDLibControl.WriteFileXML());
-                                }
-                                else if (childControl is OrthoCombo orthoComboControl)
-                                {
-                                    accumulatedText.AppendLine(orthoComboControl.WriteFileXML());
-                                }
-                                else if (childControl is OrthoDI orthoDIControl)
-                                {
-                                    accumulatedText.AppendLine(orthoDIControl.WriteFileXML());
-                                }
-                                else if (childControl is OrthoEdit orthoEditControl)
-                                {
-                                    accumulatedText.AppendLine(orthoEditControl.WriteFileXML());
-                                }
-                                else if (childControl is OrthoImage orthoImageControl)
-                                {
-                                    accumulatedText.AppendLine(orthoImageControl.WriteFileXML());
-                                }
-                                else if (childControl is OrthoLabel orthoLabelControl)
-                                {
-                                    accumulatedText.AppendLine(orthoLabelControl.WriteFileXML());
-                                }
-                                else if (childControl is OrthoPbar orthoPbarControl)
-                                {
-                                    accumulatedText.AppendLine(orthoPbarControl.WriteFileXML());
-                                }
-                                else if (childControl is OrthoRel orthoRelControl)
-                                {
-                                    accumulatedText.AppendLine(orthoRelControl.WriteFileXML());
-                                }
-                                else if (childControl is OrthoResult orthoResultControl)
-                                {
-                                    accumulatedText.AppendLine(orthoResultControl.WriteFileXML());
-                                }
-                                else if (childControl is OrthoVarname orthoVarnameControl)
-                                {
-                                    accumulatedText.AppendLine(orthoVarnameControl.WriteFileXML());
-                                }
-                                else if (childControl is Reticule reticuleControl)
-                                {
-                                    accumulatedText.AppendLine(reticuleControl.WriteFileXML());
-                                }
-                            }
-                        }
-                    }
+            DialogResult r = MessageBox.Show(message, title, MessageBoxButtons.YesNoCancel);
 
-                    // Ouvrir un stream pour écrire dans le fichier choisi
-                    using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
-                    {
-                        MessageBox.Show(accumulatedText.ToString());
-                        // Écrire le texte accumulé dans le fichier
-                        writer.Write(accumulatedText.ToString());
-                    }
-
-                    // Message de confirmation
-                    MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
+            if (r == DialogResult.Yes)
+            {
+                ExportFormToXml();
             }
         }
-
     }
 }

@@ -83,21 +83,30 @@ namespace StageCode
         {
             var xmlContent = new StringBuilder();
 
-            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            // Début du composant spécifique
+            xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
 
             // Section Apparence
-            xmlContent.AppendLine("  <Apparence>");
-            xmlContent.AppendLine($"    <Backcolor value=\"{this.BackColor.Name.ToLower()}\"/>");
-            xmlContent.AppendLine($"    <LevelVisible value=\"{this.LevelVisible}\"/>");
-            xmlContent.AppendLine($"    <LevelEnabled value=\"{this.LevelEnabled}\"/>");
-            xmlContent.AppendLine($"    <Detecteur value=\"{this.Detecteur}\"/>");
-            xmlContent.AppendLine($"    <Visibility value=\"{this.Visibility}\"/>");
-            xmlContent.AppendLine("  </Apparence>");
+            xmlContent.AppendLine("      <Apparence>");
+            xmlContent.AppendLine($"        <Backcolor value=\"{this.BackColor.Name.ToLower()}\"/>");
+            xmlContent.AppendLine($"        <LevelVisible value=\"{this.LevelVisible}\"/>");
+            xmlContent.AppendLine($"        <LevelEnabled value=\"{this.LevelEnabled}\"/>");
 
-            xmlContent.AppendLine("</Component>");
+            // Gestion de la valeur "Detecteur"
+            string detecteurValue = string.IsNullOrEmpty(this.Detecteur) ? "undefined" : this.Detecteur;
+            xmlContent.AppendLine($"        <Detecteur value=\"{detecteurValue}\"/>");
 
+            // Gestion de la visibilité
+            xmlContent.AppendLine($"        <Visibility value=\"{this.Visibility}\"/>");
+            xmlContent.AppendLine("      </Apparence>");
+
+            // Fermeture du composant
+            xmlContent.AppendLine("    </Component>");
+
+            // Retourner le contenu XML généré
             return xmlContent.ToString();
         }
+
 
         public string WriteFile()
         {

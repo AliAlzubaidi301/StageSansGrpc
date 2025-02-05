@@ -96,24 +96,24 @@ namespace StageCode.LIB
         {
             var xmlContent = new StringBuilder();
 
-            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
-            xmlContent.AppendLine("  <Apparence>");
-            xmlContent.AppendLine($"    <ImageLocation>{ImageLocation}</ImageLocation>");
+            xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine("      <Apparence>");
+            xmlContent.AppendLine($"        <ImageLocation>{ImageLocation}</ImageLocation>");
 
             // Handling the BorderStyle as a boolean value for the XML (0 for None, 1 for other types)
             int bs = (this.BorderStyle == BorderStyle.None) ? 0 : 1;
-            xmlContent.AppendLine($"    <BorderStyle>{bs}</BorderStyle>");
+            xmlContent.AppendLine($"        <BorderStyle>{bs}</BorderStyle>");
 
-            xmlContent.AppendLine($"    <SizeHeight>{Size.Height}</SizeHeight>");
-            xmlContent.AppendLine($"    <SizeWidth>{Size.Width}</SizeWidth>");
-            xmlContent.AppendLine($"    <LocationY>{Location.Y}</LocationY>");
-            xmlContent.AppendLine($"    <LocationX>{Location.X}</LocationX>");
-            xmlContent.AppendLine($"    <LevelVisible>{LevelVisible}</LevelVisible>");
-            xmlContent.AppendLine($"    <LevelEnabled>{LevelEnabled}</LevelEnabled>");
-            xmlContent.AppendLine($"    <Visibility>{Visibility}</Visibility>");
+            xmlContent.AppendLine($"        <SizeHeight>{Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"        <SizeWidth>{Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"        <LocationY>{Location.Y}</LocationY>");
+            xmlContent.AppendLine($"        <LocationX>{Location.X}</LocationX>");
+            xmlContent.AppendLine($"        <LevelVisible>{LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"        <LevelEnabled>{LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"        <Visibility>{Visibility}</Visibility>");
 
-            xmlContent.AppendLine("  </Apparence>");
-            xmlContent.AppendLine("</Component>");
+            xmlContent.AppendLine("      </Apparence>");
+            xmlContent.AppendLine("    </Component>");
 
             return xmlContent.ToString();
         }

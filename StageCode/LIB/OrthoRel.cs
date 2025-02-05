@@ -210,46 +210,46 @@ namespace StageCode.LIB
         {
             var xmlContent = new StringBuilder();
 
-            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
-            xmlContent.AppendLine("  <Apparence>");
+            xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine("      <Apparence>");
 
             // Properties
-            xmlContent.AppendLine($"    <Caption>{Caption}</Caption>");
-            xmlContent.AppendLine($"    <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(TextAlign)}</TextAlign>");
-            xmlContent.AppendLine($"    <Precision>{Precision}</Precision>");
-            xmlContent.AppendLine($"    <BackColor>{ToOle(BackColor)}</BackColor>");
-            xmlContent.AppendLine($"    <ForeColor>{ToOle(ForeColor)}</ForeColor>");
-            xmlContent.AppendLine($"    <FontName>{Font.Name}</FontName>");
-            xmlContent.AppendLine($"    <FontSize>{Font.Size}</FontSize>");
-            xmlContent.AppendLine($"    <FontStrikeout>{Font.Strikeout}</FontStrikeout>");
-            xmlContent.AppendLine($"    <FontUnderline>{Font.Underline}</FontUnderline>");
-            xmlContent.AppendLine($"    <FontBold>{Font.Bold}</FontBold>");
-            xmlContent.AppendLine($"    <FontItalic>{Font.Italic}</FontItalic>");
-            xmlContent.AppendLine($"    <TypeDesign>{Convert.ToInt32(TypeDesign)}</TypeDesign>");
-            xmlContent.AppendLine($"    <BorderWidth>{BorderWidth}</BorderWidth>");
-            xmlContent.AppendLine($"    <SizeHeight>{Size.Height}</SizeHeight>");
-            xmlContent.AppendLine($"    <SizeWidth>{Size.Width}</SizeWidth>");
-            xmlContent.AppendLine($"    <LocationY>{Location.Y}</LocationY>");
-            xmlContent.AppendLine($"    <LocationX>{Location.X}</LocationX>");
-            xmlContent.AppendLine($"    <Variable>{Variable}</Variable>");
-            xmlContent.AppendLine($"    <RelaisMode>{Convert.ToInt32((int)RelaisMode)}</RelaisMode>");
-            xmlContent.AppendLine($"    <TextOff>{TextOff}</TextOff>");
-            xmlContent.AppendLine($"    <TextOn>{TextOn}</TextOn>");
+            xmlContent.AppendLine($"        <Caption>{Caption}</Caption>");
+            xmlContent.AppendLine($"        <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(TextAlign)}</TextAlign>");
+            xmlContent.AppendLine($"        <Precision>{Precision}</Precision>");
+            xmlContent.AppendLine($"        <BackColor>{ToOle(BackColor)}</BackColor>");
+            xmlContent.AppendLine($"        <ForeColor>{ToOle(ForeColor)}</ForeColor>");
+            xmlContent.AppendLine($"        <FontName>{Font.Name}</FontName>");
+            xmlContent.AppendLine($"        <FontSize>{Font.Size}</FontSize>");
+            xmlContent.AppendLine($"        <FontStrikeout>{Font.Strikeout}</FontStrikeout>");
+            xmlContent.AppendLine($"        <FontUnderline>{Font.Underline}</FontUnderline>");
+            xmlContent.AppendLine($"        <FontBold>{Font.Bold}</FontBold>");
+            xmlContent.AppendLine($"        <FontItalic>{Font.Italic}</FontItalic>");
+            xmlContent.AppendLine($"        <TypeDesign>{Convert.ToInt32(TypeDesign)}</TypeDesign>");
+            xmlContent.AppendLine($"        <BorderWidth>{BorderWidth}</BorderWidth>");
+            xmlContent.AppendLine($"        <SizeHeight>{Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"        <SizeWidth>{Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"        <LocationY>{Location.Y}</LocationY>");
+            xmlContent.AppendLine($"        <LocationX>{Location.X}</LocationX>");
+            xmlContent.AppendLine($"        <Variable>{Variable}</Variable>");
+            xmlContent.AppendLine($"        <RelaisMode>{Convert.ToInt32((int)RelaisMode)}</RelaisMode>");
+            xmlContent.AppendLine($"        <TextOff>{TextOff}</TextOff>");
+            xmlContent.AppendLine($"        <TextOn>{TextOn}</TextOn>");
 
             // _VL values
             for (int i = 5; i < _VL.Length; i++)
             {
-                xmlContent.AppendLine($"    <VL{i}>{_VL[i]}</VL{i}>");
+                xmlContent.AppendLine($"        <VL{i}>{_VL[i]}</VL{i}>");
             }
 
-            xmlContent.AppendLine($"    <ColorOn>{ToOle(ColorOn)}</ColorOn>");
-            xmlContent.AppendLine($"    <ColorOff>{ToOle(ColorOff)}</ColorOff>");
-            xmlContent.AppendLine($"    <ColorErr>{ToOle(ColorErr)}</ColorErr>");
-            xmlContent.AppendLine($"    <LevelVisible>{LevelVisible}</LevelVisible>");
-            xmlContent.AppendLine($"    <LevelEnabled>{LevelEnabled}</LevelEnabled>");
-            xmlContent.AppendLine($"    <Visibility>{Visibility}</Visibility>");
-            xmlContent.AppendLine("  </Apparence>");
-            xmlContent.AppendLine("</Component>");
+            xmlContent.AppendLine($"        <ColorOn>{ToOle(ColorOn)}</ColorOn>");
+            xmlContent.AppendLine($"        <ColorOff>{ToOle(ColorOff)}</ColorOff>");
+            xmlContent.AppendLine($"        <ColorErr>{ToOle(ColorErr)}</ColorErr>");
+            xmlContent.AppendLine($"        <LevelVisible>{LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"        <LevelEnabled>{LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"        <Visibility>{Visibility}</Visibility>");
+            xmlContent.AppendLine("      </Apparence>");
+            xmlContent.AppendLine("    </Component>");
 
             return xmlContent.ToString();
         }

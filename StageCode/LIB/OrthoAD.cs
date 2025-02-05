@@ -190,43 +190,49 @@ namespace StageCode.LIB
         {
             var xmlContent = new StringBuilder();
 
-            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
-            xmlContent.AppendLine("  <Apparence>");
-            xmlContent.AppendLine($"    <Caption>{Caption}</Caption>");
-            xmlContent.AppendLine($"    <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(this.TextAlign)}</TextAlign>");
-            xmlContent.AppendLine($"    <Format>{Format}</Format>");
-            xmlContent.AppendLine($"    <BackColor>{ToOle(this.BackColor)}</BackColor>");
-            xmlContent.AppendLine($"    <ForeColor>{ToOle(this.ForeColor)}</ForeColor>");
-            xmlContent.AppendLine($"    <FontName>{this.Font.Name}</FontName>");
-            xmlContent.AppendLine($"    <FontSize>{this.Font.Size}</FontSize>");
-            xmlContent.AppendLine($"    <FontStrikeout>{this.Font.Strikeout}</FontStrikeout>");
-            xmlContent.AppendLine($"    <FontUnderline>{this.Font.Underline}</FontUnderline>");
-            xmlContent.AppendLine($"    <FontBold>{this.Font.Bold}</FontBold>");
-            xmlContent.AppendLine($"    <FontItalic>{this.Font.Italic}</FontItalic>");
-            xmlContent.AppendLine($"    <TypeDesign>{Convert.ToInt32(this.TypeDesign)}</TypeDesign>");
-            xmlContent.AppendLine($"    <BorderWidth>{this.BorderWidth}</BorderWidth>");
-            xmlContent.AppendLine($"    <SizeHeight>{this.Size.Height}</SizeHeight>");
-            xmlContent.AppendLine($"    <SizeWidth>{this.Size.Width}</SizeWidth>");
-            xmlContent.AppendLine($"    <LocationY>{this.Location.Y}</LocationY>");
-            xmlContent.AppendLine($"    <LocationX>{this.Location.X}</LocationX>");
-            xmlContent.AppendLine($"    <VarText>{this.VarText}</VarText>");
-            xmlContent.AppendLine($"    <VarBackColor>{this.VarBackColor}</VarBackColor>");
-            xmlContent.AppendLine($"    <VarForeColor>{this.VarForeColor}</VarForeColor>");
-            xmlContent.AppendLine($"    <VarValMax>{this.VarValMax}</VarValMax>");
-            xmlContent.AppendLine($"    <VarTextMax>{this.VarTextMax}</VarTextMax>");
-            xmlContent.AppendLine($"    <VarValMin>{this.VarValMin}</VarValMin>");
-            xmlContent.AppendLine($"    <VarTextMin>{this.VarTextMin}</VarTextMin>");
-            xmlContent.AppendLine($"    <VL7>{this._VL[7]}</VL7>");
-            xmlContent.AppendLine($"    <VL8>{this._VL[8]}</VL8>");
-            xmlContent.AppendLine($"    <ColorOn>{ToOle(this.ColorOn)}</ColorOn>");
-            xmlContent.AppendLine($"    <ColorOff>{ToOle(this.ColorOff)}</ColorOff>");
-            xmlContent.AppendLine($"    <ColorErr>{ToOle(this.ColorErr)}</ColorErr>");
-            xmlContent.AppendLine($"    <LevelVisible>{this.LevelVisible}</LevelVisible>");
-            xmlContent.AppendLine($"    <LevelEnabled>{this.LevelEnabled}</LevelEnabled>");
-            xmlContent.AppendLine($"    <Visibility>{this.Visibility}</Visibility>");
-            xmlContent.AppendLine("  </Apparence>");
-            xmlContent.AppendLine("</Component>");
+            // Début du composant spécifique
+            xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
 
+            // Section Apparence
+            xmlContent.AppendLine("      <Apparence>");
+            xmlContent.AppendLine($"        <Caption>{Caption}</Caption>");
+            xmlContent.AppendLine($"        <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(this.TextAlign)}</TextAlign>");
+            xmlContent.AppendLine($"        <Format>{Format}</Format>");
+            xmlContent.AppendLine($"        <BackColor>{ToOle(this.BackColor)}</BackColor>");
+            xmlContent.AppendLine($"        <ForeColor>{ToOle(this.ForeColor)}</ForeColor>");
+            xmlContent.AppendLine($"        <FontName>{this.Font.Name}</FontName>");
+            xmlContent.AppendLine($"        <FontSize>{this.Font.Size}</FontSize>");
+            xmlContent.AppendLine($"        <FontStrikeout>{this.Font.Strikeout}</FontStrikeout>");
+            xmlContent.AppendLine($"        <FontUnderline>{this.Font.Underline}</FontUnderline>");
+            xmlContent.AppendLine($"        <FontBold>{this.Font.Bold}</FontBold>");
+            xmlContent.AppendLine($"        <FontItalic>{this.Font.Italic}</FontItalic>");
+            xmlContent.AppendLine($"        <TypeDesign>{Convert.ToInt32(this.TypeDesign)}</TypeDesign>");
+            xmlContent.AppendLine($"        <BorderWidth>{this.BorderWidth}</BorderWidth>");
+            xmlContent.AppendLine($"        <SizeHeight>{this.Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"        <SizeWidth>{this.Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"        <LocationY>{this.Location.Y}</LocationY>");
+            xmlContent.AppendLine($"        <LocationX>{this.Location.X}</LocationX>");
+            xmlContent.AppendLine($"        <VarText>{this.VarText}</VarText>");
+            xmlContent.AppendLine($"        <VarBackColor>{this.VarBackColor}</VarBackColor>");
+            xmlContent.AppendLine($"        <VarForeColor>{this.VarForeColor}</VarForeColor>");
+            xmlContent.AppendLine($"        <VarValMax>{this.VarValMax}</VarValMax>");
+            xmlContent.AppendLine($"        <VarTextMax>{this.VarTextMax}</VarTextMax>");
+            xmlContent.AppendLine($"        <VarValMin>{this.VarValMin}</VarValMin>");
+            xmlContent.AppendLine($"        <VarTextMin>{this.VarTextMin}</VarTextMin>");
+            xmlContent.AppendLine($"        <VL7>{this._VL[7]}</VL7>");
+            xmlContent.AppendLine($"        <VL8>{this._VL[8]}</VL8>");
+            xmlContent.AppendLine($"        <ColorOn>{ToOle(this.ColorOn)}</ColorOn>");
+            xmlContent.AppendLine($"        <ColorOff>{ToOle(this.ColorOff)}</ColorOff>");
+            xmlContent.AppendLine($"        <ColorErr>{ToOle(this.ColorErr)}</ColorErr>");
+            xmlContent.AppendLine($"        <LevelVisible>{this.LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"        <LevelEnabled>{this.LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"        <Visibility>{this.Visibility}</Visibility>");
+            xmlContent.AppendLine("      </Apparence>");
+
+            // Fermeture du composant
+            xmlContent.AppendLine("    </Component>");
+
+            // Retourner le contenu XML généré
             return xmlContent.ToString();
         }
 
