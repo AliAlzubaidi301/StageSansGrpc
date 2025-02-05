@@ -193,7 +193,7 @@ namespace StageCode
             xmlContent.AppendLine("  <Controls>");
 
             // Appeler la méthode SaveAs pour accumuler tous les contrôles dans xmlContent
-            StringBuilder accumulatedText = SaveAs(); // Récupère le texte accumulé des contrôles
+            StringBuilder accumulatedText = SaveAsXML(); // Récupère le texte accumulé des contrôles
 
             // Ajouter le texte accumulé (contenu des contrôles) dans le XML
             xmlContent.AppendLine(accumulatedText.ToString());  // Ajouter le contenu des contrôles au XML
@@ -220,8 +220,7 @@ namespace StageCode
                 }
             }
         }
-
-        private StringBuilder SaveAs()
+        private StringBuilder SaveAsXML()
         {
             // Créer un StringBuilder pour accumuler le texte de tous les contrôles
             StringBuilder accumulatedText = new StringBuilder();
@@ -238,7 +237,7 @@ namespace StageCode
                         // Vérifier le type de contrôle enfant et appeler la méthode WriteFile correspondante
                         if (childControl is AM60 am60Control)
                         {
-                            accumulatedText.AppendLine(" "+ " " + am60Control.WriteFileXML());
+                            accumulatedText.AppendLine(" " + " " + am60Control.WriteFileXML());
                         }
                         else if (childControl is CONT1 cont1Control)
                         {
@@ -308,9 +307,161 @@ namespace StageCode
         }
 
 
+        public void ExportFormToTXT()
+        {
+            // Créer un StringBuilder pour accumuler le texte de tous les contrôles
+           
+
+            // Appeler la méthode SaveAs pour accumuler tous les contrôles dans xmlContent
+            StringBuilder accumulatedText = SaveAsTXT(); // Récupère le texte accumulé des contrôles
+
+            
+
+            // Ouvrir un SaveFileDialog pour choisir l'emplacement et le nom du fichier .syn
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn"; // Filtrer les fichiers pour .syn
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Ouvrir un stream pour écrire dans le fichier choisi
+                    using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
+                    {
+                        // Écrire le texte XML accumulé dans le fichier
+                        writer.Write(accumulatedText.ToString());
+                    }
+
+                    // Message de confirmation
+                    MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+        }
+        private StringBuilder SaveAsTXT()
+        {
+            // Créer un StringBuilder pour accumuler le texte de tous les contrôles
+            StringBuilder accumulatedText = new StringBuilder();
+
+            // Parcours tous les contrôles dans le panneau ou le conteneur (ici pnlViewHost)
+            foreach (Control controle in pnlViewHost.Controls)
+            {
+                // Vérifier si le contrôle est une PictureBox
+                if (controle is PictureBox pictureBox)
+                {
+                    // Parcourir les contrôles enfants de la PictureBox
+                    foreach (Control childControl in pictureBox.Controls)
+                    {
+                        // Vérifier le type de contrôle enfant et appeler la méthode WriteFile correspondante
+                        if (childControl is AM60 am60Control)
+                        {
+                            accumulatedText.AppendLine(am60Control.WriteFile());
+                        }
+                        else if (childControl is CONT1 cont1Control)
+                        {
+                            accumulatedText.AppendLine(cont1Control.WriteFile());
+                        }
+                        else if (childControl is INTEG integControl)
+                        {
+                            accumulatedText.AppendLine(integControl.WriteFile());
+                        }
+                        else if (childControl is OrthoAD orthoADControl)
+                        {
+                            accumulatedText.AppendLine(orthoADControl.WriteFile());
+                        }
+                        else if (childControl is OrthoAla orthoAlaControl)
+                        {
+                            accumulatedText.AppendLine(orthoAlaControl.WriteFile());
+                        }
+                        else if (childControl is OrthoCMDLib orthoCMDLibControl)
+                        {
+                            accumulatedText.AppendLine(orthoCMDLibControl.WriteFile());
+                        }
+                        else if (childControl is OrthoCombo orthoComboControl)
+                        {
+                            accumulatedText.AppendLine(orthoComboControl.WriteFile());
+                        }
+                        else if (childControl is OrthoDI orthoDIControl)
+                        {
+                            accumulatedText.AppendLine(orthoDIControl.WriteFile());
+                        }
+                        else if (childControl is OrthoEdit orthoEditControl)
+                        {
+                            accumulatedText.AppendLine(orthoEditControl.WriteFile());
+                        }
+                        else if (childControl is OrthoImage orthoImageControl)
+                        {
+                            accumulatedText.AppendLine(orthoImageControl.WriteFile());
+                        }
+                        else if (childControl is OrthoLabel orthoLabelControl)
+                        {
+                            accumulatedText.AppendLine(orthoLabelControl.WriteFile());
+                        }
+                        else if (childControl is OrthoPbar orthoPbarControl)
+                        {
+                            accumulatedText.AppendLine(orthoPbarControl.WriteFile());
+                        }
+                        else if (childControl is OrthoRel orthoRelControl)
+                        {
+                            accumulatedText.AppendLine(orthoRelControl.WriteFile());
+                        }
+                        else if (childControl is OrthoResult orthoResultControl)
+                        {
+                            accumulatedText.AppendLine(orthoResultControl.WriteFile());
+                        }
+                        else if (childControl is OrthoVarname orthoVarnameControl)
+                        {
+                            accumulatedText.AppendLine(orthoVarnameControl.WriteFile());
+                        }
+                        else if (childControl is Reticule reticuleControl)
+                        {
+                            accumulatedText.AppendLine(reticuleControl.WriteFile());
+                        }
+                    }
+                }
+            }
+
+            return accumulatedText;
+        }
+
+
+
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            string message = "";
+            string title = "";
 
+            switch (Langue)
+            {
+                case 1: // English
+                    message = "Save the changes?";
+                    title = "Save";
+                    break;
+                case 2: // Chinese
+                    message = "保存更改？";
+                    title = "保存";
+                    break;
+                case 3: // German
+                    message = "Änderungen speichern?";
+                    title = "Speichern";
+                    break;
+                case 4: // French
+                    message = "Enregistrer les modifications ?";
+                    title = "Enregistrer";
+                    break;
+                case 5: // Lithuanian
+                    message = "Išsaugoti pakeitimus?";
+                    title = "Išsaugoti";
+                    break;
+            }
+
+            DialogResult r = MessageBox.Show(message, title, MessageBoxButtons.YesNoCancel);
+
+            if (r == DialogResult.Yes)
+            {
+                ExportFormToXml();
+            }
+            else if (r == DialogResult.Cancel)
+            {
+                // Si l'utilisateur choisit "Non", empêcher la fermeture du formulaire
+            }
         }
         private void Couper(object sender, EventArgs e)
         {
@@ -422,6 +573,43 @@ namespace StageCode
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            string message = "";
+            string title = "";
+
+            // Définition du message et du titre en fonction de la langue
+            switch (Langue)
+            {
+                case 1: // English
+                    message = "Save the changes before opening a new file?";
+                    title = "Save Changes";
+                    break;
+                case 2: // Chinese
+                    message = "在打开新文件之前保存更改？";
+                    title = "保存更改";
+                    break;
+                case 3: // German
+                    message = "Änderungen speichern, bevor eine neue Datei geöffnet wird?";
+                    title = "Änderungen speichern";
+                    break;
+                case 4: // French
+                    message = "Enregistrer les modifications avant d'ouvrir un nouveau fichier ?";
+                    title = "Enregistrer les modifications";
+                    break;
+                case 5: // Lithuanian
+                    message = "Prieš atidarant naują failą, išsaugoti pakeitimus?";
+                    title = "Išsaugoti pakeitimus";
+                    break;
+            }
+
+            // Affichage du message avec le titre et la langue correspondante
+            DialogResult r = MessageBox.Show(message, title, MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+
+            if(r == DialogResult.Yes)
+            {
+
+            }
+
+            // Ouverture de la boîte de dialogue pour choisir un fichier
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Title = "Ouvrir un fichier"
@@ -439,10 +627,11 @@ namespace StageCode
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Une erreur est survenue lors de l'ouverture du fichier : {ex.Message}", "Erreur");
+                    MessageBox.Show($"Une erreur est survenue lors de l'ouverture du fichier : {ex.Message}", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
+
 
         private string LireXML(string filePath)
         {
@@ -1090,7 +1279,6 @@ namespace StageCode
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveAs();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -1098,6 +1286,7 @@ namespace StageCode
             string message = "";
             string title = "";
 
+            // Message de confirmation pour sauvegarder les changements
             switch (Langue)
             {
                 case 1: // English
@@ -1126,7 +1315,152 @@ namespace StageCode
 
             if (r == DialogResult.Yes)
             {
+                // Demande si l'utilisateur souhaite sauvegarder en XML ou non
+                string saveMessage = "";
+                string saveTitle = "";
+
+                switch (Langue)
+                {
+                    case 1: // English
+                        saveMessage = "Do you want to save as XML?";
+                        saveTitle = "Save As XML";
+                        break;
+                    case 2: // Chinese
+                        saveMessage = "您是否要以XML格式保存？";
+                        saveTitle = "保存为XML";
+                        break;
+                    case 3: // German
+                        saveMessage = "Möchten Sie als XML speichern?";
+                        saveTitle = "Als XML speichern";
+                        break;
+                    case 4: // French
+                        saveMessage = "Voulez-vous enregistrer en XML ?";
+                        saveTitle = "Enregistrer en XML";
+                        break;
+                    case 5: // Lithuanian
+                        saveMessage = "Ar norite išsaugoti kaip XML?";
+                        saveTitle = "Išsaugoti kaip XML";
+                        break;
+                }
+
+                // Affichage de la boîte de dialogue pour le choix de sauvegarde en XML
+                DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
+
+                if (saveResult == DialogResult.Yes)
+                {
+                    ExportFormToXml();  // Sauvegarder en XML
+                }
+                else
+                {
+                    ExportFormToTXT();
+                }
+            }
+            else if (r == DialogResult.Cancel)
+            {
+                // Si l'utilisateur choisit "Annuler", empêcher la fermeture du formulaire
+                e.Cancel = true;
+            }
+        }
+
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Déclaration des variables
+            string message = "";
+            string title = "";
+
+
+            // Définir les messages et les textes des boutons en fonction de la langue
+            switch (Langue)
+            {
+                case 1: // English
+                    message = "Would you like to save changes in XML format?";
+                    title = "Save as XML";
+
+                    break;
+                case 2: // Chinese
+                    message = "您是否希望以XML格式保存更改？";
+                    title = "保存为XML";
+
+                    break;
+                case 3: // German
+                    message = "Möchten Sie die Änderungen im XML-Format speichern?";
+                    title = "Als XML speichern";
+
+                    break;
+                case 4: // French
+                    message = "Souhaitez-vous enregistrer les modifications au format XML ?";
+                    title = "Enregistrer sous XML";
+
+                    break;
+                case 5: // Lithuanian
+                    message = "Ar norite išsaugoti pakeitimus XML formatu?";
+                    title = "Įrašyti kaip XML";
+
+                    break;
+            }
+
+            // Affichage d'un MessageBox personnalisé avec des boutons textuels en fonction de la langue
+            DialogResult r = MessageBox.Show($"{message}",title,MessageBoxButtons.YesNo);  //ShowCustomMessageBox(message, title, yesText, noText);
+
+            if (r == DialogResult.Yes)
+            {
+                // Si l'utilisateur choisit "Oui", alors enregistrer le fichier XML
                 ExportFormToXml();
+            }
+            else if (r == DialogResult.No)
+            {
+                ExportFormToTXT();
+                // Si l'utilisateur choisit "Non", ne rien faire
+                return;
+            }
+        }
+
+        // Fonction pour afficher un MessageBox personnalisé
+        private DialogResult ShowCustomMessageBox(string message, string title, string yesText, string noText)
+        {
+            using (Form customDialog = new Form())
+            {
+                customDialog.Text = title;
+                customDialog.FormBorderStyle = FormBorderStyle.FixedDialog;
+                customDialog.StartPosition = FormStartPosition.CenterScreen;
+                customDialog.MinimizeBox = false;
+                customDialog.MaximizeBox = false;
+                customDialog.ClientSize = new Size(300, 150);
+
+                // Ajouter un label pour afficher le message
+                Label messageLabel = new Label()
+                {
+                    Text = message,
+                    Location = new Point(50, 30),
+                    AutoSize = true
+                };
+                customDialog.Controls.Add(messageLabel);
+
+                // Bouton "Oui"
+                Button btnYes = new Button()
+                {
+                    Text = yesText,
+                    DialogResult = DialogResult.Yes,
+                    Location = new Point(30, 80)
+                };
+                customDialog.Controls.Add(btnYes);
+
+                // Bouton "Non"
+                Button btnNo = new Button()
+                {
+                    Text = noText,
+                    DialogResult = DialogResult.No,
+                    Location = new Point(110, 80)
+                };
+                customDialog.Controls.Add(btnNo);
+
+                customDialog.AcceptButton = btnYes; // Le bouton par défaut pour "Oui"
+                customDialog.CancelButton = btnNo;  // Le bouton "Non" comme bouton d'annulation
+
+                // Affichage du formulaire personnalisé
+                DialogResult dialogResult = customDialog.ShowDialog();
+                return dialogResult;
             }
         }
     }
