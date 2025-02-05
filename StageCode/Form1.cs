@@ -821,6 +821,13 @@ namespace StageCode
             }
 
             pnlViewHost.Controls.Clear();
+
+
+           
+
+            string a = LireXML();
+
+            RecupererContenuXML(a);
         }
 
 

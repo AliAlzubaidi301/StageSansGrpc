@@ -47,6 +47,45 @@ namespace StageCode.LIB
             return this;
         }
 
+        // Méthode pour lire un fichier XML et retourner un objet Component
+        public static CONT1 ReadFileXML(string xmlText)
+        {
+            // Charger le XML dans un XElement
+            XElement xml = XElement.Parse(xmlText);
+
+            // Créer une nouvelle instance de Component
+            CONT1 component = new CONT1();
+
+            // Extraire les attributs du composant (type et name)
+            string? type = xml.Attribute("type")?.Value;  // Le type, ici on ne l'utilise pas mais tu peux l'afficher si nécessaire
+            component.Name = xml.Attribute("name")?.Value;
+
+            // Parser la section <Apparence>
+            XElement? appearance = xml.Element("Apparence");
+            if (appearance != null)
+            {
+                // Extraire les valeurs de la section <Apparence>
+                component.Size = new Size(
+                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "0"),
+                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "0")
+                );
+
+                component.Location = new Point(
+                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+                );
+
+                component.Detecteur = appearance.Element("Detecteur")?.Value ?? "";
+                component.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
+                component.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
+                component.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";
+            }
+
+            // Retourner l'objet Component reconstruit
+            return component;
+        }
+   
+
         public string WriteFile()
         {
             return $"CONT1;{Name};{Size.Height};{Size.Width};{Location.Y};{Location.X};{Detecteur};{LevelVisible};{LevelEnabled};{Visibility}";

@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace StageCode
 {
@@ -34,6 +35,7 @@ namespace StageCode
         }
 
         #region "Read/Write on .syn file"
+
         public INTEG ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
         {
             this._comment = comment;
