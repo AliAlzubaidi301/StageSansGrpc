@@ -19,6 +19,7 @@ using System.Windows.Forms.Design;
 using System.Xml.Linq;
 using System.Windows.Forms;
 using System.Text.Json;
+using OrthoDesigner.Other;
 
 namespace StageCode
 {
@@ -1077,15 +1078,29 @@ namespace StageCode
 
         private void Form1_ClientSizeChanged(object sender, EventArgs e)
         {
-            this.MainMenu.Width = (int)(this.ClientSize.Width * 0.95);
-            this.MainMenu.Height = (int)(this.ClientSize.Height * 0.1);
+            this.MainMenu.Width = this.ClientSize.Width;
+            this.MainMenu.Height = (int)(this.ClientSize.Height * 0.08);
 
             float fontSize = (this.ClientSize.Width * 0.02f + this.ClientSize.Height * 0.02f) / 2;
-
             foreach (ToolStripMenuItem item in MainMenu.Items)
             {
                 item.Font = new Font(item.Font.FontFamily, fontSize);
             }
+
+            // Adapter pnlViewHost pour occuper tout l'espace en dessous du menu
+            pnlViewHost.Location = new Point(0, MainMenu.Bottom);
+            pnlViewHost.Width = (int)(this.ClientSize.Width * 0.8);
+            pnlViewHost.Height = this.ClientSize.Height - pnlViewHost.Top;
+
+            // Ajuster lstToolbox (à gauche du pnlViewHost)
+            lstToolbox.Width = (int)(pnlViewHost.Width * 0.3);
+            lstToolbox.Height = pnlViewHost.Height / 2; // moitié de pnlViewHost
+            lstToolbox.Location = new Point(pnlViewHost.Right, pnlViewHost.Top);
+
+            // Ajuster propertyGrid1 (sous lstToolbox, même largeur)
+            propertyGrid1.Width = lstToolbox.Width;
+            propertyGrid1.Height = pnlViewHost.Height - lstToolbox.Height;
+            propertyGrid1.Location = new Point(lstToolbox.Left, lstToolbox.Bottom);
         }
 
         #endregion
@@ -1513,11 +1528,51 @@ namespace StageCode
 
             if (saveResult == DialogResult.Yes)
             {
-                ExportFormToXml();  // Sauvegarder en XML
+                // Créer un StringBuilder pour accumuler le texte de tous les contrôles
+                StringBuilder xmlContent = new StringBuilder();
+
+                // Début du fichier XML
+                xmlContent.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                xmlContent.AppendLine("<Syno name=\"settings\">");
+
+                xmlContent.AppendLine("  <Controls>");
+
+                // Appeler la méthode SaveAs pour accumuler tous les contrôles dans xmlContent
+                StringBuilder accumulatedText = SaveAsXML(); // Récupère le texte accumulé des contrôles
+
+                // Ajouter le texte accumulé (contenu des contrôles) dans le XML
+                xmlContent.AppendLine(accumulatedText.ToString());  // Ajouter le contenu des contrôles au XML
+                xmlContent.AppendLine("  </Controls>");
+
+                // Clôturer l'élément principal <Syno>
+                xmlContent.AppendLine("</Syno>");
+
+                // Ouvrir un stream pour écrire dans le fichier choisi
+                using (StreamWriter writer = new StreamWriter("Save.syno"))
+                {
+                    // Écrire le texte XML accumulé dans le fichier
+                    writer.Write(xmlContent.ToString());
+                }
+
+                // Message de confirmation
+                MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                ExportFormToTXT();
+                // Créer un StringBuilder pour accumuler le texte de tous les contrôles
+
+
+                // Appeler la méthode SaveAs pour accumuler tous les contrôles dans xmlContent
+                StringBuilder accumulatedText = SaveAsTXT(); // Récupère le texte accumulé des contrôles
+
+                using (StreamWriter writer = new StreamWriter("A.syno"))
+                {
+                    // Écrire le texte XML accumulé dans le fichier
+                    writer.Write(accumulatedText.ToString());
+                }
+
+                // Message de confirmation
+                MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -1704,17 +1759,4 @@ namespace StageCode
             }
         }
     }
-
-    [Serializable]
-    public class SerializableControl
-    {
-        public string TypeName { get; set; } = "";
-        public string Name { get; set; } = "";
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Width { get; set; }
-        public int Height { get; set; }
-        public string? Text { get; set; }
-    }
-
 }
