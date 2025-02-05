@@ -15,6 +15,19 @@ namespace StageCode.LIB
 {
     public partial class OrthoPbar : UserControl
     {
+        private int _LevelVisible = 0; // Niveau d'accès minimum pour rendre l'objet visible
+        private int _LevelEnabled = 0; // Niveau d'accès minimum pour rendre l'objet accessible
+        private string _comment = ""; // Commentaire sur le contrôle
+        private System.Windows.Forms.ProgressBar pbar;
+
+        private string _value, _min, _max; // Valeur numérique ou nom d'une variable
+                                           // Ajout 1.0.10 Les 9 varlink en fin de fichier 
+        private string[] _VL = new string[9];
+        private string _visibility = "1";
+
+        public event EventHandler VisibilityChanging;
+        public event EventHandler VisibilityChanged;
+
         public OrthoPbar()
         {
             InitializeComponent();
@@ -28,19 +41,6 @@ namespace StageCode.LIB
         {
 
         }
-
-        private int _LevelVisible = 0; // Niveau d'accès minimum pour rendre l'objet visible
-        private int _LevelEnabled = 0; // Niveau d'accès minimum pour rendre l'objet accessible
-        private string _comment = ""; // Commentaire sur le contrôle
-        private System.Windows.Forms.ProgressBar pbar ;
-
-        private string _value, _min, _max; // Valeur numérique ou nom d'une variable
-                                           // Ajout 1.0.10 Les 9 varlink en fin de fichier 
-        private string[] _VL = new string[9];
-        private string _visibility = "1";
-
-        public event EventHandler VisibilityChanging;
-        public event EventHandler VisibilityChanged;
 
         private void OrthoPbar_Resize(object sender, EventArgs e)
         {
@@ -111,6 +111,38 @@ namespace StageCode.LIB
 
             return retour;
         }
+        public string WriteFileXML()
+        {
+            var xmlContent = new StringBuilder();
+
+            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine("  <Apparence>");
+
+            // Properties
+            xmlContent.AppendLine($"    <ToolTips>{ToolTips}</ToolTips>");
+            xmlContent.AppendLine($"    <SizeHeight>{Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"    <SizeWidth>{Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"    <LocationY>{Location.Y}</LocationY>");
+            xmlContent.AppendLine($"    <LocationX>{Location.X}</LocationX>");
+            xmlContent.AppendLine($"    <Minimum>{Minimum}</Minimum>");
+            xmlContent.AppendLine($"    <Maximum>{Maximum}</Maximum>");
+            xmlContent.AppendLine($"    <Value>{Value}</Value>");
+            xmlContent.AppendLine($"    <LevelVisible>{LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"    <LevelEnabled>{LevelEnabled}</LevelEnabled>");
+
+            // _VL values
+            for (int i = 0; i < _VL.Length; i++)
+            {
+                xmlContent.AppendLine($"    <VL{i}>{_VL[i]}</VL{i}>");
+            }
+
+            xmlContent.AppendLine($"    <Visibility>{Visibility}</Visibility>");
+            xmlContent.AppendLine("  </Apparence>");
+            xmlContent.AppendLine("</Component>");
+
+            return xmlContent.ToString();
+        }
+
         #endregion
 
         #region ProgressBar Properties
@@ -423,7 +455,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AccessibleDescription;
+                return AccessibleDescription;
             }
             set
             {
@@ -435,7 +467,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AccessibleName;
+                return AccessibleName;
             }
             set
             {
@@ -447,7 +479,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.BackgroundImage;
+                return BackgroundImage;
             }
             set
             {
@@ -459,7 +491,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.BackgroundImageLayout;
+                return BackgroundImageLayout;
             }
             set
             {
@@ -543,7 +575,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.ContextMenuStrip;
+                return ContextMenuStrip;
             }
             set
             {
@@ -555,7 +587,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.Enabled;
+                return Enabled;
             }
             set
             {
@@ -567,7 +599,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.ImeMode;
+                return ImeMode;
             }
             set
             {
@@ -755,7 +787,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.Tag;
+                return Tag;
             }
             set
             {

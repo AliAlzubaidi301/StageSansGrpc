@@ -33,10 +33,12 @@
             // 
             // TextBox1
             // 
+            TextBox1.Enabled = false;
             TextBox1.Location = new Point(0, 0);
             TextBox1.Name = "TextBox1";
             TextBox1.Size = new Size(100, 23);
             TextBox1.TabIndex = 0;
+            TextBox1.TextChanged += TextBox1_TextChanged;
             // 
             // OrthoEdit
             // 

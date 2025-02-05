@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace StageCode.LIB
@@ -50,6 +51,26 @@ namespace StageCode.LIB
         {
             return $"CONT1;{Name};{Size.Height};{Size.Width};{Location.Y};{Location.X};{Detecteur};{LevelVisible};{LevelEnabled};{Visibility}";
         }
+        public string WriteFileXML()
+        {
+            var xmlContent = new StringBuilder();
+
+            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine("  <Apparence>");
+            xmlContent.AppendLine($"    <SizeHeight>{Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"    <SizeWidth>{Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"    <LocationY>{Location.Y}</LocationY>");
+            xmlContent.AppendLine($"    <LocationX>{Location.X}</LocationX>");
+            xmlContent.AppendLine($"    <Detecteur>{Detecteur}</Detecteur>");
+            xmlContent.AppendLine($"    <LevelVisible>{LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"    <LevelEnabled>{LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"    <Visibility>{Visibility}</Visibility>");
+            xmlContent.AppendLine("  </Apparence>");
+            xmlContent.AppendLine("</Component>");
+
+            return xmlContent.ToString();
+        }
+
 
         [Category("Orthodyne"), Description("Nom du détecteur associé au graph")]
         public string Detecteur

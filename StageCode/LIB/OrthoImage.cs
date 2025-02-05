@@ -13,6 +13,18 @@ namespace StageCode.LIB
 {
     public partial class OrthoImage : UserControl
     {
+        private int _LevelVisible = 0; // Niveau d'accès minimum pour rendre l'objet visible
+        private int _LevelEnabled = 0; // Niveau d'accès minimum pour rendre l'objet accessible
+        private string _comment = ""; // Commentaire sur le contrôle
+
+        public string _path;
+        private string _imglocation;
+        private BorderStyle _borderstyle;
+        private string _visibility = "1";
+
+        public event EventHandler VisibilityChanging;
+        public event EventHandler VisibilityChanged;
+
         public OrthoImage()
         {
             InitializeComponent();
@@ -26,18 +38,6 @@ namespace StageCode.LIB
         {
 
         }
-
-        private int _LevelVisible = 0; // Niveau d'accès minimum pour rendre l'objet visible
-        private int _LevelEnabled = 0; // Niveau d'accès minimum pour rendre l'objet accessible
-        private string _comment = ""; // Commentaire sur le contrôle
-
-        public string _path;
-        private string _imglocation;
-        private BorderStyle _borderstyle;
-        private string _visibility = "1";
-
-        public event EventHandler VisibilityChanging;
-        public event EventHandler VisibilityChanged;
         #region Read/Write on .syn file
         public object ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
         {
@@ -92,6 +92,32 @@ namespace StageCode.LIB
             // BUG 1030 : L'image ne retient que le nom du fichier, puisque les images sont dans Syno/Pictures/
             return "IMAGE;" + ImageLocation + ";" + bs.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
         }
+        public string WriteFileXML()
+        {
+            var xmlContent = new StringBuilder();
+
+            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine("  <Apparence>");
+            xmlContent.AppendLine($"    <ImageLocation>{ImageLocation}</ImageLocation>");
+
+            // Handling the BorderStyle as a boolean value for the XML (0 for None, 1 for other types)
+            int bs = (this.BorderStyle == BorderStyle.None) ? 0 : 1;
+            xmlContent.AppendLine($"    <BorderStyle>{bs}</BorderStyle>");
+
+            xmlContent.AppendLine($"    <SizeHeight>{Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"    <SizeWidth>{Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"    <LocationY>{Location.Y}</LocationY>");
+            xmlContent.AppendLine($"    <LocationX>{Location.X}</LocationX>");
+            xmlContent.AppendLine($"    <LevelVisible>{LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"    <LevelEnabled>{LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"    <Visibility>{Visibility}</Visibility>");
+
+            xmlContent.AppendLine("  </Apparence>");
+            xmlContent.AppendLine("</Component>");
+
+            return xmlContent.ToString();
+        }
+
         #endregion
 
         #region Control Properties
@@ -111,12 +137,11 @@ namespace StageCode.LIB
                     // PictureBox1.Image = System.Drawing.Image.FromFile(value)
                     PictureBox1.Image = System.Drawing.Image.FromFile(_path.Substring(0, _path.LastIndexOf(@"\")) + @"\Pictures\" + value);
                 }
-                catch (Exception ex)
+                catch
                 {
                     if (!string.IsNullOrEmpty(value))
                     {
                         // BUG 1031 : Ajout du path complet de l'image en cas d'erreur
-                        // MessageBox.Show("Can't find this image :")
                         MessageBox.Show("Can't find this image :" + Constants.vbCrLf + _path.Substring(0, _path.LastIndexOf(@"\")) + @"\Pictures\" + value);
                     }
                 }
@@ -242,7 +267,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AccessibleDescription;
+                return AccessibleDescription;
             }
             set
             {
@@ -254,7 +279,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AccessibleName;
+                return AccessibleName;
             }
             set
             {
@@ -266,7 +291,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.BackgroundImage;
+                return BackgroundImage;
             }
             set
             {
@@ -350,7 +375,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.ContextMenuStrip;
+                return ContextMenuStrip;
             }
             set
             {
@@ -562,7 +587,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.Tag;
+                return Tag;
             }
             set
             {

@@ -34,11 +34,11 @@ namespace StageCode
 
             AM60 am60Control = new AM60();
 
-            string type = xml.Attribute("type")?.Value;
+            string? type = xml.Attribute("type")?.Value;
             am60Control.Name = xml.Attribute("name")?.Value;
 
             // Parse the <Apparence> section
-            XElement appearance = xml.Element("Apparence");
+            XElement? appearance = xml.Element("Apparence");
             if (appearance != null)
             {
                 // Extract values from the <Apparence> section
@@ -218,8 +218,8 @@ namespace StageCode
         [Browsable(false)]
         public new ContextMenuStrip ContextMenuStrip
         {
-            get { return base.ContextMenuStrip; }
-            set { base.ContextMenuStrip = value; }
+            get { return ContextMenuStrip; }
+            set { ContextMenuStrip = value; }
         }
 
         [Browsable(false)]
@@ -343,7 +343,7 @@ namespace StageCode
         [Browsable(false)]
         public new object Tag
         {
-            get { return base.Tag; }
+            get { return Tag; }
             set { base.Tag = value; }
         }
 

@@ -33,11 +33,13 @@
             // 
             // ComboBox1
             // 
+            ComboBox1.Enabled = false;
             ComboBox1.FormattingEnabled = true;
             ComboBox1.Location = new Point(3, 3);
             ComboBox1.Name = "ComboBox1";
             ComboBox1.Size = new Size(121, 23);
             ComboBox1.TabIndex = 0;
+            ComboBox1.SelectedIndexChanged += ComboBox1_SelectedIndexChanged_1;
             // 
             // OrthoCombo
             // 
@@ -45,7 +47,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(ComboBox1);
             Name = "OrthoCombo";
-            Size = new Size(126, 29);
+            Size = new Size(126, 39);
             Load += OrthoCombo_Load;
             ResumeLayout(false);
         }

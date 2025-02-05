@@ -3,6 +3,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
+using System.Text;
 using System.Windows.Forms;
 
 namespace StageCode.LIB
@@ -185,6 +186,50 @@ namespace StageCode.LIB
                 ";" + ToOle(this.ColorOff).ToString() + ";" + ToOle(this.ColorErr).ToString() + ";" + this.LevelVisible.ToString() +
                 ";" + this.LevelEnabled.ToString() + ";" + this.Visibility;
         }
+        public string WriteFileXML()
+        {
+            var xmlContent = new StringBuilder();
+
+            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine("  <Apparence>");
+            xmlContent.AppendLine($"    <Caption>{Caption}</Caption>");
+            xmlContent.AppendLine($"    <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(this.TextAlign)}</TextAlign>");
+            xmlContent.AppendLine($"    <Format>{Format}</Format>");
+            xmlContent.AppendLine($"    <BackColor>{ToOle(this.BackColor)}</BackColor>");
+            xmlContent.AppendLine($"    <ForeColor>{ToOle(this.ForeColor)}</ForeColor>");
+            xmlContent.AppendLine($"    <FontName>{this.Font.Name}</FontName>");
+            xmlContent.AppendLine($"    <FontSize>{this.Font.Size}</FontSize>");
+            xmlContent.AppendLine($"    <FontStrikeout>{this.Font.Strikeout}</FontStrikeout>");
+            xmlContent.AppendLine($"    <FontUnderline>{this.Font.Underline}</FontUnderline>");
+            xmlContent.AppendLine($"    <FontBold>{this.Font.Bold}</FontBold>");
+            xmlContent.AppendLine($"    <FontItalic>{this.Font.Italic}</FontItalic>");
+            xmlContent.AppendLine($"    <TypeDesign>{Convert.ToInt32(this.TypeDesign)}</TypeDesign>");
+            xmlContent.AppendLine($"    <BorderWidth>{this.BorderWidth}</BorderWidth>");
+            xmlContent.AppendLine($"    <SizeHeight>{this.Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"    <SizeWidth>{this.Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"    <LocationY>{this.Location.Y}</LocationY>");
+            xmlContent.AppendLine($"    <LocationX>{this.Location.X}</LocationX>");
+            xmlContent.AppendLine($"    <VarText>{this.VarText}</VarText>");
+            xmlContent.AppendLine($"    <VarBackColor>{this.VarBackColor}</VarBackColor>");
+            xmlContent.AppendLine($"    <VarForeColor>{this.VarForeColor}</VarForeColor>");
+            xmlContent.AppendLine($"    <VarValMax>{this.VarValMax}</VarValMax>");
+            xmlContent.AppendLine($"    <VarTextMax>{this.VarTextMax}</VarTextMax>");
+            xmlContent.AppendLine($"    <VarValMin>{this.VarValMin}</VarValMin>");
+            xmlContent.AppendLine($"    <VarTextMin>{this.VarTextMin}</VarTextMin>");
+            xmlContent.AppendLine($"    <VL7>{this._VL[7]}</VL7>");
+            xmlContent.AppendLine($"    <VL8>{this._VL[8]}</VL8>");
+            xmlContent.AppendLine($"    <ColorOn>{ToOle(this.ColorOn)}</ColorOn>");
+            xmlContent.AppendLine($"    <ColorOff>{ToOle(this.ColorOff)}</ColorOff>");
+            xmlContent.AppendLine($"    <ColorErr>{ToOle(this.ColorErr)}</ColorErr>");
+            xmlContent.AppendLine($"    <LevelVisible>{this.LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"    <LevelEnabled>{this.LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"    <Visibility>{this.Visibility}</Visibility>");
+            xmlContent.AppendLine("  </Apparence>");
+            xmlContent.AppendLine("</Component>");
+
+            return xmlContent.ToString();
+        }
+
         #endregion
 
         #region "Label Properties"
@@ -425,64 +470,57 @@ namespace StageCode.LIB
         [Browsable(false)]
         public string AccessibleDescription
         {
-            get { return base.AccessibleDescription; }
+            get { return AccessibleDescription; }
             set { base.AccessibleDescription = value; }
         }
 
         [Browsable(false)]
         public string AccessibleName
         {
-            get { return base.AccessibleName; }
-            set { base.AccessibleName = value; }
+            get { return AccessibleName; }
+            set { AccessibleName = value; }
         }
 
         [Browsable(false)]
         public override Image BackgroundImage
         {
-            get { return base.BackgroundImage; }
-            set { base.BackgroundImage = value; }
+            get { return BackgroundImage; }
+            set { BackgroundImage = value; }
         }
 
         [Browsable(false)]
         public override ImageLayout BackgroundImageLayout
         {
-            get { return base.BackgroundImageLayout; }
-            set { base.BackgroundImageLayout = value; }
+            get { return BackgroundImageLayout; }
+            set { BackgroundImageLayout = value; }
         }
 
         [Browsable(false)]
         public BorderStyle BorderStyle
         {
-            get { return base.BorderStyle; }
-            set { base.BorderStyle = value; }
+            get { return BorderStyle; }
+            set { BorderStyle = value; }
         }
 
 
         [Browsable(false)]
         public override Cursor Cursor
         {
-            get { return base.Cursor; }
-            set { base.Cursor = value; }
+            get { return Cursor; }
+            set { Cursor = value; }
         }
 
         [Browsable(false)]
         public override RightToLeft RightToLeft
         {
-            get { return base.RightToLeft; }
-            set { base.RightToLeft = value; }
-        }
-
-        [Browsable(false)]
-        public bool UseWaitCursor
-        {
-            get { return base.UseWaitCursor; }
-            set { base.UseWaitCursor = value; }
+            get { return RightToLeft; }
+            set { RightToLeft = value; }
         }
 
         [Browsable(false)]
         public override bool AllowDrop
         {
-            get { return base.AllowDrop; }
+            get { return AllowDrop; }
             set { base.AllowDrop = value; }
         }
 
@@ -496,7 +534,7 @@ namespace StageCode.LIB
         [Browsable(false)]
         public override ContextMenuStrip ContextMenuStrip
         {
-            get { return base.ContextMenuStrip; }
+            get { return ContextMenuStrip; }
             set { base.ContextMenuStrip = value; }
         }
 

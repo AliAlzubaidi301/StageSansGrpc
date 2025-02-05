@@ -156,14 +156,49 @@ namespace StageCode.LIB
         public string WriteFile()
         {
             return "ORTHO;EDIT;" + this.Text + ";" + TextAlign.ToString() + ";" + Format + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";5;" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + VarMeM + ";" + Convert.ToInt32(FieldType).ToString() + ";" + ValMin + ";" + ValMax + ";;" + MaxLength.ToString() + ";" + PasswordChar + ";" + TextVirtualKeyboard + ";" + Det + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
-
-
-
-
-
-
-
         }
+        public string WriteFileXML()
+        {
+            var xmlContent = new StringBuilder();
+
+            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine("  <Apparence>");
+            xmlContent.AppendLine($"    <Text>{Text}</Text>");
+            xmlContent.AppendLine($"    <TextAlign>{TextAlign.ToString()}</TextAlign>");
+            xmlContent.AppendLine($"    <Format>{Format}</Format>");
+            xmlContent.AppendLine($"    <BackColor>{ToOle(BackColor)}</BackColor>");
+            xmlContent.AppendLine($"    <ForeColor>{ToOle(ForeColor)}</ForeColor>");
+            xmlContent.AppendLine($"    <FontName>{Font.Name}</FontName>");
+            xmlContent.AppendLine($"    <FontSize>{Font.Size}</FontSize>");
+            xmlContent.AppendLine($"    <FontStrikeout>{Font.Strikeout}</FontStrikeout>");
+            xmlContent.AppendLine($"    <FontUnderline>{Font.Underline}</FontUnderline>");
+            xmlContent.AppendLine($"    <FontBold>{Font.Bold}</FontBold>");
+            xmlContent.AppendLine($"    <FontItalic>{Font.Italic}</FontItalic>");
+            xmlContent.AppendLine($"    <BorderWidth>{BorderWidth}</BorderWidth>");
+            xmlContent.AppendLine($"    <SizeHeight>{Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"    <SizeWidth>{Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"    <LocationY>{Location.Y}</LocationY>");
+            xmlContent.AppendLine($"    <LocationX>{Location.X}</LocationX>");
+            xmlContent.AppendLine($"    <VarMeM>{VarMeM}</VarMeM>");
+            xmlContent.AppendLine($"    <FieldType>{Convert.ToInt32(FieldType)}</FieldType>");
+            xmlContent.AppendLine($"    <ValMin>{ValMin}</ValMin>");
+            xmlContent.AppendLine($"    <ValMax>{ValMax}</ValMax>");
+            xmlContent.AppendLine($"    <MaxLength>{MaxLength}</MaxLength>");
+            xmlContent.AppendLine($"    <PasswordChar>{PasswordChar}</PasswordChar>");
+            xmlContent.AppendLine($"    <TextVirtualKeyboard>{TextVirtualKeyboard}</TextVirtualKeyboard>");
+            xmlContent.AppendLine($"    <Det>{Det}</Det>");
+            xmlContent.AppendLine($"    <ColorOn>{ToOle(ColorOn)}</ColorOn>");
+            xmlContent.AppendLine($"    <ColorOff>{ToOle(ColorOff)}</ColorOff>");
+            xmlContent.AppendLine($"    <ColorErr>{ToOle(ColorErr)}</ColorErr>");
+            xmlContent.AppendLine($"    <LevelVisible>{LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"    <LevelEnabled>{LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"    <Visibility>{Visibility}</Visibility>");
+            xmlContent.AppendLine("  </Apparence>");
+            xmlContent.AppendLine("</Component>");
+
+            return xmlContent.ToString();
+        }
+
         #endregion
 
         #region TextBox Properties
@@ -488,7 +523,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AccessibleDescription;
+                return AccessibleDescription;
             }
             set
             {
@@ -500,7 +535,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AccessibleName;
+                return AccessibleName;
             }
             set
             {
@@ -512,7 +547,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.BackgroundImage;
+                return BackgroundImage;
             }
             set
             {
@@ -524,7 +559,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.BackgroundImageLayout;
+                return BackgroundImageLayout;
             }
             set
             {
@@ -536,7 +571,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.BorderStyle;
+                return BorderStyle;
             }
             set
             {
@@ -548,7 +583,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.Cursor;
+                return Cursor;
             }
             set
             {
@@ -560,7 +595,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.RightToLeft;
+                return RightToLeft;
             }
             set
             {
@@ -572,7 +607,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.UseWaitCursor;
+                return UseWaitCursor;
             }
             set
             {
@@ -584,7 +619,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AllowDrop;
+                return AllowDrop;
             }
             set
             {
@@ -608,7 +643,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.ContextMenuStrip;
+                return ContextMenuStrip;
             }
             set
             {
@@ -820,7 +855,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.Tag;
+                return Tag;
             }
             set
             {
@@ -865,6 +900,11 @@ namespace StageCode.LIB
         public Type GType()
         {
             return GetType();
+        }
+
+        private void TextBox1_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

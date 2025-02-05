@@ -232,10 +232,63 @@ namespace StageCode.LIB
             return this;
         }
 
+        public string WriteFileXML()
+        {
+            var xmlContent = new StringBuilder();
+
+            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine($"  <Caption>{Caption}</Caption>");
+            xmlContent.AppendLine($"  <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(TextAlign)}</TextAlign>");
+            xmlContent.AppendLine($"  <Precision>{Precision}</Precision>");
+            xmlContent.AppendLine($"  <BackColor>{ToOle(BackColor)}</BackColor>");
+            xmlContent.AppendLine($"  <ForeColor>{ToOle(ForeColor)}</ForeColor>");
+            xmlContent.AppendLine($"  <FontName>{Font.Name}</FontName>");
+            xmlContent.AppendLine($"  <FontSize>{Font.Size}</FontSize>");
+            xmlContent.AppendLine($"  <FontStrikeout>{Font.Strikeout}</FontStrikeout>");
+            xmlContent.AppendLine($"  <FontUnderline>{Font.Underline}</FontUnderline>");
+            xmlContent.AppendLine($"  <FontBold>{Font.Bold}</FontBold>");
+            xmlContent.AppendLine($"  <FontItalic>{Font.Italic}</FontItalic>");
+            xmlContent.AppendLine($"  <TypeDesign>{Convert.ToInt32(TypeDesign)}</TypeDesign>");
+            xmlContent.AppendLine($"  <BorderWidth>{BorderWidth}</BorderWidth>");
+            xmlContent.AppendLine($"  <SizeHeight>{Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"  <SizeWidth>{Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"  <LocationY>{Location.Y}</LocationY>");
+            xmlContent.AppendLine($"  <LocationX>{Location.X}</LocationX>");
+            xmlContent.AppendLine($"  <Etat>{Etat}</Etat>");
+            xmlContent.AppendLine($"  <VarLink2>{VarLink2}</VarLink2>");
+            xmlContent.AppendLine($"  <NomFichier>{NomFichier}</NomFichier>");
+            xmlContent.AppendLine($"  <VL3>{_VL[3]}</VL3>");
+            xmlContent.AppendLine($"  <VL4>{_VL[4]}</VL4>");
+            xmlContent.AppendLine($"  <VL5>{_VL[5]}</VL5>");
+            xmlContent.AppendLine($"  <VL6>{_VL[6]}</VL6>");
+            xmlContent.AppendLine($"  <Commande>{Commande}</Commande>");
+            xmlContent.AppendLine($"  <VarLink9>{VarLink9}</VarLink9>");
+            xmlContent.AppendLine($"  <ColorOn>{ToOle(ColorOn)}</ColorOn>");
+            xmlContent.AppendLine($"  <ColorOff>{ToOle(ColorOff)}</ColorOff>");
+            xmlContent.AppendLine($"  <ColorErr>{ToOle(ColorErr)}</ColorErr>");
+            xmlContent.AppendLine($"  <LevelVisible>{LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"  <LevelEnabled>{LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"  <Visibility>{Visibility}</Visibility>");
+
+            // Ajout de la section Apparence
+            xmlContent.AppendLine("  <Apparence>");
+            xmlContent.AppendLine($"    <Backcolor value=\"{ToOle(BackColor)}\"/>");
+            xmlContent.AppendLine($"    <FontSize value=\"{Font.Size}\"/>");
+            xmlContent.AppendLine($"    <FontName value=\"{Font.Name}\"/>");
+            xmlContent.AppendLine($"    <LevelVisible value=\"{LevelVisible}\"/>");
+            xmlContent.AppendLine($"    <LevelEnabled value=\"{LevelEnabled}\"/>");
+            xmlContent.AppendLine($"    <Visibility value=\"{Visibility}\"/>");
+            xmlContent.AppendLine("  </Apparence>");
+
+            xmlContent.AppendLine("</Component>");
+
+            return xmlContent.ToString();
+        }
         public string WriteFile()
         {
             return "ORTHO;ALA;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Etat + ";" + VarLink2 + ";" + NomFichier + ";" + _VL[3] + ";" + _VL[4] + ";" + _VL[5] + ";" + _VL[6] + ";" + Commande + ";" + VarLink9 + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
         }
+
         #endregion
 
 
@@ -612,7 +665,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AccessibleRole;
+                return AccessibleRole;
             }
             set
             {
@@ -624,7 +677,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AccessibleDescription;
+                return AccessibleDescription;
             }
             set
             {
@@ -636,7 +689,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AccessibleName;
+                return AccessibleName;
             }
             set
             {
@@ -648,7 +701,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.BackgroundImage;
+                return BackgroundImage;
             }
             set
             {
@@ -660,7 +713,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.BackgroundImageLayout;
+                return BackgroundImageLayout;
             }
             set
             {
@@ -672,7 +725,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.BorderStyle;
+                return BorderStyle;
             }
             set
             {
@@ -684,7 +737,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.Cursor;
+                return Cursor;
             }
             set
             {
@@ -696,7 +749,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.RightToLeft;
+                return RightToLeft;
             }
             set
             {
@@ -708,7 +761,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.UseWaitCursor;
+                return UseWaitCursor;
             }
             set
             {
@@ -720,7 +773,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AllowDrop;
+                return AllowDrop;
             }
             set
             {
@@ -732,7 +785,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AutoValidate;
+                return AutoValidate;
             }
             set
             {
@@ -744,7 +797,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.ContextMenuStrip;
+                return ContextMenuStrip;
             }
             set
             {
@@ -756,7 +809,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.Enabled;
+                return Enabled;
             }
             set
             {
@@ -768,7 +821,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.ImeMode;
+                return ImeMode;
             }
             set
             {
@@ -780,7 +833,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.TabIndex;
+                return TabIndex;
             }
             set
             {
@@ -792,7 +845,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.TabStop;
+                return TabStop;
             }
             set
             {
@@ -804,7 +857,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.Visible;
+                return Visible;
             }
             set
             {
@@ -956,7 +1009,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.Tag;
+                return Tag;
             }
             set
             {
@@ -968,7 +1021,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.CausesValidation;
+                return CausesValidation;
             }
             set
             {

@@ -23,11 +23,16 @@ namespace StageCode
         public static int Langue = 1; // 1 = English, 2 = Chinese, 3 = German, 4 = French, 5 = Lithuanian
         private Form1 frm;
 
-        private Control selectedFrame = null; // Stocke la PictureBox sélectionnée
+        private Control? selectedFrame = null; // Stocke la PictureBox sélectionnée
         private bool isResizings = false;
         private Point lastMousePosition;
 
         private string selectedControl = "";
+
+        private PictureBox? resizingFrame = null;
+        private Point mouseOffset;
+        private bool isResizing = false;
+        private bool isMoving = false;
 
         //A corriger
         //ORthoAD et CButton TabName a faire
@@ -396,7 +401,7 @@ namespace StageCode
 
                 foreach (XElement component in xml.Elements("Component"))
                 {
-                    string type = component.Attribute("type")?.Value;
+                    string? type = component.Attribute("type")?.Value;
 
                     if (type == "AM60")
                     {
@@ -632,7 +637,7 @@ namespace StageCode
             }
 
             // Si un contrôle est sélectionné, on procède à l'ajout
-            Control newControl = null;
+            Control? newControl = null;
 
             // Vérifier si un contrôle est sélectionné avant de créer un nouveau contrôle
             switch (selectedControl)
@@ -730,17 +735,13 @@ namespace StageCode
                 newControl.Click += NewControl_Click;
             }
         }
-        private PictureBox resizingFrame = null;
-        private Point mouseOffset;
-        private bool isResizing = false;
-        private bool isMoving = false;
 
         private void NewControl_Click(object? sender, EventArgs e)
         {
-            Control controle = sender as Control;
+            Control? controle = sender as Control;
 
             // Vérifier si le contrôle est un contrôle enfant d'une PictureBox
-            PictureBox frame = controle?.Parent as PictureBox;
+            PictureBox? frame = controle?.Parent as PictureBox;
 
             if (frame != null)
             {
@@ -829,7 +830,7 @@ namespace StageCode
 
         private void Frame_MouseDown(object sender, MouseEventArgs e)
         {
-            PictureBox frame = sender as PictureBox;
+            PictureBox? frame = sender as PictureBox;
 
             if (frame != null)
             {
@@ -856,7 +857,7 @@ namespace StageCode
 
         private void Frame_MouseMove(object sender, MouseEventArgs e)
         {
-            PictureBox frame = sender as PictureBox;
+            PictureBox? frame = sender as PictureBox;
 
             if (isResizing && resizingFrame != null)
             {
@@ -927,7 +928,7 @@ namespace StageCode
             isResizing = false;
             isMoving = false;
 
-            PictureBox frame = sender as PictureBox;
+            PictureBox? frame = sender as PictureBox;
             if (frame != null)
             {
                 frame.Cursor = Cursors.Default; // Remettre le curseur par défaut
@@ -947,7 +948,7 @@ namespace StageCode
         // Méthode pour dessiner les bordures pointillées sur les PictureBox
         private void Frame_Paint(object sender, PaintEventArgs e)
         {
-            PictureBox frame = sender as PictureBox;
+            PictureBox? frame = sender as PictureBox;
             if (frame != null)
             {
                 using (Pen pen = new Pen(Color.Black))
@@ -990,63 +991,63 @@ namespace StageCode
                                 }
                                 else if (childControl is CONT1 cont1Control)
                                 {
-                                    accumulatedText.AppendLine(cont1Control.WriteFile());
+                                    accumulatedText.AppendLine(cont1Control.WriteFileXML());
                                 }
                                 else if (childControl is INTEG integControl)
                                 {
-                                    accumulatedText.AppendLine(integControl.WriteFile());
+                                    accumulatedText.AppendLine(integControl.WriteFileXML());
                                 }
                                 else if (childControl is OrthoAD orthoADControl)
                                 {
-                                    accumulatedText.AppendLine(orthoADControl.WriteFile());
+                                    accumulatedText.AppendLine(orthoADControl.WriteFileXML());
                                 }
                                 else if (childControl is OrthoAla orthoAlaControl)
                                 {
-                                    accumulatedText.AppendLine(orthoAlaControl.WriteFile());
+                                    accumulatedText.AppendLine(orthoAlaControl.WriteFileXML());
                                 }
                                 else if (childControl is OrthoCMDLib orthoCMDLibControl)
                                 {
-                                    accumulatedText.AppendLine(orthoCMDLibControl.WriteFile());
+                                    accumulatedText.AppendLine(orthoCMDLibControl.WriteFileXML());
                                 }
                                 else if (childControl is OrthoCombo orthoComboControl)
                                 {
-                                    accumulatedText.AppendLine(orthoComboControl.WriteFile());
+                                    accumulatedText.AppendLine(orthoComboControl.WriteFileXML());
                                 }
                                 else if (childControl is OrthoDI orthoDIControl)
                                 {
-                                    accumulatedText.AppendLine(orthoDIControl.WriteFile());
+                                    accumulatedText.AppendLine(orthoDIControl.WriteFileXML());
                                 }
                                 else if (childControl is OrthoEdit orthoEditControl)
                                 {
-                                    accumulatedText.AppendLine(orthoEditControl.WriteFile());
+                                    accumulatedText.AppendLine(orthoEditControl.WriteFileXML());
                                 }
                                 else if (childControl is OrthoImage orthoImageControl)
                                 {
-                                    accumulatedText.AppendLine(orthoImageControl.WriteFile());
+                                    accumulatedText.AppendLine(orthoImageControl.WriteFileXML());
                                 }
                                 else if (childControl is OrthoLabel orthoLabelControl)
                                 {
-                                    accumulatedText.AppendLine(orthoLabelControl.WriteFile());
+                                    accumulatedText.AppendLine(orthoLabelControl.WriteFileXML());
                                 }
                                 else if (childControl is OrthoPbar orthoPbarControl)
                                 {
-                                    accumulatedText.AppendLine(orthoPbarControl.WriteFile());
+                                    accumulatedText.AppendLine(orthoPbarControl.WriteFileXML());
                                 }
                                 else if (childControl is OrthoRel orthoRelControl)
                                 {
-                                    accumulatedText.AppendLine(orthoRelControl.WriteFile());
+                                    accumulatedText.AppendLine(orthoRelControl.WriteFileXML());
                                 }
                                 else if (childControl is OrthoResult orthoResultControl)
                                 {
-                                    accumulatedText.AppendLine(orthoResultControl.WriteFile());
+                                    accumulatedText.AppendLine(orthoResultControl.WriteFileXML());
                                 }
                                 else if (childControl is OrthoVarname orthoVarnameControl)
                                 {
-                                    accumulatedText.AppendLine(orthoVarnameControl.WriteFile());
+                                    accumulatedText.AppendLine(orthoVarnameControl.WriteFileXML());
                                 }
                                 else if (childControl is Reticule reticuleControl)
                                 {
-                                    accumulatedText.AppendLine(reticuleControl.WriteFile());
+                                    accumulatedText.AppendLine(reticuleControl.WriteFileXML());
                                 }
                             }
                         }

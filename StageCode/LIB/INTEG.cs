@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Text;
 using System.Windows.Forms;
 
 namespace StageCode
@@ -48,12 +49,32 @@ namespace StageCode
             }
             return this;
         }
-
         public string WriteFile()
         {
             return "INTEG;" + this.Name + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() +
                    ";" + this.Detecteur + ";" + this.LevelVisible.ToString() + ";" + this.LevelEnabled.ToString() + ";" + this.Visibility;
         }
+        public string WriteFileXML()
+        {
+            var xmlContent = new StringBuilder();
+
+            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine("  <Apparence>");
+            xmlContent.AppendLine($"  <INTEG>{Name}</INTEG>");
+            xmlContent.AppendLine($"  <SizeHeight>{Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"  <SizeWidth>{Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"  <LocationY>{Location.Y}</LocationY>");
+            xmlContent.AppendLine($"  <LocationX>{Location.X}</LocationX>");
+            xmlContent.AppendLine($"  <Detecteur>{Detecteur}</Detecteur>");
+            xmlContent.AppendLine($"  <LevelVisible>{LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"  <LevelEnabled>{LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"  <Visibility>{Visibility}</Visibility>");
+            xmlContent.AppendLine("  </Apparence>");
+            xmlContent.AppendLine("</Component>");
+
+            return xmlContent.ToString();
+        }
+
         #endregion
 
         #region "Control Properties"
@@ -132,50 +153,50 @@ namespace StageCode
         [Browsable(false)]
         public new string AccessibleDescription
         {
-            get { return base.AccessibleDescription; }
+            get { return AccessibleDescription; }
             set { base.AccessibleDescription = value; }
         }
 
         [Browsable(false)]
         public new string AccessibleName
         {
-            get { return base.AccessibleName; }
-            set { base.AccessibleName = value; }
+            get { return AccessibleName; }
+            set { AccessibleName = value; }
         }
 
         [Browsable(false)]
         public new Image BackgroundImage
         {
-            get { return base.BackgroundImage; }
-            set { base.BackgroundImage = value; }
+            get { return BackgroundImage; }
+            set { BackgroundImage = value; }
         }
 
         [Browsable(false)]
         public new ImageLayout BackgroundImageLayout
         {
-            get { return base.BackgroundImageLayout; }
-            set { base.BackgroundImageLayout = value; }
+            get { return BackgroundImageLayout; }
+            set { BackgroundImageLayout = value; }
         }
 
         [Browsable(false)]
         public new BorderStyle BorderStyle
         {
-            get { return base.BorderStyle; }
-            set { base.BorderStyle = value; }
+            get { return BorderStyle; }
+            set { BorderStyle = value; }
         }
 
         [Browsable(false)]
         public new Cursor Cursor
         {
-            get { return base.Cursor; }
-            set { base.Cursor = value; }
+            get { return Cursor; }
+            set { Cursor = value; }
         }
 
         [Browsable(false)]
         public new RightToLeft RightToLeft
         {
-            get { return base.RightToLeft; }
-            set { base.RightToLeft = value; }
+            get { return RightToLeft; }
+            set { RightToLeft = value; }
         }
 
         [Browsable(false)]
@@ -202,15 +223,15 @@ namespace StageCode
         [Browsable(false)]
         public new ContextMenuStrip ContextMenuStrip
         {
-            get { return base.ContextMenuStrip; }
-            set { base.ContextMenuStrip = value; }
+            get { return ContextMenuStrip; }
+            set { ContextMenuStrip = value; }
         }
 
         [Browsable(false)]
         public new bool Enabled
         {
-            get { return base.Enabled; }
-            set { base.Enabled = value; }
+            get { return Enabled; }
+            set { Enabled = value; }
         }
 
         [Browsable(false)]
@@ -327,8 +348,8 @@ namespace StageCode
         [Browsable(false)]
         public new object Tag
         {
-            get { return base.Tag; }
-            set { base.Tag = value; }
+            get { return Tag; }
+            set { Tag = value; }
         }
 
         [Browsable(false)]

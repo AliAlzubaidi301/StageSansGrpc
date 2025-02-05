@@ -108,6 +108,37 @@ namespace StageCode.LIB
         {
             return "RETICULE;" + this.Name + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Detecteur + ";" + LabX + ";" + UnitX + ";" + LabY + ";" + UnitY + ";" + LabS + ";" + UnitS + ";" + LabW + ";" + _LevelVisible.ToString() + ";" + _LevelEnabled.ToString() + ";" + Visibility;
         }
+        public string WriteFileXML()
+        {
+            var xmlContent = new StringBuilder();
+
+            xmlContent.AppendLine($"<Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine("  <Reticule>");
+
+            // Properties
+            xmlContent.AppendLine($"    <Name>{this.Name}</Name>");
+            xmlContent.AppendLine($"    <SizeHeight>{this.Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"    <SizeWidth>{this.Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"    <LocationY>{this.Location.Y}</LocationY>");
+            xmlContent.AppendLine($"    <LocationX>{this.Location.X}</LocationX>");
+            xmlContent.AppendLine($"    <Detecteur>{Detecteur}</Detecteur>");
+            xmlContent.AppendLine($"    <LabX>{LabX}</LabX>");
+            xmlContent.AppendLine($"    <UnitX>{UnitX}</UnitX>");
+            xmlContent.AppendLine($"    <LabY>{LabY}</LabY>");
+            xmlContent.AppendLine($"    <UnitY>{UnitY}</UnitY>");
+            xmlContent.AppendLine($"    <LabS>{LabS}</LabS>");
+            xmlContent.AppendLine($"    <UnitS>{UnitS}</UnitS>");
+            xmlContent.AppendLine($"    <LabW>{LabW}</LabW>");
+            xmlContent.AppendLine($"    <LevelVisible>{_LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"    <LevelEnabled>{_LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"    <Visibility>{Visibility}</Visibility>");
+
+            xmlContent.AppendLine("  </Reticule>");
+            xmlContent.AppendLine("</Component>");
+
+            return xmlContent.ToString();
+        }
+
         #endregion
 
         #region Control Properties
@@ -247,7 +278,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.BackColor;
+                return BackColor;
             }
             set
             {
@@ -259,7 +290,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.ForeColor;
+                return ForeColor;
             }
             set
             {
@@ -271,7 +302,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.Font;
+                return Font;
             }
             set
             {
@@ -337,7 +368,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AccessibleDescription;
+                return AccessibleDescription;
             }
             set
             {
@@ -349,7 +380,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.AccessibleName;
+                return AccessibleName;
             }
             set
             {
@@ -361,7 +392,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.BackgroundImage;
+                return BackgroundImage;
             }
             set
             {
@@ -457,7 +488,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.ContextMenuStrip;
+                return ContextMenuStrip;
             }
             set
             {
@@ -469,7 +500,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.Enabled;
+                return Enabled;
             }
             set
             {
@@ -481,7 +512,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.ImeMode;
+                return ImeMode;
             }
             set
             {
@@ -493,7 +524,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.TabIndex;
+                return TabIndex;
             }
             set
             {
@@ -505,7 +536,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.TabStop;
+                return TabStop;
             }
             set
             {
@@ -669,7 +700,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.Tag;
+                return Tag;
             }
             set
             {
@@ -681,7 +712,7 @@ namespace StageCode.LIB
         {
             get
             {
-                return base.CausesValidation;
+                return CausesValidation;
             }
             set
             {

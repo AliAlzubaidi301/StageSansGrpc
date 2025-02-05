@@ -33,6 +33,7 @@
             // 
             // TextBox1
             // 
+            TextBox1.Enabled = false;
             TextBox1.Location = new Point(3, 3);
             TextBox1.Name = "TextBox1";
             TextBox1.Size = new Size(100, 23);
