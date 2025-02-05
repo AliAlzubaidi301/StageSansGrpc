@@ -825,9 +825,9 @@ namespace StageCode
 
            
 
-            string a = LireXML();
+            //string a = LireXML();
 
-            RecupererContenuXML(a);
+            //RecupererContenuXML(a);
         }
 
 

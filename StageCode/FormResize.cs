@@ -46,7 +46,6 @@ namespace StageCode
             this.btnResize.Top = this.ClientSize.Height - this.btnResize.Height - 20;
 
             ConfigureAnchors();
-
         }
 
         private void FormResize_Load(object sender, EventArgs e)
