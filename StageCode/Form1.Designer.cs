@@ -53,7 +53,7 @@
             MainMenu.Items.AddRange(new ToolStripItem[] { btnFile, btnEdition, btnView, btnInfos, btnVersion });
             MainMenu.Location = new Point(0, 0);
             MainMenu.Name = "MainMenu";
-            MainMenu.Size = new Size(800, 24);
+            MainMenu.Size = new Size(1012, 24);
             MainMenu.TabIndex = 0;
             MainMenu.Text = "menuStrip1";
             // 
@@ -67,28 +67,28 @@
             // newToolStripMenuItem
             // 
             newToolStripMenuItem.Name = "newToolStripMenuItem";
-            newToolStripMenuItem.Size = new Size(180, 22);
+            newToolStripMenuItem.Size = new Size(114, 22);
             newToolStripMenuItem.Text = "New";
             newToolStripMenuItem.Click += newToolStripMenuItem_Click;
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(180, 22);
+            openToolStripMenuItem.Size = new Size(114, 22);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(180, 22);
+            saveToolStripMenuItem.Size = new Size(114, 22);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
             // saveAsToolStripMenuItem
             // 
             saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new Size(180, 22);
+            saveAsToolStripMenuItem.Size = new Size(114, 22);
             saveAsToolStripMenuItem.Text = "Save As";
             saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
             // 
@@ -140,31 +140,31 @@
             pnlViewHost.BackColor = Color.White;
             pnlViewHost.Location = new Point(0, 31);
             pnlViewHost.Name = "pnlViewHost";
-            pnlViewHost.Size = new Size(590, 419);
+            pnlViewHost.Size = new Size(729, 485);
             pnlViewHost.TabIndex = 1;
             // 
             // lstToolbox
             // 
             lstToolbox.FormattingEnabled = true;
             lstToolbox.ItemHeight = 15;
-            lstToolbox.Location = new Point(596, 31);
+            lstToolbox.Location = new Point(735, 27);
             lstToolbox.Name = "lstToolbox";
-            lstToolbox.Size = new Size(204, 229);
+            lstToolbox.Size = new Size(277, 259);
             lstToolbox.TabIndex = 2;
             lstToolbox.SelectedIndexChanged += lstToolbox_SelectedIndexChanged;
             // 
             // propertyGrid1
             // 
-            propertyGrid1.Location = new Point(596, 267);
+            propertyGrid1.Location = new Point(735, 292);
             propertyGrid1.Name = "propertyGrid1";
-            propertyGrid1.Size = new Size(204, 183);
+            propertyGrid1.Size = new Size(277, 224);
             propertyGrid1.TabIndex = 3;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(1012, 528);
             Controls.Add(propertyGrid1);
             Controls.Add(lstToolbox);
             Controls.Add(pnlViewHost);

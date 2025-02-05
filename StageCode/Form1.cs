@@ -41,7 +41,7 @@ namespace StageCode
         private bool isMoving = false;
 
         //A corriger
-        //ORthoAD et CButton TabName a faire et DI
+        //ORthoAD et CButton TabName a faire
 
         public Form1()
         {
@@ -1043,7 +1043,7 @@ namespace StageCode
                 "OrthoAla",
                 "OrthoCMDLib",
                 "OrthoCombo",
-                "OrthoDl",
+                "OrthoDI",
                 "OrthoEdit",
                 "Ortholmage",
                 "OrthoLabel",
