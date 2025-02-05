@@ -26,3 +26,6 @@ dotnet_diagnostic.CS8625.severity = none
 
 # CS0114: Un membre masque un membre hérité ; le mot clé override est manquant
 dotnet_diagnostic.CS0114.severity = none
+
+# SYSLIB0011: Le type ou le membre est obsolète
+dotnet_diagnostic.SYSLIB0011.severity = none

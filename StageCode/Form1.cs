@@ -11,10 +11,14 @@ using System.Drawing.Design;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using System.Xml.Linq;
+using System.Windows.Forms;
+using System.Text.Json;
 
 namespace StageCode
 {
@@ -29,13 +33,15 @@ namespace StageCode
 
         private string selectedControl = "";
 
+        private string SelectedPictureBox = "";
+
         private PictureBox? resizingFrame = null;
         private Point mouseOffset;
         private bool isResizing = false;
         private bool isMoving = false;
 
         //A corriger
-        //ORthoAD et CButton TabName a faire
+        //ORthoAD et CButton TabName a faire et DI
 
         public Form1()
         {
@@ -463,52 +469,177 @@ namespace StageCode
                 // Si l'utilisateur choisit "Non", empêcher la fermeture du formulaire
             }
         }
+
+
         private void Couper(object sender, EventArgs e)
         {
-            if (ActiveControl is TextBox textBox && !string.IsNullOrEmpty(textBox.SelectedText))
+            // Trouver la PictureBox sélectionnée
+            PictureBox? frame = pnlViewHost.Controls.OfType<PictureBox>()
+                                              .FirstOrDefault(p => p.Name == SelectedPictureBox);
+
+            if (frame != null)
             {
-                Clipboard.SetText(textBox.SelectedText);
-                textBox.SelectedText = string.Empty;
-            }
-            else
-            {
-                MessageBox.Show("Aucun texte sélectionné à couper.");
-            }
-        }
-        private void Copier(object sender, EventArgs e)
-        {
-            if (ActiveControl is TextBox textBox && !string.IsNullOrEmpty(textBox.SelectedText))
-            {
-                Clipboard.SetText(textBox.SelectedText);
-            }
-            else
-            {
-                MessageBox.Show("Aucun texte sélectionné à copier.");
+                // Liste des informations des contrôles contenus dans la PictureBox
+                List<SerializableControl> controlsData = new List<SerializableControl>();
+
+                foreach (Control ctrl in frame.Controls)
+                {
+                    controlsData.Add(new SerializableControl
+                    {
+                        TypeName = ctrl.GetType().AssemblyQualifiedName ?? "",
+                        Name = ctrl.Name,
+                        X = ctrl.Location.X,
+                        Y = ctrl.Location.Y,
+                        Width = ctrl.Width,
+                        Height = ctrl.Height,
+                        Text = (ctrl is TextBox textBox) ? textBox.Text : ctrl.Text
+                    });
+                }
+
+                // Sérialiser les données
+                DataObject data = new DataObject();
+                using (MemoryStream ms = new MemoryStream())
+                {
+#pragma warning disable SYSLIB0011 // Le type ou le membre est obsolète
+                    BinaryFormatter bf = new BinaryFormatter();
+#pragma warning restore SYSLIB0011 // Le type ou le membre est obsolète
+                    bf.Serialize(ms, controlsData);
+                    data.SetData("ControlsData", ms.ToArray());
+                }
+
+                // Mettre les données dans le presse-papiers
+                Clipboard.SetDataObject(data, true);
+
+                // Supprimer uniquement les contrôles internes
+                frame.Controls.Clear();
+                pnlViewHost.Controls.Remove(frame);
             }
         }
 
+
+
+
+
+
+        private void Copier(object sender, EventArgs e)
+        {
+            // Trouver la PictureBox sélectionnée
+            PictureBox? frame = pnlViewHost.Controls.OfType<PictureBox>()
+                                              .FirstOrDefault(p => p.Name == SelectedPictureBox);
+
+            if (frame != null)
+            {
+                // Liste des informations des contrôles contenus dans la PictureBox
+                List<SerializableControl> controlsData = new List<SerializableControl>();
+
+                foreach (Control ctrl in frame.Controls)
+                {
+                    controlsData.Add(new SerializableControl
+                    {
+                        TypeName = ctrl.GetType().AssemblyQualifiedName ?? "",
+                        Name = ctrl.Name,
+                        X = ctrl.Location.X,
+                        Y = ctrl.Location.Y,
+                        Width = ctrl.Width,
+                        Height = ctrl.Height,
+                        Text = (ctrl is TextBox textBox) ? textBox.Text : ctrl.Text
+                    });
+                }
+
+                // Sérialiser les données
+                DataObject data = new DataObject();
+                using (MemoryStream ms = new MemoryStream())
+                {
+#pragma warning disable SYSLIB0011 // Le type ou le membre est obsolète
+                    BinaryFormatter bf = new BinaryFormatter();
+#pragma warning restore SYSLIB0011 // Le type ou le membre est obsolète
+                    bf.Serialize(ms, controlsData);
+                    data.SetData("ControlsData", ms.ToArray());
+                }
+
+                // Mettre les données dans le presse-papiers
+                Clipboard.SetDataObject(data, true);
+
+                MessageBox.Show("Copie effectuée !");
+            }
+            else
+            {
+                MessageBox.Show("Aucune PictureBox sélectionnée.");
+            }
+        }
+
+
         private void Coller(object sender, EventArgs e)
         {
-            if (ActiveControl is TextBox textBox && Clipboard.ContainsText())
+            if (Clipboard.ContainsData("ControlsData"))
             {
-                textBox.Paste();
-            }
-            else
-            {
-                MessageBox.Show("Aucun texte à coller.");
+                // Récupérer la position de la souris relative à pnlViewHost
+                Point mousePosition = pnlViewHost.PointToClient(Cursor.Position);
+
+                // Récupérer les données du presse-papiers
+                byte[] rawData = (byte[])Clipboard.GetData("ControlsData")!;
+                using (MemoryStream ms = new MemoryStream(rawData))
+                {
+#pragma warning disable SYSLIB0011 // Suppression de l'avertissement d'obsolescence
+                    BinaryFormatter bf = new BinaryFormatter();
+#pragma warning restore SYSLIB0011
+                    List<SerializableControl> controlsData = (List<SerializableControl>)bf.Deserialize(ms);
+
+                    // Créer une nouvelle PictureBox pour contenir les contrôles collés
+                    PictureBox newFrame = new PictureBox
+                    {
+                        BorderStyle = BorderStyle.None,
+                        BackColor = Color.White,
+                        Size = new Size(200, 200), // Taille par défaut, peut être ajustée
+                        Location = mousePosition, // Position à l'endroit du clic
+                        AllowDrop = true // Pour gérer éventuellement le drag & drop
+                    };
+
+                    // Ajouter les événements à newFrame (et non à un autre contrôle)
+                    newFrame.Paint += Frame_Paint;
+                    newFrame.Click += NewControl_Click;
+
+                    // Restaurer les contrôles dans la nouvelle PictureBox
+                    foreach (var controlData in controlsData)
+                    {
+                        Type? controlType = Type.GetType(controlData.TypeName);
+                        if (controlType != null)
+                        {
+                            Control newControl = (Control)Activator.CreateInstance(controlType)!;
+                            newControl.Name = controlData.Name;
+                            newControl.Location = new Point(controlData.X, controlData.Y);
+                            newControl.Size = new Size(controlData.Width, controlData.Height);
+                            if (newControl is TextBox textBox) textBox.Text = controlData.Text;
+                            else newControl.Text = controlData.Text;
+
+                            newFrame.Controls.Add(newControl);
+                        }
+                    }
+
+                    // Ajouter la nouvelle PictureBox à pnlViewHost
+                    pnlViewHost.Controls.Add(newFrame);
+                    newFrame.Invalidate(); // Redessiner
+                    SelectedPictureBox = "";
+                }
             }
         }
+
         private void Supprimer(object sender, EventArgs e)
         {
-            if (ActiveControl is TextBox textBox && !string.IsNullOrEmpty(textBox.SelectedText))
+            PictureBox? frame = pnlViewHost.Controls.OfType<PictureBox>()
+                                      .FirstOrDefault(p => p.Name == SelectedPictureBox);
+
+            if (frame != null)
             {
-                textBox.SelectedText = string.Empty;
+                pnlViewHost.Controls.Remove(frame);
+                frame.Dispose(); // Libérer la mémoire utilisée par la PictureBox
             }
             else
             {
-                MessageBox.Show("Aucun texte sélectionné à supprimer.");
+                MessageBox.Show("Aucune PictureBox sélectionnée.");
             }
         }
+
         private void RedimensionnerSynoptique(object sender, EventArgs e)
         {
             FormResize forme = new FormResize(this);
@@ -948,6 +1079,8 @@ namespace StageCode
                         // Supprimer le handler d'événement Paint pour ne plus dessiner la bordure
                         frame.Paint -= Frame_Paint;
 
+                        SelectedPictureBox = "";
+
                         frame.Invalidate();
                     }
                 }
@@ -1267,12 +1400,21 @@ namespace StageCode
         private void Frame_Paint(object sender, PaintEventArgs e)
         {
             PictureBox? frame = sender as PictureBox;
+
+            int pictureBoxCount = pnlViewHost.Controls.OfType<PictureBox>().Count();
+
+            // Mettre à jour le nom du PictureBox avec un numéro unique
+            frame.Name = "PictureBox" + (pictureBoxCount + 1);  // Exemple : PictureBox1, PictureBox2, etc.
+
+            SelectedPictureBox = frame.Name;
+
             if (frame != null)
             {
                 using (Pen pen = new Pen(Color.Black))
                 {
                     pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot; // Bordure en pointillés
                     e.Graphics.DrawRectangle(pen, 0, 0, frame.Width - 1, frame.Height - 1);
+
                 }
             }
         }
@@ -1464,4 +1606,17 @@ namespace StageCode
             }
         }
     }
+
+    [Serializable]
+    public class SerializableControl
+    {
+        public string TypeName { get; set; } = "";
+        public string Name { get; set; } = "";
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public string? Text { get; set; }
+    }
+
 }

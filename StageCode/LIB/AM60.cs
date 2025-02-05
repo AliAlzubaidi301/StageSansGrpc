@@ -11,6 +11,7 @@ using System.Xml.Linq;
 
 namespace StageCode
 {
+    [Serializable]
     public partial class AM60 : UserControl
     {
         #region "Orthodyne Data"

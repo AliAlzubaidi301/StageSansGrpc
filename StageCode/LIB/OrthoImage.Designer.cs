@@ -34,6 +34,7 @@
             // 
             // PictureBox1
             // 
+            PictureBox1.BackColor = Color.White;
             PictureBox1.Location = new Point(0, 0);
             PictureBox1.Name = "PictureBox1";
             PictureBox1.Size = new Size(133, 97);
