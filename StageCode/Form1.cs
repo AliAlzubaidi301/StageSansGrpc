@@ -462,12 +462,53 @@ namespace StageCode
 
             if (r == DialogResult.Yes)
             {
-                ExportFormToXml();
+                // Demande si l'utilisateur souhaite sauvegarder en XML ou non
+                string saveMessage = "";
+                string saveTitle = "";
+
+                switch (Langue)
+                {
+                    case 1: // English
+                        saveMessage = "Do you want to save as XML?";
+                        saveTitle = "Save As XML";
+                        break;
+                    case 2: // Chinese
+                        saveMessage = "您是否要以XML格式保存？";
+                        saveTitle = "保存为XML";
+                        break;
+                    case 3: // German
+                        saveMessage = "Möchten Sie als XML speichern?";
+                        saveTitle = "Als XML speichern";
+                        break;
+                    case 4: // French
+                        saveMessage = "Voulez-vous enregistrer en XML ?";
+                        saveTitle = "Enregistrer en XML";
+                        break;
+                    case 5: // Lithuanian
+                        saveMessage = "Ar norite išsaugoti kaip XML?";
+                        saveTitle = "Išsaugoti kaip XML";
+                        break;
+                }
+
+                // Affichage de la boîte de dialogue pour le choix de sauvegarde en XML
+                DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
+
+                if (saveResult == DialogResult.Yes)
+                {
+                    ExportFormToXml();  // Sauvegarder en XML
+                }
+                else
+                {
+                    ExportFormToTXT();
+                }
             }
             else if (r == DialogResult.Cancel)
             {
-                // Si l'utilisateur choisit "Non", empêcher la fermeture du formulaire
+                return;
             }
+
+            pnlViewHost.Controls.Clear();
+
         }
 
 
@@ -735,32 +776,50 @@ namespace StageCode
             // Affichage du message avec le titre et la langue correspondante
             DialogResult r = MessageBox.Show(message, title, MessageBoxButtons.YesNo, MessageBoxIcon.Information);
 
-            if(r == DialogResult.Yes)
+            if (r == DialogResult.Yes)
             {
+                // Demande si l'utilisateur souhaite sauvegarder en XML ou non
+                string saveMessage = "";
+                string saveTitle = "";
 
+                switch (Langue)
+                {
+                    case 1: // English
+                        saveMessage = "Do you want to save as XML?";
+                        saveTitle = "Save As XML";
+                        break;
+                    case 2: // Chinese
+                        saveMessage = "您是否要以XML格式保存？";
+                        saveTitle = "保存为XML";
+                        break;
+                    case 3: // German
+                        saveMessage = "Möchten Sie als XML speichern?";
+                        saveTitle = "Als XML speichern";
+                        break;
+                    case 4: // French
+                        saveMessage = "Voulez-vous enregistrer en XML ?";
+                        saveTitle = "Enregistrer en XML";
+                        break;
+                    case 5: // Lithuanian
+                        saveMessage = "Ar norite išsaugoti kaip XML?";
+                        saveTitle = "Išsaugoti kaip XML";
+                        break;
+                }
+
+                // Affichage de la boîte de dialogue pour le choix de sauvegarde en XML
+                DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
+
+                if (saveResult == DialogResult.Yes)
+                {
+                    ExportFormToXml();  // Sauvegarder en XML
+                }
+                else
+                {
+                    ExportFormToTXT();
+                }
             }
 
-            // Ouverture de la boîte de dialogue pour choisir un fichier
-            OpenFileDialog openFileDialog = new OpenFileDialog
-            {
-                Title = "Ouvrir un fichier"
-            };
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    // Lire le contenu du fichier XML
-                    string fileContent = LireXML(openFileDialog.FileName);
-
-                    // Appeler la fonction pour traiter le fichier XML en fonction du type d'objet
-                    RecupererContenuXML(fileContent);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Une erreur est survenue lors de l'ouverture du fichier : {ex.Message}", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
+            pnlViewHost.Controls.Clear();
         }
 
 
@@ -1421,6 +1480,45 @@ namespace StageCode
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            // Demande si l'utilisateur souhaite sauvegarder en XML ou non
+            string saveMessage = "";
+            string saveTitle = "";
+
+            switch (Langue)
+            {
+                case 1: // English
+                    saveMessage = "Do you want to save as XML?";
+                    saveTitle = "Save As XML";
+                    break;
+                case 2: // Chinese
+                    saveMessage = "您是否要以XML格式保存？";
+                    saveTitle = "保存为XML";
+                    break;
+                case 3: // German
+                    saveMessage = "Möchten Sie als XML speichern?";
+                    saveTitle = "Als XML speichern";
+                    break;
+                case 4: // French
+                    saveMessage = "Voulez-vous enregistrer en XML ?";
+                    saveTitle = "Enregistrer en XML";
+                    break;
+                case 5: // Lithuanian
+                    saveMessage = "Ar norite išsaugoti kaip XML?";
+                    saveTitle = "Išsaugoti kaip XML";
+                    break;
+            }
+
+            // Affichage de la boîte de dialogue pour le choix de sauvegarde en XML
+            DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
+
+            if (saveResult == DialogResult.Yes)
+            {
+                ExportFormToXml();  // Sauvegarder en XML
+            }
+            else
+            {
+                ExportFormToTXT();
+            }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
