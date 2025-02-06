@@ -32,7 +32,7 @@ namespace StageCode
         private bool isMovable = false;
 
         //A corriger
-        //CButton TabName a faire
+        //TabName a faire
 
         public Form1()
         {
@@ -845,8 +845,6 @@ namespace StageCode
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
 
-                            frame.DoubleClick += Frame_DoubleClick;
-                            am60Control.DoubleClick +=NewControl_DoubleClick;
 
                             frame.MouseLeave += Frame_MouseLeave;
 
@@ -854,6 +852,7 @@ namespace StageCode
                             frame.Controls.Add(am60Control);
 
                             am60Control.Click+= NewControl_Click;
+                            am60Control.MouseEnter += NewControl_MouseEnter;
 
                             // Ajouter la PictureBox au conteneur principal
                             pnlViewHost.Controls.Add(frame);
@@ -887,10 +886,7 @@ namespace StageCode
                             // Ajouter le contrôle Cont1 à la PictureBox
                             frame.Controls.Add(cont1Control);
 
-
-                            frame.DoubleClick += Frame_DoubleClick;
-                            cont1Control.DoubleClick += NewControl_DoubleClick;
-
+                            cont1Control.MouseEnter += NewControl_MouseEnter;
                             frame.MouseLeave += Frame_MouseLeave;
 
                             cont1Control.Click += NewControl_Click;
@@ -908,6 +904,53 @@ namespace StageCode
                 MessageBox.Show($"Erreur : {ex.Message}");
             }
         }
+
+        private void NewControl_MouseEnter(object? sender, EventArgs e)
+        {
+            // Activer ou désactiver le mode déplacement
+            isMovable = !isMovable;
+
+            // Récupérer le contrôle qui a déclenché l'événement
+            Control? ctrl = sender as Control;
+
+            // Vérifier si le contrôle a un parent de type PictureBox
+            PictureBox? frame = ctrl?.Parent as PictureBox;
+
+            // Modifier le curseur selon l'état du déplacement
+            frame.Cursor = isMovable ? Cursors.SizeAll : Cursors.Default;
+
+            if (IsMdiChild)
+            {
+                // Ajouter les événements aux enfants pour permettre le déplacement
+                foreach (Control child in frame.Controls)
+                {
+                    child.MouseDown -= Frame_MouseDown;
+                    child.MouseMove -= Frame_MouseMove;
+                    child.MouseUp -= Frame_MouseUp;
+
+                    child.MouseDown += Frame_MouseDown;
+                    child.MouseMove += Frame_MouseMove;
+                    child.MouseUp += Frame_MouseUp;
+                }
+            }
+            else
+            {
+                // Ajouter les événements aux enfants pour permettre le déplacement
+                foreach (Control child in frame.Controls)
+                {
+
+                    child.MouseDown -= Frame_MouseDown;
+                    child.MouseMove -= Frame_MouseMove;
+                    child.MouseUp -= Frame_MouseUp;
+
+                    child.MouseDown += Frame_MouseDown;
+                    child.MouseMove += Frame_MouseMove;
+                    child.MouseUp += Frame_MouseUp;
+
+                }
+            }
+        }
+
 
         private void RecupererContenuTXT(string xmlContent)
         {
@@ -1544,13 +1587,15 @@ namespace StageCode
                 // Gérer le dessin personnalisé pour la bordure en pointillés
                 frame.Paint += Frame_Paint;
 
-                frame.DoubleClick += Frame_DoubleClick;
-                newControl.DoubleClick += NewControl_DoubleClick;
+                newControl.MouseEnter += NewControl_MouseEnter;
+
                 // Ajouter le contrôle à l'intérieur de la PictureBox
                 newControl.Location = new Point(5, 5);
                 frame.Controls.Add(newControl);
 
                 frame.MouseLeave += Frame_MouseLeave;
+
+               // frame.Bufer
                 // Ajouter la PictureBox au conteneur principal
                 pnlViewHost.Controls.Add(frame);
 
@@ -1560,53 +1605,6 @@ namespace StageCode
                 newControl.Click += NewControl_Click;
             }
         }
-
-        private void NewControl_DoubleClick(object? sender, EventArgs e)
-        {
-            // Activer ou désactiver le mode déplacement
-            isMovable = !isMovable;
-
-            // Récupérer le contrôle qui a déclenché l'événement
-            Control? ctrl = sender as Control;
-
-            // Vérifier si le contrôle a un parent de type PictureBox
-            PictureBox? frame = ctrl?.Parent as PictureBox;
-
-            // Modifier le curseur selon l'état du déplacement
-            frame.Cursor = isMovable ? Cursors.SizeAll : Cursors.Default;
-
-            if (IsMdiChild)
-            {
-                // Ajouter les événements aux enfants pour permettre le déplacement
-                foreach (Control child in frame.Controls)
-                {
-                    child.MouseDown -= Frame_MouseDown;
-                    child.MouseMove -= Frame_MouseMove;
-                    child.MouseUp -= Frame_MouseUp;
-
-                    child.MouseDown += Frame_MouseDown;
-                    child.MouseMove += Frame_MouseMove;
-                    child.MouseUp += Frame_MouseUp;
-                }
-            }
-            else
-            {
-                // Ajouter les événements aux enfants pour permettre le déplacement
-                foreach (Control child in frame.Controls)
-                {
-
-                    child.MouseDown -= Frame_MouseDown;
-                    child.MouseMove -= Frame_MouseMove;
-                    child.MouseUp -= Frame_MouseUp;
-
-                    child.MouseDown += Frame_MouseDown;
-                    child.MouseMove += Frame_MouseMove;
-                    child.MouseUp += Frame_MouseUp;
-
-                }
-            }
-        }
-
 
         private void Frame_MouseLeave(object? sender, EventArgs e)
         {
@@ -1724,35 +1722,6 @@ namespace StageCode
         #endregion
 
         #region Mouse
-
-        private void Frame_DoubleClick(object? sender, EventArgs e)
-        {
-            // Activer ou désactiver le mode déplacement
-            isMovable = !isMovable;
-
-            PictureBox? frame = sender as PictureBox;
-
-
-            if (!isMovable)
-            {
-                frame.MouseDown += Frame_MouseDown2;
-                frame.MouseMove += Frame_MouseMove2;
-                frame.MouseUp += Frame_MouseUp2;
-            }
-
-            else
-            {
-                frame.Cursor = isMovable ? Cursors.SizeAll : Cursors.Default;
-
-                // Appliquer les événements aux contrôles enfants pour permettre le déplacement
-                foreach (Control child in frame.Controls)
-                {
-                    child.MouseDown += Frame_MouseDown;
-                    child.MouseMove += Frame_MouseMove;
-                    child.MouseUp += Frame_MouseUp;
-                }
-            }
-        }
 
         private void Frame_MouseDown(object sender, MouseEventArgs e)
         {
