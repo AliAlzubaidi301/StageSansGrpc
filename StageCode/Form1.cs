@@ -1,25 +1,16 @@
 ﻿using StageCode.LIB;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.Design;
-using System.ComponentModel.Design.Serialization;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Design;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Serialization;
 using System.Text;
-using System.Windows.Forms;
-using System.Windows.Forms.Design;
-using System.Xml.Linq;
-using System.Windows.Forms;
-using System.Text.Json;
 using OrthoDesigner.Other;
+using System.Xml.Linq;
+using System.Diagnostics;
+using System.ComponentModel.Design;
+using System.Threading.Channels;
+using System.Windows.Forms.VisualStyles;
+using Microsoft.VisualBasic;
+using System.Windows.Forms;
+using StageCode.Other;
+using System;
 
 namespace StageCode
 {
@@ -777,59 +768,29 @@ namespace StageCode
             // Affichage du message avec le titre et la langue correspondante
             DialogResult r = MessageBox.Show(message, title, MessageBoxButtons.YesNo, MessageBoxIcon.Information);
 
-            if (r == DialogResult.Yes)
+            try
             {
-                // Demande si l'utilisateur souhaite sauvegarder en XML ou non
-                string saveMessage = "";
-                string saveTitle = "";
-
-                switch (Langue)
+                if (r == DialogResult.Yes)
                 {
-                    case 1: // English
-                        saveMessage = "Do you want to save as XML?";
-                        saveTitle = "Save As XML";
-                        break;
-                    case 2: // Chinese
-                        saveMessage = "您是否要以XML格式保存？";
-                        saveTitle = "保存为XML";
-                        break;
-                    case 3: // German
-                        saveMessage = "Möchten Sie als XML speichern?";
-                        saveTitle = "Als XML speichern";
-                        break;
-                    case 4: // French
-                        saveMessage = "Voulez-vous enregistrer en XML ?";
-                        saveTitle = "Enregistrer en XML";
-                        break;
-                    case 5: // Lithuanian
-                        saveMessage = "Ar norite išsaugoti kaip XML?";
-                        saveTitle = "Išsaugoti kaip XML";
-                        break;
+                    ExportFormToXml();
                 }
 
-                // Affichage de la boîte de dialogue pour le choix de sauvegarde en XML
-                DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
+                pnlViewHost.Controls.Clear();
 
-                if (saveResult == DialogResult.Yes)
-                {
-                    ExportFormToXml();  // Sauvegarder en XML
-                }
-                else
-                {
-                    ExportFormToTXT();
-                }
+                OpenFileDialog file = new OpenFileDialog();
+                file.Filter = "Fichier SYN (*.syn)|*.syn";
+
+                file.ShowDialog();
+                string a = LireXML(file.FileName);
+
+                MessageBox.Show(a);
+                RecupererContenuXML(a);
             }
-
-            pnlViewHost.Controls.Clear();
-
-
-           
-
-            //string a = LireXML();
-
-            //RecupererContenuXML(a);
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
-
 
         private string LireXML(string filePath)
         {
@@ -845,6 +806,109 @@ namespace StageCode
         }
 
         private void RecupererContenuXML(string xmlContent)
+        {
+            try
+            {
+                XElement xml = XElement.Parse(xmlContent);
+
+                // Parcourir tous les éléments <Component> du XML
+                foreach (XElement component in xml.Descendants("Component"))
+                {
+                    string? type = component.Attribute("type")?.Value;
+
+                    // Convertir l'élément en texte pour passer à ReadFileXML
+                    string componentText = component.ToString();
+
+                    if (type == "AM60")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet AM60
+                        AM60 am60Control = AM60.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle AM60
+                            am60Control.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox frame = new PictureBox
+                            {
+                                Size = new Size(am60Control.Size.Width + 10, am60Control.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            frame.DoubleClick += Frame_DoubleClick;
+                            am60Control.DoubleClick +=NewControl_DoubleClick;
+
+                            frame.MouseLeave += Frame_MouseLeave;
+
+                            // Ajouter le contrôle AM60 à la PictureBox
+                            frame.Controls.Add(am60Control);
+
+                            am60Control.Click+= NewControl_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            pnlViewHost.Controls.Add(frame);
+                        }
+                    }
+                    else if (type == "CONT1")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet Cont1
+                        CONT1 cont1Control = CONT1.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle Cont1
+                            cont1Control.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox frame = new PictureBox
+                            {
+                                Size = new Size(cont1Control.Size.Width + 10, cont1Control.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            // Ajouter le contrôle Cont1 à la PictureBox
+                            frame.Controls.Add(cont1Control);
+
+
+                            frame.DoubleClick += Frame_DoubleClick;
+                            cont1Control.DoubleClick += NewControl_DoubleClick;
+
+                            frame.MouseLeave += Frame_MouseLeave;
+
+                            cont1Control.Click += NewControl_Click;
+
+
+                            // Ajouter la PictureBox au conteneur principal
+                            pnlViewHost.Controls.Add(frame);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Gestion des erreurs
+                MessageBox.Show($"Erreur : {ex.Message}");
+            }
+        }
+
+        private void RecupererContenuTXT(string xmlContent)
         {
             //try
             //{
@@ -935,570 +999,6 @@ namespace StageCode
             //}
         }
 
-        #endregion
-
-        #region Appliquer la langue
-
-        private void AppliquerLangue()
-        {
-            switch (Langue)
-            {
-                case 1: // English
-                    btnFile.Text = "File";
-                    btnEdition.Text = "Edit";
-                    btnView.Text = "View";
-                    newToolStripMenuItem.Text = "New";
-                    openToolStripMenuItem.Text = "Open";
-                    saveToolStripMenuItem.Text = "Save";
-                    btnInfos.Text = "Info";
-
-                    // Menu Infos
-                    controlCommentToolStripMenuItem.Text = "Control Comment";
-                    aboutToolStripMenuItem.Text = "About";
-
-                    // Menu Edit
-                    btnEdition.DropDownItems[0].Text = "Cut";
-                    btnEdition.DropDownItems[1].Text = "Copy";
-                    btnEdition.DropDownItems[2].Text = "Paste";
-                    btnEdition.DropDownItems[4].Text = "Delete";
-                    btnEdition.DropDownItems[6].Text = "Resize synoptique";
-                    btnEdition.DropDownItems[7].Text = "Protect";
-
-                    // Menu View
-                    btnView.DropDownItems[0].Text = "Resolution";
-                    btnView.DropDownItems[1].Text = "Language";
-                    btnView.DropDownItems[2].Text = "Visibility Checker";
-                    break;
-
-                case 2: // Chinese
-                    btnFile.Text = "文件";
-                    btnEdition.Text = "编辑";
-                    btnView.Text = "视图";
-                    newToolStripMenuItem.Text = "新建";
-                    openToolStripMenuItem.Text = "打开";
-                    saveToolStripMenuItem.Text = "保存";
-                    btnInfos.Text = "信息";
-
-                    // Menu Infos
-                    controlCommentToolStripMenuItem.Text = "控制评论";
-                    aboutToolStripMenuItem.Text = "关于";
-
-                    // Menu Edit
-                    btnEdition.DropDownItems[0].Text = "剪切";
-                    btnEdition.DropDownItems[1].Text = "复制";
-                    btnEdition.DropDownItems[2].Text = "粘贴";
-                    btnEdition.DropDownItems[4].Text = "删除";
-                    btnEdition.DropDownItems[6].Text = "调整大小";
-                    btnEdition.DropDownItems[7].Text = "保护";
-
-                    // Menu View
-                    btnView.DropDownItems[0].Text = "分辨率";
-                    btnView.DropDownItems[1].Text = "语言";
-                    btnView.DropDownItems[2].Text = "可见性检查";
-                    break;
-
-                case 3: // German
-                    btnFile.Text = "Datei";
-                    btnEdition.Text = "Bearbeiten";
-                    btnView.Text = "Ansicht";
-                    newToolStripMenuItem.Text = "Neu";
-                    openToolStripMenuItem.Text = "Öffnen";
-                    saveToolStripMenuItem.Text = "Speichern";
-                    btnInfos.Text = "Info";
-
-                    // Menu Infos
-                    controlCommentToolStripMenuItem.Text = "Kontrollkommentar";
-                    aboutToolStripMenuItem.Text = "Über";
-
-                    // Menu Edit
-                    btnEdition.DropDownItems[0].Text = "Ausschneiden";
-                    btnEdition.DropDownItems[1].Text = "Kopieren";
-                    btnEdition.DropDownItems[2].Text = "Einfügen";
-                    btnEdition.DropDownItems[4].Text = "Löschen";
-                    btnEdition.DropDownItems[6].Text = "Größe ändern";
-                    btnEdition.DropDownItems[7].Text = "Schützen";
-
-                    // Menu View
-                    btnView.DropDownItems[0].Text = "Auflösung";
-                    btnView.DropDownItems[1].Text = "Sprache";
-                    btnView.DropDownItems[2].Text = "Sichtbarkeitsprüfung";
-                    break;
-
-                case 4: // French
-                    btnFile.Text = "Fichier";
-                    btnEdition.Text = "Édition";
-                    btnView.Text = "Voir";
-                    newToolStripMenuItem.Text = "Nouveau";
-                    openToolStripMenuItem.Text = "Ouvrir";
-                    saveToolStripMenuItem.Text = "Enregistrer";
-                    btnInfos.Text = "Infos";
-
-                    // Menu Infos
-                    controlCommentToolStripMenuItem.Text = "Contrôle Commentaire";
-                    aboutToolStripMenuItem.Text = "À propos";
-
-                    // Menu Edit
-                    btnEdition.DropDownItems[0].Text = "Couper";
-                    btnEdition.DropDownItems[1].Text = "Copier";
-                    btnEdition.DropDownItems[2].Text = "Coller";
-                    btnEdition.DropDownItems[4].Text = "Supprimer";
-                    btnEdition.DropDownItems[6].Text = "Redimensionner synoptique";
-                    btnEdition.DropDownItems[7].Text = "Protéger";
-
-                    // Menu View
-                    btnView.DropDownItems[0].Text = "Résolution";
-                    btnView.DropDownItems[1].Text = "Langue";
-                    btnView.DropDownItems[2].Text = "Vérifier visibilité";
-                    break;
-
-                case 5: // Lithuanian
-                    btnFile.Text = "Byla";
-                    btnEdition.Text = "Redaguoti";
-                    btnView.Text = "Peržiūra";
-                    newToolStripMenuItem.Text = "Naujas";
-                    openToolStripMenuItem.Text = "Atidaryti";
-                    saveToolStripMenuItem.Text = "Išsaugoti";
-                    btnInfos.Text = "Informacija";
-
-                    // Menu Infos
-                    controlCommentToolStripMenuItem.Text = "Kontrolės komentaras";
-                    aboutToolStripMenuItem.Text = "Apie";
-
-                    // Menu Edit
-                    btnEdition.DropDownItems[0].Text = "Pjauti";
-                    btnEdition.DropDownItems[1].Text = "Kopijuoti";
-                    btnEdition.DropDownItems[2].Text = "Įklijuoti";
-                    btnEdition.DropDownItems[4].Text = "Ištrinti";
-                    btnEdition.DropDownItems[6].Text = "Pakeisti dydį";
-                    btnEdition.DropDownItems[7].Text = "Apsaugoti";
-
-                    // Menu View
-                    btnView.DropDownItems[0].Text = "Rezoliucija";
-                    btnView.DropDownItems[1].Text = "Kalba";
-                    btnView.DropDownItems[2].Text = "Matomumo patikrinimas";
-                    break;
-            }
-        }
-        #endregion
-
-        #region Responsive
-
-        private void Form1_ClientSizeChanged(object sender, EventArgs e)
-        {
-            this.MainMenu.Width = this.ClientSize.Width;
-            this.MainMenu.Height = (int)(this.ClientSize.Height * 0.08);
-
-            float fontSize = (this.ClientSize.Width * 0.02f + this.ClientSize.Height * 0.02f) / 2;
-            foreach (ToolStripMenuItem item in MainMenu.Items)
-            {
-                item.Font = new Font(item.Font.FontFamily, fontSize);
-            }
-
-            // Adapter pnlViewHost pour occuper tout l'espace en dessous du menu
-            pnlViewHost.Location = new Point(0, MainMenu.Bottom);
-            pnlViewHost.Width = (int)(this.ClientSize.Width * 0.8);
-            pnlViewHost.Height = this.ClientSize.Height - pnlViewHost.Top;
-
-            // Ajuster lstToolbox (à gauche du pnlViewHost)
-            lstToolbox.Width = (int)(pnlViewHost.Width * 0.3);
-            lstToolbox.Height = pnlViewHost.Height / 2; // moitié de pnlViewHost
-            lstToolbox.Location = new Point(pnlViewHost.Right, pnlViewHost.Top);
-
-            // Ajuster propertyGrid1 (sous lstToolbox, même largeur)
-            propertyGrid1.Width = lstToolbox.Width;
-            propertyGrid1.Height = pnlViewHost.Height - lstToolbox.Height;
-            propertyGrid1.Location = new Point(lstToolbox.Left, lstToolbox.Bottom);
-        }
-
-        #endregion
-
-        private void Initialize()
-        {
-            lstToolbox.Items.Clear();
-            lstToolbox.Items.AddRange(new string[]
-            {
-                "AM60",
-                "Cont1",
-                "INTEG",
-                "OrthoAD",
-                "OrthoAla",
-                "OrthoCMDLib",
-                "OrthoCombo",
-                "OrthoDI",
-                "OrthoEdit",
-                "Ortholmage",
-                "OrthoLabel",
-                "OrthoPbar",
-                "OrthoRel",
-                "OrthoResult",
-                "OrthoVarname",
-                "Reticule"
-            });
-
-        }
-
-        private void lstToolbox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (lstToolbox.SelectedItem != null)
-            {
-                selectedControl = lstToolbox.SelectedItem.ToString();
-
-                this.Cursor = Cursors.Cross;
-            }
-        }
-
-        private void pnlViewHost_Click(object sender, MouseEventArgs e)
-        {
-            // Si le curseur est dans son état par défaut, on désactive les bordures pointillées sur toutes les PictureBox
-            if (this.Cursor == DefaultCursor)
-            {
-                // Parcours toutes les PictureBox dans le pnlViewHost et supprime les bordures pointillées
-                foreach (Control control in pnlViewHost.Controls)
-                {
-                    if (control is PictureBox frame)
-                    {
-                        // Supprimer le handler d'événement Paint pour ne plus dessiner la bordure
-                        frame.Paint -= Frame_Paint;
-
-                        SelectedPictureBox = "";
-
-                        frame.Invalidate();
-                    }
-                }
-                return; // Sortir de la méthode si le curseur est par défaut
-            }
-
-            // Si un contrôle est sélectionné, on procède à l'ajout
-            Control? newControl = null;
-
-            // Vérifier si un contrôle est sélectionné avant de créer un nouveau contrôle
-            switch (selectedControl)
-            {
-                case "AM60":
-                    newControl = new AM60();
-                    break;
-
-                case "Cont1":
-                    newControl = new CONT1();
-                    break;
-
-                case "INTEG":
-                    newControl = new INTEG();
-                    break;
-
-                case "OrthoAD":
-                    newControl = new OrthoAD();
-                    break;
-
-                case "OrthoAla":
-                    newControl = new OrthoAla();
-                    break;
-
-                case "OrthoCMDLib":
-                    newControl = new OrthoCMDLib();
-                    break;
-
-                case "OrthoCombo":
-                    newControl = new OrthoCombo();
-                    break;
-
-                case "OrthoDI":
-                    newControl = new OrthoDI();
-                    break;
-
-                case "OrthoEdit":
-                    newControl = new OrthoEdit();
-                    break;
-
-                case "Ortholmage":
-                    newControl = new OrthoImage();
-                    break;
-
-                case "OrthoLabel":
-                    newControl = new OrthoLabel();
-                    break;
-
-                case "OrthoPbar":
-                    newControl = new OrthoPbar();
-                    break;
-
-                case "OrthoRel":
-                    newControl = new OrthoRel();
-                    break;
-
-                case "OrthoResult":
-                    newControl = new OrthoResult();
-                    break;
-
-                case "OrthoVarname":
-                    newControl = new OrthoVarname();
-                    break;
-
-                case "Reticule":
-                    newControl = new Reticule();
-                    break;
-
-                default:
-                    return;
-            }
-
-            if (newControl != null)
-            {
-                // Création de la PictureBox qui servira de cadre
-                PictureBox frame = new PictureBox
-                {
-                    Size = new Size(newControl.Width + 10, newControl.Height + 10), // Ajuste la taille
-                    Location = new Point(e.X - 5, e.Y - 5) // Position ajustée par rapport au clic
-                };
-
-                // Gérer le dessin personnalisé pour la bordure en pointillés
-                frame.Paint += Frame_Paint;
-
-                // Ajouter le contrôle à l'intérieur de la PictureBox
-                newControl.Location = new Point(5, 5);
-                frame.Controls.Add(newControl);
-
-                // Ajouter la PictureBox au conteneur principal
-                pnlViewHost.Controls.Add(frame);
-
-                // Réinitialiser le curseur
-                this.Cursor = DefaultCursor;
-
-                newControl.Click += NewControl_Click;
-            }
-        }
-
-        private void NewControl_Click(object? sender, EventArgs e)
-        {
-            Control? controle = sender as Control;
-
-            // Vérifier si le contrôle est un contrôle enfant d'une PictureBox
-            PictureBox? frame = controle?.Parent as PictureBox;
-
-            if (frame != null)
-            {
-                // Ajouter des gestionnaires d'événements pour déplacer ou redimensionner
-                frame.MouseDown += Frame_MouseDown;
-                frame.MouseMove += Frame_MouseMove;
-                frame.MouseUp += Frame_MouseUp;
-
-                // Ajouter la gestion du dessin des bordures pointillées
-                frame.Paint += Frame_Paint;
-                frame.Invalidate(); // Cela va déclencher l'événement Paint pour redessiner
-
-                // Si un contrôle est sélectionné, afficher ses propriétés dans le PropertyGrid
-                if (controle is AM60 am60Control)
-                {
-                    // Mettre à jour le PropertyGrid avec l'objet AM60 sélectionné
-                    propertyGrid1.SelectedObject = am60Control;
-                }
-                else if (controle is CONT1 cont1Control)
-                {
-                    propertyGrid1.SelectedObject = cont1Control;
-                }
-                else if (controle is INTEG integControl)
-                {
-                    propertyGrid1.SelectedObject = integControl;
-                }
-                else if (controle is OrthoAD orthoADControl)
-                {
-                    propertyGrid1.SelectedObject = orthoADControl;
-                }
-                else if (controle is OrthoAla orthoAlaControl)
-                {
-                    propertyGrid1.SelectedObject = orthoAlaControl;
-                }
-                else if (controle is OrthoCMDLib orthoCMDLibControl)
-                {
-                    propertyGrid1.SelectedObject = orthoCMDLibControl;
-                }
-                else if (controle is OrthoCombo orthoComboControl)
-                {
-                    propertyGrid1.SelectedObject = orthoComboControl;
-                }
-                else if (controle is OrthoDI orthoDIControl)
-                {
-                    propertyGrid1.SelectedObject = orthoDIControl;
-                }
-                else if (controle is OrthoEdit orthoEditControl)
-                {
-                    propertyGrid1.SelectedObject = orthoEditControl;
-                }
-                else if (controle is OrthoImage orthoImageControl)
-                {
-                    propertyGrid1.SelectedObject = orthoImageControl;
-                }
-                else if (controle is OrthoLabel orthoLabelControl)
-                {
-                    propertyGrid1.SelectedObject = orthoLabelControl;
-                }
-                else if (controle is OrthoPbar orthoPbarControl)
-                {
-                    propertyGrid1.SelectedObject = orthoPbarControl;
-                }
-                else if (controle is OrthoRel orthoRelControl)
-                {
-                    propertyGrid1.SelectedObject = orthoRelControl;
-                }
-                else if (controle is OrthoResult orthoResultControl)
-                {
-                    propertyGrid1.SelectedObject = orthoResultControl;
-                }
-                else if (controle is OrthoVarname orthoVarnameControl)
-                {
-                    propertyGrid1.SelectedObject = orthoVarnameControl;
-                }
-                else if (controle is Reticule reticuleControl)
-                {
-                    propertyGrid1.SelectedObject = reticuleControl;
-                }
-
-                // Ajouter des vérifications pour les autres types de contrôles
-
-                // Réinitialiser le curseur
-                this.Cursor = Cursors.Default;
-            }
-        }
-
-        private void Frame_MouseDown(object sender, MouseEventArgs e)
-        {
-            PictureBox? frame = sender as PictureBox;
-
-            if (frame != null)
-            {
-                // Détecter si on clique sur une bordure pour le redimensionnement
-                if (IsNearBorder(e.Location, frame))
-                {
-                    resizingFrame = frame;
-                    mouseOffset = e.Location;
-                    isResizing = true;
-                    frame.Cursor = Cursors.SizeNWSE; // Curseur de redimensionnement
-                }
-                else
-                {
-                    // Si on clique à l'intérieur de la PictureBox, commencer à déplacer la PictureBox elle-même
-                    isMoving = true;
-                    mouseOffset = e.Location;
-                    frame.Cursor = Cursors.SizeAll; // Curseur pour déplacer
-
-                    // Afficher un message box pour indiquer que l'on est en mode déplacement
-                    MessageBox.Show("Mode Déplacement activé ! Cliquez et déplacez la PictureBox.", "Déplacement", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-        }
-
-        private void Frame_MouseMove(object sender, MouseEventArgs e)
-        {
-            PictureBox? frame = sender as PictureBox;
-
-            if (isResizing && resizingFrame != null)
-            {
-                // Si on redimensionne, ajuster la taille de la PictureBox
-                int deltaX = e.X - mouseOffset.X;
-                int deltaY = e.Y - mouseOffset.Y;
-
-                // Ajuster la taille de la PictureBox en fonction du mouvement de la souris
-                resizingFrame.Width = Math.Max(10, resizingFrame.Width + deltaX);
-                resizingFrame.Height = Math.Max(10, resizingFrame.Height + deltaY);
-
-                // Redimensionner l'objet à l'intérieur de la PictureBox pour qu'il prenne toute la taille
-                if (resizingFrame.Controls.Count > 0)
-                {
-                    Control child = resizingFrame.Controls[0];
-                    child.Width = resizingFrame.Width;
-                    child.Height = resizingFrame.Height;
-                }
-
-                // Mise à jour de la position de la souris
-                mouseOffset = e.Location;
-
-                // Redessiner la bordure de la PictureBox
-                resizingFrame.Invalidate();
-            }
-            else if (isMoving && frame != null)
-            {
-                // Si on déplace la PictureBox, ajuster la position de la PictureBox elle-même
-                int deltaX = e.X - mouseOffset.X;
-                int deltaY = e.Y - mouseOffset.Y;
-
-                // Déplacer la PictureBox en fonction du mouvement de la souris
-                frame.Left += deltaX;
-                frame.Top += deltaY;
-
-                // Afficher un message chaque fois que l'on déplace la PictureBox
-                MessageBox.Show("Déplacement en cours...", "Déplacement", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // Mettre à jour la position de l'objet enfant (si nécessaire)
-                if (frame.Controls.Count > 0)
-                {
-                    Control child = frame.Controls[0];
-                    child.Left += deltaX;
-                    child.Top += deltaY;
-                }
-
-                // Mise à jour de la position de la souris pour les futurs calculs
-                mouseOffset = e.Location;
-            }
-            else
-            {
-                // Modifier le curseur en fonction de la position de la souris
-                if (frame != null && IsNearBorder(e.Location, frame))
-                {
-                    frame.Cursor = Cursors.SizeNWSE; // Curseur de redimensionnement
-                }
-                else
-                {
-                    frame.Cursor = Cursors.Default; // Curseur par défaut
-                }
-            }
-        }
-
-        private void Frame_MouseUp(object sender, MouseEventArgs e)
-        {
-            // Réinitialiser les indicateurs de redimensionnement et déplacement
-            resizingFrame = null;
-            isResizing = false;
-            isMoving = false;
-
-            PictureBox? frame = sender as PictureBox;
-            if (frame != null)
-            {
-                frame.Cursor = Cursors.Default; // Remettre le curseur par défaut
-            }
-        }
-
-        private bool IsNearBorder(Point mousePosition, PictureBox frame)
-        {
-            // Vérifier si la souris est proche des bords de la PictureBox
-            int borderDistance = 10; // Distance de la bordure pour le redimensionnement
-            return mousePosition.X >= frame.Width - borderDistance ||
-                   mousePosition.X <= borderDistance ||
-                   mousePosition.Y >= frame.Height - borderDistance ||
-                   mousePosition.Y <= borderDistance;
-        }
-
-        // Méthode pour dessiner les bordures pointillées sur les PictureBox
-        private void Frame_Paint(object sender, PaintEventArgs e)
-        {
-            PictureBox? frame = sender as PictureBox;
-
-            int pictureBoxCount = pnlViewHost.Controls.OfType<PictureBox>().Count();
-
-            // Mettre à jour le nom du PictureBox avec un numéro unique
-            frame.Name = "PictureBox" + (pictureBoxCount + 1);  // Exemple : PictureBox1, PictureBox2, etc.
-
-            SelectedPictureBox = frame.Name;
-
-            if (frame != null)
-            {
-                using (Pen pen = new Pen(Color.Black))
-                {
-                    pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot; // Bordure en pointillés
-                    e.Graphics.DrawRectangle(pen, 0, 0, frame.Width - 1, frame.Height - 1);
-
-                }
-            }
-        }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1703,7 +1203,7 @@ namespace StageCode
             }
 
             // Affichage d'un MessageBox personnalisé avec des boutons textuels en fonction de la langue
-            DialogResult r = MessageBox.Show($"{message}",title,MessageBoxButtons.YesNo);  //ShowCustomMessageBox(message, title, yesText, noText);
+            DialogResult r = MessageBox.Show($"{message}", title, MessageBoxButtons.YesNo);  //ShowCustomMessageBox(message, title, yesText, noText);
 
             if (r == DialogResult.Yes)
             {
@@ -1717,6 +1217,682 @@ namespace StageCode
                 return;
             }
         }
+
+        #endregion
+
+        #region Appliquer la langue
+
+        private void AppliquerLangue()
+        {
+            switch (Langue)
+            {
+                case 1: // English
+                    btnFile.Text = "File";
+                    btnEdition.Text = "Edit";
+                    btnView.Text = "View";
+                    newToolStripMenuItem.Text = "New";
+                    openToolStripMenuItem.Text = "Open";
+                    saveToolStripMenuItem.Text = "Save";
+                    btnInfos.Text = "Info";
+
+                    // Menu Infos
+                    controlCommentToolStripMenuItem.Text = "Control Comment";
+                    aboutToolStripMenuItem.Text = "About";
+
+                    // Menu Edit
+                    btnEdition.DropDownItems[0].Text = "Cut";
+                    btnEdition.DropDownItems[1].Text = "Copy";
+                    btnEdition.DropDownItems[2].Text = "Paste";
+                    btnEdition.DropDownItems[4].Text = "Delete";
+                    btnEdition.DropDownItems[6].Text = "Resize synoptique";
+                    btnEdition.DropDownItems[7].Text = "Protect";
+
+                    // Menu View
+                    btnView.DropDownItems[0].Text = "Resolution";
+                    btnView.DropDownItems[1].Text = "Language";
+                    btnView.DropDownItems[2].Text = "Visibility Checker";
+                    break;
+
+                case 2: // Chinese
+                    btnFile.Text = "文件";
+                    btnEdition.Text = "编辑";
+                    btnView.Text = "视图";
+                    newToolStripMenuItem.Text = "新建";
+                    openToolStripMenuItem.Text = "打开";
+                    saveToolStripMenuItem.Text = "保存";
+                    btnInfos.Text = "信息";
+
+                    // Menu Infos
+                    controlCommentToolStripMenuItem.Text = "控制评论";
+                    aboutToolStripMenuItem.Text = "关于";
+
+                    // Menu Edit
+                    btnEdition.DropDownItems[0].Text = "剪切";
+                    btnEdition.DropDownItems[1].Text = "复制";
+                    btnEdition.DropDownItems[2].Text = "粘贴";
+                    btnEdition.DropDownItems[4].Text = "删除";
+                    btnEdition.DropDownItems[6].Text = "调整大小";
+                    btnEdition.DropDownItems[7].Text = "保护";
+
+                    // Menu View
+                    btnView.DropDownItems[0].Text = "分辨率";
+                    btnView.DropDownItems[1].Text = "语言";
+                    btnView.DropDownItems[2].Text = "可见性检查";
+                    break;
+
+                case 3: // German
+                    btnFile.Text = "Datei";
+                    btnEdition.Text = "Bearbeiten";
+                    btnView.Text = "Ansicht";
+                    newToolStripMenuItem.Text = "Neu";
+                    openToolStripMenuItem.Text = "Öffnen";
+                    saveToolStripMenuItem.Text = "Speichern";
+                    btnInfos.Text = "Info";
+
+                    // Menu Infos
+                    controlCommentToolStripMenuItem.Text = "Kontrollkommentar";
+                    aboutToolStripMenuItem.Text = "Über";
+
+                    // Menu Edit
+                    btnEdition.DropDownItems[0].Text = "Ausschneiden";
+                    btnEdition.DropDownItems[1].Text = "Kopieren";
+                    btnEdition.DropDownItems[2].Text = "Einfügen";
+                    btnEdition.DropDownItems[4].Text = "Löschen";
+                    btnEdition.DropDownItems[6].Text = "Größe ändern";
+                    btnEdition.DropDownItems[7].Text = "Schützen";
+
+                    // Menu View
+                    btnView.DropDownItems[0].Text = "Auflösung";
+                    btnView.DropDownItems[1].Text = "Sprache";
+                    btnView.DropDownItems[2].Text = "Sichtbarkeitsprüfung";
+                    break;
+
+                case 4: // French
+                    btnFile.Text = "Fichier";
+                    btnEdition.Text = "Édition";
+                    btnView.Text = "Voir";
+                    newToolStripMenuItem.Text = "Nouveau";
+                    openToolStripMenuItem.Text = "Ouvrir";
+                    saveToolStripMenuItem.Text = "Enregistrer";
+                    btnInfos.Text = "Infos";
+
+                    // Menu Infos
+                    controlCommentToolStripMenuItem.Text = "Contrôle Commentaire";
+                    aboutToolStripMenuItem.Text = "À propos";
+
+                    // Menu Edit
+                    btnEdition.DropDownItems[0].Text = "Couper";
+                    btnEdition.DropDownItems[1].Text = "Copier";
+                    btnEdition.DropDownItems[2].Text = "Coller";
+                    btnEdition.DropDownItems[4].Text = "Supprimer";
+                    btnEdition.DropDownItems[6].Text = "Redimensionner synoptique";
+                    btnEdition.DropDownItems[7].Text = "Protéger";
+
+                    // Menu View
+                    btnView.DropDownItems[0].Text = "Résolution";
+                    btnView.DropDownItems[1].Text = "Langue";
+                    btnView.DropDownItems[2].Text = "Vérifier visibilité";
+                    break;
+
+                case 5: // Lithuanian
+                    btnFile.Text = "Byla";
+                    btnEdition.Text = "Redaguoti";
+                    btnView.Text = "Peržiūra";
+                    newToolStripMenuItem.Text = "Naujas";
+                    openToolStripMenuItem.Text = "Atidaryti";
+                    saveToolStripMenuItem.Text = "Išsaugoti";
+                    btnInfos.Text = "Informacija";
+
+                    // Menu Infos
+                    controlCommentToolStripMenuItem.Text = "Kontrolės komentaras";
+                    aboutToolStripMenuItem.Text = "Apie";
+
+                    // Menu Edit
+                    btnEdition.DropDownItems[0].Text = "Pjauti";
+                    btnEdition.DropDownItems[1].Text = "Kopijuoti";
+                    btnEdition.DropDownItems[2].Text = "Įklijuoti";
+                    btnEdition.DropDownItems[4].Text = "Ištrinti";
+                    btnEdition.DropDownItems[6].Text = "Pakeisti dydį";
+                    btnEdition.DropDownItems[7].Text = "Apsaugoti";
+
+                    // Menu View
+                    btnView.DropDownItems[0].Text = "Rezoliucija";
+                    btnView.DropDownItems[1].Text = "Kalba";
+                    btnView.DropDownItems[2].Text = "Matomumo patikrinimas";
+                    break;
+            }
+        }
+        #endregion
+
+        #region Responsive
+
+        private void Form1_ClientSizeChanged(object sender, EventArgs e)
+        {
+            this.MainMenu.Width = this.ClientSize.Width;
+            this.MainMenu.Height = (int)(this.ClientSize.Height * 0.08);
+
+            float fontSize = (this.ClientSize.Width * 0.02f + this.ClientSize.Height * 0.02f) / 2;
+            foreach (ToolStripMenuItem item in MainMenu.Items)
+            {
+                item.Font = new Font(item.Font.FontFamily, fontSize);
+            }
+
+            // Adapter pnlViewHost pour occuper tout l'espace en dessous du menu
+            pnlViewHost.Location = new Point(0, MainMenu.Bottom);
+            pnlViewHost.Width = (int)(this.ClientSize.Width * 0.8);
+            pnlViewHost.Height = this.ClientSize.Height - pnlViewHost.Top;
+
+            // Ajuster lstToolbox (à gauche du pnlViewHost)
+            lstToolbox.Width = (int)(pnlViewHost.Width * 0.3);
+            lstToolbox.Height = pnlViewHost.Height / 2; // moitié de pnlViewHost
+            lstToolbox.Location = new Point(pnlViewHost.Right, pnlViewHost.Top);
+
+            // Ajuster propertyGrid1 (sous lstToolbox, même largeur)
+            propertyGrid1.Width = lstToolbox.Width;
+            propertyGrid1.Height = pnlViewHost.Height - lstToolbox.Height;
+            propertyGrid1.Location = new Point(lstToolbox.Left, lstToolbox.Bottom);
+        }
+
+        #endregion
+
+        #region lstToolbox
+
+        private void Initialize()
+        {
+            lstToolbox.Items.Clear();
+            lstToolbox.Items.AddRange(new string[]
+            {
+                "AM60",
+                "Cont1",
+                "INTEG",
+                "OrthoAD",
+                "OrthoAla",
+                "OrthoCMDLib",
+                "OrthoCombo",
+                "OrthoDI",
+                "OrthoEdit",
+                "Ortholmage",
+                "OrthoLabel",
+                "OrthoPbar",
+                "OrthoRel",
+                "OrthoResult",
+                "OrthoVarname",
+                "Reticule"
+            });
+
+        }
+
+        private void lstToolbox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lstToolbox.SelectedItem != null)
+            {
+                selectedControl = lstToolbox.SelectedItem.ToString();
+
+                this.Cursor = Cursors.Cross;
+            }
+        }
+
+        #endregion
+
+        #region PnlView
+
+        private void pnlViewHost_Click(object sender, MouseEventArgs e)
+        {
+            // Si le curseur est dans son état par défaut, on désactive les bordures pointillées sur toutes les PictureBox
+            if (this.Cursor == DefaultCursor)
+            {
+                // Parcours toutes les PictureBox dans le pnlViewHost et supprime les bordures pointillées
+                foreach (Control control in pnlViewHost.Controls)
+                {
+                    if (control is PictureBox frame)
+                    {
+                        // Supprimer le handler d'événement Paint pour ne plus dessiner la bordure
+                        frame.Paint -= Frame_Paint;
+
+                        SelectedPictureBox = "";
+
+                        frame.Invalidate();
+                    }
+                }
+                return; // Sortir de la méthode si le curseur est par défaut
+            }
+
+            // Si un contrôle est sélectionné, on procède à l'ajout
+            Control? newControl = null;
+
+            // Vérifier si un contrôle est sélectionné avant de créer un nouveau contrôle
+            switch (selectedControl)
+            {
+                case "AM60":
+                    newControl = new AM60();
+                    break;
+
+                case "Cont1":
+                    newControl = new CONT1();
+                    break;
+
+                case "INTEG":
+                    newControl = new INTEG();
+                    break;
+
+                case "OrthoAD":
+                    newControl = new OrthoAD();
+                    break;
+
+                case "OrthoAla":
+                    newControl = new OrthoAla();
+                    break;
+
+                case "OrthoCMDLib":
+                    newControl = new OrthoCMDLib();
+                    break;
+
+                case "OrthoCombo":
+                    newControl = new OrthoCombo();
+                    break;
+
+                case "OrthoDI":
+                    newControl = new OrthoDI();
+                    break;
+
+                case "OrthoEdit":
+                    newControl = new OrthoEdit();
+                    break;
+
+                case "Ortholmage":
+                    newControl = new OrthoImage();
+                    break;
+
+                case "OrthoLabel":
+                    newControl = new OrthoLabel();
+                    break;
+
+                case "OrthoPbar":
+                    newControl = new OrthoPbar();
+                    break;
+
+                case "OrthoRel":
+                    newControl = new OrthoRel();
+                    break;
+
+                case "OrthoResult":
+                    newControl = new OrthoResult();
+                    break;
+
+                case "OrthoVarname":
+                    newControl = new OrthoVarname();
+                    break;
+
+                case "Reticule":
+                    newControl = new Reticule();
+                    break;
+
+                default:
+                    return;
+            }
+
+            if (newControl != null)
+            {
+                // Création de la PictureBox qui servira de cadre
+                PictureBox frame = new PictureBox
+                {
+                    Size = new Size(newControl.Width + 10, newControl.Height + 10), // Ajuste la taille
+                    Location = new Point(e.X - 5, e.Y - 5) // Position ajustée par rapport au clic
+                };
+
+                // Gérer le dessin personnalisé pour la bordure en pointillés
+                frame.Paint += Frame_Paint;
+
+                frame.DoubleClick += Frame_DoubleClick;
+                newControl.DoubleClick += NewControl_DoubleClick;
+                // Ajouter le contrôle à l'intérieur de la PictureBox
+                newControl.Location = new Point(5, 5);
+                frame.Controls.Add(newControl);
+
+                frame.MouseLeave += Frame_MouseLeave;
+                // Ajouter la PictureBox au conteneur principal
+                pnlViewHost.Controls.Add(frame);
+
+                // Réinitialiser le curseur
+                this.Cursor = DefaultCursor;
+
+                newControl.Click += NewControl_Click;
+            }
+        }
+
+        private void NewControl_DoubleClick(object? sender, EventArgs e)
+        {
+            // Activer ou désactiver le mode déplacement
+            isMovable = !isMovable;
+
+            // Récupérer le contrôle qui a déclenché l'événement
+            Control? ctrl = sender as Control;
+
+            // Vérifier si le contrôle a un parent de type PictureBox
+            PictureBox? frame = ctrl?.Parent as PictureBox;
+
+            // Modifier le curseur selon l'état du déplacement
+            frame.Cursor = isMovable ? Cursors.Hand : Cursors.Default;
+
+            if (IsMdiChild)
+            {
+                // Ajouter les événements aux enfants pour permettre le déplacement
+                foreach (Control child in frame.Controls)
+                {
+                    child.MouseDown -= Frame_MouseDown;
+                    child.MouseMove -= Frame_MouseMove;
+                    child.MouseUp -= Frame_MouseUp;
+
+                    child.MouseDown += Frame_MouseDown;
+                    child.MouseMove += Frame_MouseMove;
+                    child.MouseUp += Frame_MouseUp;
+                }
+            }
+            else
+            {
+                // Ajouter les événements aux enfants pour permettre le déplacement
+                foreach (Control child in frame.Controls)
+                {
+
+                    child.MouseDown -= Frame_MouseDown;
+                    child.MouseMove -= Frame_MouseMove;
+                    child.MouseUp -= Frame_MouseUp;
+
+                    child.MouseDown += Frame_MouseDown;
+                    child.MouseMove += Frame_MouseMove;
+                    child.MouseUp += Frame_MouseUp;
+
+                }
+            }
+        }
+
+
+        private void Frame_MouseLeave(object? sender, EventArgs e)
+        {
+            PictureBox? p = sender as PictureBox;
+            foreach(Control ctrl in p.Controls)
+            {
+                p.Size = ctrl.Size;
+
+                p.Width += 10;
+                p.Height += 10;
+            }
+        }
+
+        private void NewControl_Click(object? sender, EventArgs e)
+        {
+            Control? controle = sender as Control;
+
+            // Vérifier si le contrôle est un contrôle enfant d'une PictureBox
+            PictureBox? frame = controle?.Parent as PictureBox;
+
+            if (frame != null)
+            {
+                // Ajouter des gestionnaires d'événements pour déplacer ou redimensionner
+                frame.MouseDown += Frame_MouseDown2;
+                frame.MouseMove += Frame_MouseMove2;
+                frame.MouseUp += Frame_MouseUp2;
+
+                // Ajouter la gestion du dessin des bordures pointillées
+                frame.Paint += Frame_Paint;
+                frame.Invalidate(); // Cela va déclencher l'événement Paint pour redessiner
+
+                // Si un contrôle est sélectionné, afficher ses propriétés dans le PropertyGrid
+                if (controle is AM60 am60Control)
+                {
+                    // Mettre à jour le PropertyGrid avec l'objet AM60 sélectionné
+                    propertyGrid1.SelectedObject = am60Control;
+                }
+                else if (controle is CONT1 cont1Control)
+                {
+                    propertyGrid1.SelectedObject = cont1Control;
+                }
+                else if (controle is INTEG integControl)
+                {
+                    propertyGrid1.SelectedObject = integControl;
+                }
+                else if (controle is OrthoAD orthoADControl)
+                {
+                    propertyGrid1.SelectedObject = orthoADControl;
+                }
+                else if (controle is OrthoAla orthoAlaControl)
+                {
+                    propertyGrid1.SelectedObject = orthoAlaControl;
+                }
+                else if (controle is OrthoCMDLib orthoCMDLibControl)
+                {
+                    propertyGrid1.SelectedObject = orthoCMDLibControl;
+                }
+                else if (controle is OrthoCombo orthoComboControl)
+                {
+                    propertyGrid1.SelectedObject = orthoComboControl;
+                }
+                else if (controle is OrthoDI orthoDIControl)
+                {
+                    propertyGrid1.SelectedObject = orthoDIControl;
+                }
+                else if (controle is OrthoEdit orthoEditControl)
+                {
+                    propertyGrid1.SelectedObject = orthoEditControl;
+                }
+                else if (controle is OrthoImage orthoImageControl)
+                {
+                    propertyGrid1.SelectedObject = orthoImageControl;
+                }
+                else if (controle is OrthoLabel orthoLabelControl)
+                {
+                    propertyGrid1.SelectedObject = orthoLabelControl;
+                }
+                else if (controle is OrthoPbar orthoPbarControl)
+                {
+                    propertyGrid1.SelectedObject = orthoPbarControl;
+                }
+                else if (controle is OrthoRel orthoRelControl)
+                {
+                    propertyGrid1.SelectedObject = orthoRelControl;
+                }
+                else if (controle is OrthoResult orthoResultControl)
+                {
+                    propertyGrid1.SelectedObject = orthoResultControl;
+                }
+                else if (controle is OrthoVarname orthoVarnameControl)
+                {
+                    propertyGrid1.SelectedObject = orthoVarnameControl;
+                }
+                else if (controle is Reticule reticuleControl)
+                {
+                    propertyGrid1.SelectedObject = reticuleControl;
+                }
+
+                // Ajouter des vérifications pour les autres types de contrôles
+
+                // Réinitialiser le curseur
+                this.Cursor = Cursors.Default;
+            }
+        }
+
+        #endregion
+
+        #region Mouse
+
+        // Variables globales
+        private bool isMovable = false;
+
+        private void Frame_DoubleClick(object? sender, EventArgs e)
+        {
+            // Activer ou désactiver le mode déplacement
+            isMovable = !isMovable;
+
+            PictureBox? frame = sender as PictureBox;
+
+
+            if (!isMovable)
+            {
+                frame.MouseDown += Frame_MouseDown2;
+                frame.MouseMove += Frame_MouseMove2;
+                frame.MouseUp += Frame_MouseUp2;
+            }
+
+            else
+            {
+                frame.Cursor = isMovable ? Cursors.Hand : Cursors.Default;
+
+                // Appliquer les événements aux contrôles enfants pour permettre le déplacement
+                foreach (Control child in frame.Controls)
+                {
+                    child.MouseDown += Frame_MouseDown;
+                    child.MouseMove += Frame_MouseMove;
+                    child.MouseUp += Frame_MouseUp;
+                }
+            }
+        }
+
+        private void Frame_MouseDown(object sender, MouseEventArgs e)
+        {
+            // Vérifier que le déplacement est activé
+            if (!isMovable) return;
+
+            // Récupérer la PictureBox, même si on clique sur un élément à l’intérieur
+            PictureBox? frame = (sender as PictureBox) ?? (sender as Control)?.Parent as PictureBox;
+
+            if (frame != null)
+            {
+                isMoving = true;
+                mouseOffset = e.Location;
+            }
+        }
+
+        private void Frame_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!isMoving) return;
+
+            PictureBox? frame = (sender as PictureBox) ?? (sender as Control)?.Parent as PictureBox;
+
+            if (frame != null)
+            {
+                frame.Left += e.X - mouseOffset.X;
+                frame.Top += e.Y - mouseOffset.Y;
+            }
+        }
+
+        private void Frame_MouseUp(object sender, MouseEventArgs e)
+        {
+            isMoving = false;
+        }
+
+
+
+        private void Frame_MouseDown2(object sender, MouseEventArgs e)
+        {
+            PictureBox? frame = sender as PictureBox;
+
+            if (frame != null)
+            {
+                // Détecter si on clique sur une bordure pour le redimensionnement
+                if (IsNearBorder(e.Location, frame))
+                {
+                    resizingFrame = frame;
+                    mouseOffset = e.Location;
+                    isResizing = true;
+                    frame.Cursor = Cursors.SizeNWSE; // Curseur de redimensionnement
+                }
+            }
+        }
+
+        private void Frame_MouseMove2(object sender, MouseEventArgs e)
+        {
+            PictureBox? frame = sender as PictureBox;
+
+            if (isResizing && resizingFrame != null)
+            {
+                // Ajuster la taille de la PictureBox en fonction du mouvement de la souris
+                int deltaX = e.X - mouseOffset.X;
+                int deltaY = e.Y - mouseOffset.Y;
+
+                resizingFrame.Width = Math.Max(10, resizingFrame.Width + deltaX);
+                resizingFrame.Height = Math.Max(10, resizingFrame.Height + deltaY);
+
+                // Redimensionner l'objet à l'intérieur de la PictureBox pour qu'il prenne toute la taille
+                if (resizingFrame.Controls.Count > 0)
+                {
+                    Control child = resizingFrame.Controls[0];
+                    child.Width = resizingFrame.Width;
+                    child.Height = resizingFrame.Height;
+                }
+
+                // Mise à jour de la position de la souris
+                mouseOffset = e.Location;
+
+                // Redessiner la bordure de la PictureBox
+                resizingFrame.Invalidate();
+            }
+            else
+            {
+                // Modifier le curseur en fonction de la position de la souris
+                if (frame != null && IsNearBorder(e.Location, frame))
+                {
+                    frame.Cursor = Cursors.SizeNWSE; // Curseur de redimensionnement
+                }
+                else
+                {
+                    frame.Cursor = Cursors.Default; // Curseur par défaut
+                }
+            }
+        }
+
+        private void Frame_MouseUp2(object sender, MouseEventArgs e)
+        {
+            // Réinitialiser les indicateurs de redimensionnement
+            resizingFrame = null;
+            isResizing = false;
+
+            PictureBox? frame = sender as PictureBox;
+            if (frame != null)
+            {
+                frame.Cursor = Cursors.Default; // Remettre le curseur par défaut
+            }
+        }
+
+
+
+        #endregion
+
+        #region Border
+
+        private bool IsNearBorder(Point mousePosition, PictureBox frame)
+        {
+            // Vérifier si la souris est proche des bords de la PictureBox
+            int borderDistance = 10; // Distance de la bordure pour le redimensionnement
+            return mousePosition.X >= frame.Width - borderDistance ||
+                   mousePosition.X <= borderDistance ||
+                   mousePosition.Y >= frame.Height - borderDistance ||
+                   mousePosition.Y <= borderDistance;
+        }
+
+        // Méthode pour dessiner les bordures pointillées sur les PictureBox
+        private void Frame_Paint(object sender, PaintEventArgs e)
+        {
+            PictureBox? frame = sender as PictureBox;
+
+            int pictureBoxCount = pnlViewHost.Controls.OfType<PictureBox>().Count();
+
+            // Mettre à jour le nom du PictureBox avec un numéro unique
+            frame.Name = "PictureBox" + (pictureBoxCount + 1);  // Exemple : PictureBox1, PictureBox2, etc.
+
+            SelectedPictureBox = frame.Name;
+
+            if (frame != null)
+            {
+                using (Pen pen = new Pen(Color.Black))
+                {
+                    pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot; // Bordure en pointillés
+                    e.Graphics.DrawRectangle(pen, 0, 0, frame.Width - 1, frame.Height - 1);
+
+                }
+            }
+        }
+
+        #endregion
 
         // Fonction pour afficher un MessageBox personnalisé
         private DialogResult ShowCustomMessageBox(string message, string title, string yesText, string noText)

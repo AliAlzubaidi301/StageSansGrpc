@@ -29,7 +29,7 @@ namespace StageCode
         public event EventHandler VisibilityChanged;
 
         #region "Read/Write on .syn file"
-        public AM60 ReadFileXML(string xmlText)
+        public static AM60 ReadFileXML(string xmlText)
         {
             XElement xml = XElement.Parse(xmlText);
 
@@ -48,6 +48,16 @@ namespace StageCode
                 am60Control.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Attribute("value")?.Value ?? "0");
                 am60Control.Detecteur = appearance.Element("Detecteur")?.Attribute("value")?.Value ?? "";
                 am60Control.Visibility = appearance.Element("Visibility")?.Attribute("value")?.Value ?? "Visible";
+
+                // Extract Size and Location from the <Apparence> section
+                am60Control.Size = new Size(
+                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+                );
+                am60Control.Location = new Point(
+                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+                );
             }
 
             // Return the populated AM60 object
@@ -79,7 +89,6 @@ namespace StageCode
 
             return this;
         }
-
         public string WriteFileXML()
         {
             var xmlContent = new StringBuilder();
@@ -99,6 +108,13 @@ namespace StageCode
 
             // Gestion de la visibilité
             xmlContent.AppendLine($"        <Visibility value=\"{this.Visibility}\"/>");
+
+            // Ajout des informations de taille et de position
+            xmlContent.AppendLine($"        <SizeWidth>{this.Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"        <SizeHeight>{this.Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"        <LocationX>{this.Location.X}</LocationX>");
+            xmlContent.AppendLine($"        <LocationY>{this.Location.Y}</LocationY>");
+
             xmlContent.AppendLine("      </Apparence>");
 
             // Fermeture du composant
@@ -108,11 +124,11 @@ namespace StageCode
             return xmlContent.ToString();
         }
 
-
         public string WriteFile()
         {
             return $"AM60;{this.Name};{this.Size.Height};{this.Size.Width};{this.Location.Y};{this.Location.X};{this.Detecteur};{this.LevelVisible};{this.LevelEnabled};{this.Visibility}";
         }
+
 
 
         #endregion
