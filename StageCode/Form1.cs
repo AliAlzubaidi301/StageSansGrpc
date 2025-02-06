@@ -38,6 +38,8 @@ namespace StageCode
         {
             InitializeComponent();
 
+            this.DoubleBuffered = true;
+
             this.ClientSizeChanged += Form1_ClientSizeChanged;
             pnlViewHost.MouseClick += pnlViewHost_Click;
         }
@@ -1571,7 +1573,7 @@ namespace StageCode
             PictureBox? frame = ctrl?.Parent as PictureBox;
 
             // Modifier le curseur selon l'état du déplacement
-            frame.Cursor = isMovable ? Cursors.Hand : Cursors.Default;
+            frame.Cursor = isMovable ? Cursors.SizeAll : Cursors.Default;
 
             if (IsMdiChild)
             {
@@ -1616,6 +1618,15 @@ namespace StageCode
                 p.Width += 10;
                 p.Height += 10;
             }
+
+            p.Paint-= Frame_Paint;
+            p.Invalidate();
+
+            this.Cursor = DefaultCursor;
+
+            this.isMoving = false;
+            this.isMovable = false;
+
         }
 
         private void NewControl_Click(object? sender, EventArgs e)
@@ -1731,7 +1742,7 @@ namespace StageCode
 
             else
             {
-                frame.Cursor = isMovable ? Cursors.Hand : Cursors.Default;
+                frame.Cursor = isMovable ? Cursors.SizeAll : Cursors.Default;
 
                 // Appliquer les événements aux contrôles enfants pour permettre le déplacement
                 foreach (Control child in frame.Controls)
