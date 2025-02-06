@@ -19,10 +19,6 @@ namespace StageCode
         public static int Langue = 1; // 1 = English, 2 = Chinese, 3 = German, 4 = French, 5 = Lithuanian
         private Form1 frm;
 
-        private Control? selectedFrame = null; // Stocke la PictureBox sélectionnée
-        private bool isResizings = false;
-        private Point lastMousePosition;
-
         private string selectedControl = "";
 
         private string SelectedPictureBox = "";
@@ -32,8 +28,11 @@ namespace StageCode
         private bool isResizing = false;
         private bool isMoving = false;
 
+        // Variables globales
+        private bool isMovable = false;
+
         //A corriger
-        //ORthoAD et CButton TabName a faire
+        //CButton TabName a faire
 
         public Form1()
         {
@@ -1714,9 +1713,6 @@ namespace StageCode
         #endregion
 
         #region Mouse
-
-        // Variables globales
-        private bool isMovable = false;
 
         private void Frame_DoubleClick(object? sender, EventArgs e)
         {

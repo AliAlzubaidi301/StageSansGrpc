@@ -56,7 +56,7 @@ namespace StageCode.LIB
         {
 
         }
-        private void OrthoResult_Resize(object sender, EventArgs e)
+        public void OrthoResult_Resize(object sender, EventArgs e)
         {
             TextBox1.Size = this.Size;
         }

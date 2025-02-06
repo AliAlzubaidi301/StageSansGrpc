@@ -1,29 +1,27 @@
-﻿using StageCode.Other;
+﻿using Microsoft.VisualBasic;
+using StageCode.Other;
 using System;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Text;
 using System.Windows.Forms;
+using static StageCode.Other.Langs;
 
 namespace StageCode.LIB
 {
+    public enum TDesign
+    {
+        Bouton = 1,
+        Rectangle,
+        Cercle,
+        Arrondi,
+        Tedit,
+        Combo
+    }
     public partial class OrthoAD : UserControl
     {
-        private void OrthoAD_Load(object sender, EventArgs e)
-        {
-
-        }
-        public enum TDesign
-        {
-            Bouton = 1,
-            Rectangle,
-            Cercle,
-            Arrondi,
-            Tedit,
-            Combo
-        }
-
         private string _captionValues = "OrthoAD";
         private int _LevelVisible = 0; // Niveau d'accès minimum pour rendre l'objet visible
         private int _LevelEnabled = 0; // Niveau d'accès minimum pour rendre l'objet accessible
@@ -44,147 +42,154 @@ namespace StageCode.LIB
         private string _VarValMin; // Varlink 6 : Reference Min
         private string _VarTextMin; // Varlink 7 : Texte affiche si plus petit que valmin
         private string _visibility = "1";
-
-        // Param non utilisé mais visible au cas où
-        private string[] _VL = new string[8];
+        /// <summary>
+        /// Param non utilisé mais visible au cas où
+        /// </summary>
+        private string[] _VL = new string[9];
 
         public event EventHandler VisibilityChanging;
         public event EventHandler VisibilityChanged;
+
+        private void OrthoAD_Load(object sender, EventArgs e)
+        {
+
+        }
 
         public OrthoAD()
         {
             InitializeComponent();
 
-            // Ajout du bouton au contrôle
+            Langs.LanguageChanged += LanguageChangedEventHandler;
+
             this.Controls.Add(btn);
             btn.Text = this.Name;
-            this.BackColor = Color.Transparent;
-            btn.FillType = CButton.eFillType.Solid; // Remplacez par la classe CButtonLib.CButton si vous l'utilisez
-            btn.Shape = CButton.eShape.Rectangle; // Même remarque ici pour CButtonLib.CButton
+            BackColor = Color.Transparent;
+            btn.FillType = CButton.eFillType.Solid;
+            btn.Shape = CButton.eShape.Rectangle;
             btn.Corners.All = 6;
-            // Inscription des gestionnaires d'événements
-            ControlUtils.RegisterControl(btn, () => Visibility, h => VisibilityChanging += h,h => VisibilityChanged += h);
 
-
+            ControlUtils.RegisterControl(btn, () => Visibility, h => VisibilityChanging += h, h => VisibilityChanged += h);
+            base.Resize += OrthoResult_Resize;
+            base.Load += OrthoAD_Load;
         }
-
         private void OrthoResult_Resize(object sender, EventArgs e)
         {
-            if (btn.Shape == CButton.eShape.Ellipse) // Vérifie si la forme est une ellipse
+            if (btn.Shape == CButton.eShape.Ellipse)
             {
-                btn.Size = new Size(this.Height, this.Height); // Définir la taille du bouton en fonction de la hauteur du formulaire
-                this.Size = new Size(this.Height, this.Height); // Définir la taille du formulaire selon la hauteur
+                btn.Size = new Size(this.Height, this.Height);
+                this.Size = new Size(this.Height, this.Height);
             }
             else
             {
-                btn.Size = this.Size; // Sinon, définir la taille du bouton à la taille du formulaire
+                btn.Size = this.Size;
             }
         }
+
         /// <summary>
-        /// Conversion des couleurs dans différents modes d'encodage
+        /// Convertion des couleurs dans différents mode d'encodage
         /// </summary>
         /// <param name="DataIn">Couleur en format Ole</param>
-        /// <returns>Couleur au format .Net</returns>
+        /// <returns>couleur au format .Net</returns>
         private Color FromOle(string DataIn)
         {
-            // Gestion de la transparence à la Orthodyne
-            if (DataIn == "-1")
+            // Gestion de la transparance à la Orthodyne
+            if (Double.Parse(DataIn) == -1)
             {
                 return Color.Transparent;
             }
             return ColorTranslator.FromOle(int.Parse(DataIn));
         }
+
         /// <summary>
-        /// Conversion des couleurs dans différents modes d'encodage
+        /// Convertion des couleurs dans différents mode d'encodage
         /// </summary>
         /// <param name="DataIn">Couleur en format .Net</param>
-        /// <returns>Couleur au format Ole</returns>
-        private string ToOle(Color DataIn)
+        /// <returns>couleur au format Ole</returns>
+        private string ToOle(Color Datain)
         {
-            if (DataIn == Color.Transparent)
+            if (Datain == Color.Transparent)
             {
-                return "-1";
+                return (-1).ToString();
             }
-            return ColorTranslator.ToOle(DataIn).ToString();
+            return ColorTranslator.ToOle(Datain).ToString();
         }
-        #region("Read/Write on .syn file")
 
-        public OrthoAD ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
+        #region Read/Write on .syn file
+        public object ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
         {
-            FontStyle styleText = FontStyle.Regular;
-            this.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(splitPvirgule[3]));
+            var StyleText = new FontStyle();
+            TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(splitPvirgule[3]));
 
             if (splitPvirgule[9] == "True")
             {
-                styleText |= FontStyle.Strikeout;
+                StyleText |= FontStyle.Strikeout;  // Utilisation de l'opérateur bitwise OR
             }
             if (splitPvirgule[10] == "True")
             {
-                styleText |= FontStyle.Underline;
+                StyleText |= FontStyle.Underline;  // Utilisation de l'opérateur bitwise OR
             }
             if (splitPvirgule[11] == "True")
             {
-                styleText |= FontStyle.Bold;
+                StyleText |= FontStyle.Bold;       // Utilisation de l'opérateur bitwise OR
             }
             if (splitPvirgule[12] == "True")
             {
-                styleText |= FontStyle.Italic;
+                StyleText |= FontStyle.Italic;     // Utilisation de l'opérateur bitwise OR
             }
 
-            this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
-            this.Comment = comment;
-            this.Caption = splitPvirgule[2];
-            this.Format = splitPvirgule[4];
-            this.Font = new Font(splitPvirgule[7], float.Parse(splitPvirgule[8]), styleText);
-            this.Text = splitPvirgule[2];
-            this.BackColor = FromOle(splitPvirgule[5]);
-            this.ForeColor = FromOle(splitPvirgule[6]);
-            this.TypeDesign = (TDesign)Enum.Parse(typeof(TDesign), splitPvirgule[13]); // ⚠️ Peut lever une exception si la valeur est invalide
-            this.BorderWidth = int.Parse(splitPvirgule[14]);
-            this.Size = new Size(int.Parse(splitPvirgule[16]), int.Parse(splitPvirgule[15]));
 
+            this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
+            this.comment = comment;
+            Caption = splitPvirgule[2];
+            Format = splitPvirgule[4];
+            Font = new Font(splitPvirgule[7], int.Parse(splitPvirgule[8]), StyleText);
+            this.Text = splitPvirgule[2];
+            BackColor = FromOle(splitPvirgule[5]);
+            ForeColor = FromOle(splitPvirgule[6]);
+            if (Enum.IsDefined(typeof(TDesign), splitPvirgule[13]))
+            {
+                // Si la valeur est valide, effectuez le casting
+                TypeDesign = (TDesign)Enum.Parse(typeof(TDesign), splitPvirgule[13]);
+            }
+            else
+            {
+                // Si la valeur n'est pas valide, vous pouvez gérer l'erreur ici
+                MessageBox.Show("La valeur pour TypeDesign est invalide.");
+            }
+            BorderWidth = int.Parse(splitPvirgule[14]);
+            this.Size = new Size(int.Parse(splitPvirgule[16]), int.Parse(splitPvirgule[15]));
             if (FromCopy)
             {
-                this.Location = new Point(int.Parse(splitPvirgule[18]) + 10, int.Parse(splitPvirgule[17]) + 10);
+                this.Location = new Point((int)Math.Round(Double.Parse(splitPvirgule[18]) + 10d), (int)Math.Round(Double.Parse(splitPvirgule[17]) + 10d));
             }
             else
             {
                 this.Location = new Point(int.Parse(splitPvirgule[18]), int.Parse(splitPvirgule[17]));
             }
-
-            this.VarText = splitPvirgule[19];
-            this.VarBackColor = splitPvirgule[20];
-            this.VarForeColor = splitPvirgule[21];
-            this.VarValMax = splitPvirgule[22];
-            this.VarTextMax = splitPvirgule[23];
-            this.VarValMin = splitPvirgule[24];
-            this.VarTextMin = splitPvirgule[25];
-            this._VL[7] = splitPvirgule[26];
-            this._VL[8] = splitPvirgule[27];
-            this.ColorOn = FromOle(splitPvirgule[28]);
-            this.ColorOff = FromOle(splitPvirgule[29]);
-            this.ColorErr = FromOle(splitPvirgule[30]);
-            this.LevelVisible = int.Parse(splitPvirgule[31]);
-            this.LevelEnabled = int.Parse(splitPvirgule[32]);
-
+            VarText = splitPvirgule[19];
+            VarBackColor = splitPvirgule[20];
+            VarForeColor = splitPvirgule[21];
+            VarValMax = splitPvirgule[22];
+            VarTextMax = splitPvirgule[23];
+            VarValMin = splitPvirgule[24];
+            VarTextMin = splitPvirgule[25];
+            _VL[7] = splitPvirgule[26];
+            _VL[8] = splitPvirgule[27];
+            ColorOn = FromOle(splitPvirgule[28]);
+            ColorOff = FromOle(splitPvirgule[29]);
+            ColorErr = FromOle(splitPvirgule[30]);
+            LevelVisible = int.Parse(splitPvirgule[31]);
+            LevelEnabled = int.Parse(splitPvirgule[32]);
             if (splitPvirgule.Length >= 34)
             {
-                this.Visibility = splitPvirgule[33];
+                Visibility = splitPvirgule[33];
             }
-
             return this;
         }
+
         public string WriteFile()
         {
-            return "ORTHO;AD;" + this.Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(this.TextAlign).ToString() + ";" + this.Format +
-                ";" + ToOle(this.BackColor).ToString() + ";" + ToOle(this.ForeColor).ToString() + ";" + this.Font.Name.ToString() +
-                ";" + this.Font.Size.ToString() + ";" + this.Font.Strikeout.ToString() +
-                ";" + this.Font.Underline.ToString() + ";" + this.Font.Bold.ToString() + ";" + this.Font.Italic.ToString() +
-                ";" + Convert.ToInt32(this.TypeDesign).ToString() + ";" + this.BorderWidth.ToString() + ";" + this.Size.Height.ToString() +
-                ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() +
-                ";" + this.VarText + ";" + this.VarBackColor + ";" + this.VarForeColor + ";" + this.VarValMax + ";" + this.VarTextMax + ";" + this.VarValMin + ";" + this.VarTextMin + ";" + this._VL[7] + ";" + this._VL[8] + ";" + ToOle(this.ColorOn).ToString() +
-                ";" + ToOle(this.ColorOff).ToString() + ";" + ToOle(this.ColorErr).ToString() + ";" + this.LevelVisible.ToString() +
-                ";" + this.LevelEnabled.ToString() + ";" + this.Visibility;
+            return "ORTHO;AD;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Format + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + VarText + ";" + VarBackColor + ";" + VarForeColor + ";" + VarValMax + ";" + VarTextMax + ";" + VarValMin + ";" + VarTextMin + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
         }
         public string WriteFileXML()
         {
@@ -238,31 +243,56 @@ namespace StageCode.LIB
 
         #endregion
 
-        #region "Label Properties"
-        [Category("Apparence"), Description("Détermine la position du texte dans ce contrôle")]
+        #region Label Properties
+        [Category("Apparence")]
+        [Description("Détermine la potition du texte dans ce contrôle")]
         public ContentAlignment TextAlign
         {
-            get { return btn.TextAlign; }
-            set { btn.TextAlign = value; }
+            get
+            {
+                return btn.TextAlign;
+            }
+            set
+            {
+                btn.TextAlign = value;
+            }
         }
-
-        [Category("Apparence"), ShowOnProtectedMode(), Description("La couleur d'arrière plan du contrôle.")]
-        public override Font Font
+        [Category("Apparence")]
+        [ShowOnProtectedMode()]
+        [Description("La couleur d'arrière plan du contrôle.")]
+        public Font Font
         {
-            get { return btn.Font; }
-            set { btn.Font = value; }
+            get
+            {
+                return btn.Font;
+            }
+            set
+            {
+                btn.Font = value;
+            }
         }
-
-        [Category("Apparence"), Description("La couleur d'arrière plan du contrôle.")]
-        public override Color ForeColor
+        [Category("Apparence")]
+        [Description("La couleur d'arrière plan du contrôle.")]
+        public Color ForeColor
         {
-            get { return btn.ForeColor; }
-            set { btn.ForeColor = value; }
+            get
+            {
+                return btn.ForeColor;
+            }
+            set
+            {
+                btn.ForeColor = value;
+            }
         }
-
+        [Category("Apparence")]
+        [Description("Texte du label")]
+        [ShowOnProtectedMode()]
         public string Caption
         {
-            get { return _captionValues; }
+            get
+            {
+                return _captionValues;
+            }
             set
             {
                 _captionValues = value;
@@ -270,11 +300,708 @@ namespace StageCode.LIB
             }
         }
 
+        public Color BackColor
+        {
+            get
+            {
+                return btn.BackColor;
+            }
+            set
+            {
+                btn.BackColor = value;
+            }
+        }
+
+        #endregion
+
+        #region Orthodyne Properties
+        [Category("Not assigned")]
+        [Description("Variable interne non utilisé actuellement")]
+        public string VarLink8
+        {
+            get
+            {
+                return _VL[7];
+            }
+            set
+            {
+                _VL[7] = value;
+            }
+        }
+        [Category("Not assigned")]
+        [Description("Variable interne non utilisé actuellement")]
+        public string VarLink9
+        {
+            get
+            {
+                return _VL[8];
+            }
+            set
+            {
+                _VL[8] = value;
+            }
+        }
+        [Category("Affichage conditionnel")]
+        [ShowOnProtectedMode()]
+        [Description("Var ou valeur qui définit la valeur maximum.")]
+        public string VarValMax
+        {
+            get
+            {
+                return _VarValMax;
+            }
+            set
+            {
+                _VarValMax = value;
+            }
+        }
+        [Category("Affichage conditionnel")]
+        [ShowOnProtectedMode()]
+        [Description("Texte/Var affiché si la valeur est plus grande ou égale que la valeur de référence définie dans VarValMax")]
+        public string VarTextMax
+        {
+            get
+            {
+                return _VarTextMax;
+            }
+            set
+            {
+                _VarTextMax = value;
+            }
+        }
+        [Category("Affichage conditionnel")]
+        [ShowOnProtectedMode()]
+        [Description("Texte/Var affiché si la valeur est plus petite que la valeur de référence définie dans VarValMin")]
+        public string VarTextMin
+        {
+            get
+            {
+                return _VarTextMin;
+            }
+            set
+            {
+                _VarTextMin = value;
+            }
+        }
+        [Category("Affichage conditionnel")]
+        [ShowOnProtectedMode()]
+        [Description("Var ou valeur qui définit la valeur minimum.")]
+        public string VarValMin
+        {
+            get
+            {
+                return _VarValMin;
+            }
+            set
+            {
+                _VarValMin = value;
+            }
+        }
+        [Category("Apparence")]
+        [Description("Taille de la bordure du contrôle")]
+        public int BorderWidth
+        {
+            get
+            {
+                return _BorderW;
+            }
+            set
+            {
+                _BorderW = value;
+            }
+        }
+        [Category("Orthodyne")]
+        [Browsable(false)]
+        [Description("Commentaire sur l'objet")]
+        public string comment
+        {
+            get
+            {
+                return _comment;
+            }
+            set
+            {
+                _comment = value;
+            }
+        }
+        [Category("Orthodyne")]
+        [Description("Indique la précision requise")]
+        [DefaultValue("")]
+        public string Format
+        {
+            get
+            {
+                return _Format;
+            }
+            set
+            {
+                _Format = value;
+            }
+        }
+        [Category("Orthodyne")]
+        [Description("Indique quel type de design utiliser")]
+        public TDesign TypeDesign
+        {
+            get
+            {
+                return _TypeDesign;
+            }
+            set
+            {
+                _TypeDesign = value;
+                switch (value)
+                {
+                    case var @case when @case == TDesign.Bouton:
+                        {
+                            btn.Shape = CButton.eShape.Rectangle;
+                            btn.Corners.All = 0;
+                            break;
+                        }
+                    case var case1 when case1 == TDesign.Arrondi:
+                        {
+                            btn.Shape = CButton.eShape.Rectangle;
+                            btn.Corners.All = 6;
+                            break;
+                        }
+                    case var case2 when case2 == TDesign.Rectangle:
+                        {
+                            btn.Shape = CButton.eShape.Rectangle;
+                            btn.Corners.All = 0;
+                            break;
+                        }
+                    case var case3 when case3 == TDesign.Cercle:
+                        {
+                            btn.Shape = CButton.eShape.Ellipse;
+                            btn.Size = new Size(this.Height, this.Height);
+                            this.Size = btn.Size;
+                            break;
+                        }
+                }
+            }
+        }
+        [Category("Orthodyne")]
+        [Description("Niveau minimum pour rendre l'objet visible (si 0, toujours visible)")]
+        public int LevelVisible
+        {
+            get
+            {
+                return _LevelVisible;
+            }
+            set
+            {
+                _LevelVisible = value;
+            }
+        }
+        [Category("Orthodyne")]
+        [Description("Niveau minimum pour rendre l'objet accessible (si 0, toujours accessible)")]
+        public int LevelEnabled
+        {
+            get
+            {
+                return _LevelEnabled;
+            }
+            set
+            {
+                _LevelEnabled = value;
+            }
+        }
+        [Category("Orthodyne")]
+        [Description("Couleur lorsque actif")]
+        public Color ColorOn
+        {
+            get
+            {
+                return _ColorOn;
+            }
+            set
+            {
+                _ColorOn = value;
+            }
+        }
+        [Category("Orthodyne")]
+        [Description("Couleur lorsque non actif")]
+        public Color ColorOff
+        {
+            get
+            {
+                return _ColorOff;
+            }
+            set
+            {
+                _ColorOff = value;
+            }
+        }
+        [Category("Orthodyne")]
+        [Description("Couleur lorsque en erreur")]
+        public Color ColorErr
+        {
+            get
+            {
+                return _ColorErr;
+            }
+            set
+            {
+                _ColorErr = value;
+            }
+        }
+        [Category("Texte")]
+        [Description("Nom de la variable qui donne le texte.")]
+        public string VarText
+        {
+            get
+            {
+                return _VarText;
+            }
+            set
+            {
+                _VarText = value;
+            }
+        }
+        [Category("Texte")]
+        [Description("Nom de la variable qui donne la couleur d'arrière plan.")]
+        public string VarBackColor
+        {
+            get
+            {
+                return _VarBackColor;
+            }
+            set
+            {
+                _VarBackColor = value;
+            }
+        }
+        [Category("Texte")]
+        [Description("Nom de la variable qui donne la couleur du texte.")]
+        public string VarForeColor
+        {
+            get
+            {
+                return _VarForeColor;
+            }
+            set
+            {
+                _VarForeColor = value;
+            }
+        }
+
+        [Category("Orthodyne")]
+        [Description("If 0 or will be hidden, if #VarName will depend on variable value")]
+        public string Visibility
+        {
+            get
+            {
+                return _visibility;
+            }
+            set
+            {
+
+                VisibilityChanging?.Invoke(this, EventArgs.Empty);
+                if (string.IsNullOrEmpty(value))
+                    _visibility = "1";
+                else
+                    _visibility = value;
+                VisibilityChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+        #endregion
+
+        #region Hiding useless Properties
+        [Browsable(false)]
+        public AccessibleRole AccessibleRole
+        {
+            get
+            {
+                return base.AccessibleRole;
+            }
+            set
+            {
+                base.AccessibleRole = value;
+            }
+        }
+        [Browsable(false)]
+        public string AccessibleDescription
+        {
+            get
+            {
+                return base.AccessibleDescription;
+            }
+            set
+            {
+                base.AccessibleDescription = value;
+            }
+        }
+        [Browsable(false)]
+        public string AccessibleName
+        {
+            get
+            {
+                return base.AccessibleName;
+            }
+            set
+            {
+                base.AccessibleName = value;
+            }
+        }
+        [Browsable(false)]
+        public Image BackgroundImage
+        {
+            get
+            {
+                return base.BackgroundImage;
+            }
+            set
+            {
+                base.BackgroundImage = value;
+            }
+        }
+        [Browsable(false)]
+        public ImageLayout BackgroundImageLayout
+        {
+            get
+            {
+                return base.BackgroundImageLayout;
+            }
+            set
+            {
+                base.BackgroundImageLayout = value;
+            }
+        }
+        [Browsable(false)]
+        public BorderStyle BorderStyle
+        {
+            get
+            {
+                return base.BorderStyle;
+            }
+            set
+            {
+                base.BorderStyle = value;
+            }
+        }
+        [Browsable(false)]
+        public Cursor Cursor
+        {
+            get
+            {
+                return base.Cursor;
+            }
+            set
+            {
+                base.Cursor = value;
+            }
+        }
+        [Browsable(false)]
+        public RightToLeft RightToLeft
+        {
+            get
+            {
+                return base.RightToLeft;
+            }
+            set
+            {
+                base.RightToLeft = value;
+            }
+        }
+        [Browsable(false)]
+        public bool UseWaitCursor
+        {
+            get
+            {
+                return base.UseWaitCursor;
+            }
+            set
+            {
+                base.UseWaitCursor = value;
+            }
+        }
+        [Browsable(false)]
+        public bool AllowDrop
+        {
+            get
+            {
+                return base.AllowDrop;
+            }
+            set
+            {
+                base.AllowDrop = value;
+            }
+        }
+        [Browsable(false)]
+        public AutoValidate AutoValidate
+        {
+            get
+            {
+                return base.AutoValidate;
+            }
+            set
+            {
+                base.AutoValidate = value;
+            }
+        }
+        [Browsable(false)]
+        public ContextMenuStrip ContextMenuStrip
+        {
+            get
+            {
+                return base.ContextMenuStrip;
+            }
+            set
+            {
+                base.ContextMenuStrip = value;
+            }
+        }
+        [Browsable(false)]
+        public bool Enabled
+        {
+            get
+            {
+                return base.Enabled;
+            }
+            set
+            {
+                base.Enabled = value;
+            }
+        }
+        [Browsable(false)]
+        public ImeMode ImeMode
+        {
+            get
+            {
+                return base.ImeMode;
+            }
+            set
+            {
+                base.ImeMode = value;
+            }
+        }
+        [Browsable(false)]
+        public int TabIndex
+        {
+            get
+            {
+                return base.TabIndex;
+            }
+            set
+            {
+                base.TabIndex = value;
+            }
+        }
+        [Browsable(false)]
+        public bool TabStop
+        {
+            get
+            {
+                return base.TabStop;
+            }
+            set
+            {
+                base.TabStop = value;
+            }
+        }
+        [Browsable(false)]
+        public bool Visible
+        {
+            get
+            {
+                return base.Visible;
+            }
+            set
+            {
+                base.Visible = value;
+            }
+        }
+        [Browsable(false)]
+        public AnchorStyles Anchor
+        {
+            get
+            {
+                return base.Anchor;
+            }
+            set
+            {
+                base.Anchor = value;
+            }
+        }
+        [Browsable(false)]
+        public bool AutoScroll
+        {
+            get
+            {
+                return base.AutoScroll;
+            }
+            set
+            {
+                base.AutoScroll = value;
+            }
+        }
+        [Browsable(false)]
+        public Size AutoScrollMargin
+        {
+            get
+            {
+                return base.AutoScrollMargin;
+            }
+            set
+            {
+                base.AutoScrollMargin = value;
+            }
+        }
+        [Browsable(false)]
+        public Size AutoScrollMinSize
+        {
+            get
+            {
+                return base.AutoScrollMinSize;
+            }
+            set
+            {
+                base.AutoScrollMinSize = value;
+            }
+        }
+        [Browsable(false)]
+        public bool AutoSize
+        {
+            get
+            {
+                return base.AutoSize;
+            }
+            set
+            {
+                base.AutoSize = value;
+            }
+        }
+        [Browsable(false)]
+        public AutoSizeMode AutoSizeMode
+        {
+            get
+            {
+                return base.AutoSizeMode;
+            }
+            set
+            {
+                base.AutoSizeMode = value;
+            }
+        }
+        [Browsable(false)]
+        public DockStyle Dock
+        {
+            get
+            {
+                return base.Dock;
+            }
+            set
+            {
+                base.Dock = value;
+            }
+        }
+        [Browsable(false)]
+        public Padding Margin
+        {
+            get
+            {
+                return base.Margin;
+            }
+            set
+            {
+                base.Margin = value;
+            }
+        }
+        [Browsable(false)]
+        public Size MaximumSize
+        {
+            get
+            {
+                return base.MaximumSize;
+            }
+            set
+            {
+                base.MaximumSize = value;
+            }
+        }
+        [Browsable(false)]
+        public Size MinimumSize
+        {
+            get
+            {
+                return base.MinimumSize;
+            }
+            set
+            {
+                base.MinimumSize = value;
+            }
+        }
+        [Browsable(false)]
+        public Padding Padding
+        {
+            get
+            {
+                return base.Padding;
+            }
+            set
+            {
+                base.Padding = value;
+            }
+        }
+        [Browsable(false)]
+        public ControlBindingsCollection DataBindings
+        {
+            get
+            {
+                return base.DataBindings;
+            }
+        }
+        [Browsable(false)]
+        public object Tag
+        {
+            get
+            {
+                return base.Tag;
+            }
+            set
+            {
+                base.Tag = value;
+            }
+        }
+        [Browsable(false)]
+        public bool CausesValidation
+        {
+            get
+            {
+                return base.CausesValidation;
+            }
+            set
+            {
+                base.CausesValidation = value;
+            }
+        }
+        #endregion
+
+        public string Type
+        {
+            get
+            {
+                return "ORTHO";
+            }
+        }
+
+        public string SType
+        {
+            get
+            {
+                return "AD";
+            }
+        }
+
+        public Type GType()
+        {
+            return GetType();
+        }
+
         private void LanguageChangedEventHandler(AvailableLanguage NewLanguage)
         {
             if (_captionValues.Contains("|"))
             {
-                string[] str = _captionValues.Split('|');
+                string[] str = _captionValues.Split("|");
                 int idx = Convert.ToInt32(NewLanguage.LanguageID);
                 if (str.Length > idx)
                 {
@@ -291,330 +1018,6 @@ namespace StageCode.LIB
             }
         }
 
-
-        public override Color BackColor
-        {
-            get { return btn.BackColor; }
-            set { btn.BackColor = value; }
-        }
-        #endregion
-
-        #region "Orthodyne Properties"
-        [Category("Not assigned"), Description("Variable interne non utilisé actuellement")]
-        public string VarLink8
-        {
-            get { return _VL[7]; }
-            set { _VL[7] = value; }
-        }
-
-        [Category("Not assigned"), Description("Variable interne non utilisé actuellement")]
-        public string VarLink9
-        {
-            get { return _VL[8]; }
-            set { _VL[8] = value; }
-        }
-
-        [Category("Affichage conditionnel"), ShowOnProtectedMode(), Description("Var ou valeur qui définit la valeur maximum.")]
-        public string VarValMax
-        {
-            get { return _VarValMax; }
-            set { _VarValMax = value; }
-        }
-
-        public string VarTextMax
-        {
-            get { return _VarTextMax; }
-            set { _VarTextMax = value; }
-        }
-
-        public string VarTextMin
-        {
-            get { return _VarTextMin; }
-            set { _VarTextMin = value; }
-        }
-
-        [Category("Affichage conditionnel"), ShowOnProtectedMode(), Description("Var ou valeur qui définit la valeur minimum.")]
-        public string VarValMin
-        {
-            get { return _VarValMin; }
-            set { _VarValMin = value; }
-        }
-
-        [Category("Apparence"), Description("Taille de la bordure du contrôle")]
-        public int BorderWidth
-        {
-            get { return _BorderW; }
-            set { _BorderW = value; }
-        }
-
-        [Category("Orthodyne"), Browsable(false), Description("Commentaire sur l'objet")]
-        public string Comment
-        {
-            get { return _comment; }
-            set { _comment = value; }
-        }
-
-        public string Format
-        {
-            get { return _Format; }
-            set { _Format = value; }
-        }
-
-        [Category("Orthodyne"), Description("Indique quel type de design utiliser")]
-        public TDesign TypeDesign
-        {
-            get { return _TypeDesign; }
-            set
-            {
-                _TypeDesign = value;
-                switch (value)
-                {
-                    case TDesign.Bouton:
-                        btn.Shape = CButton.eShape.Rectangle;
-                        btn.Corners.All = 0;
-                        break;
-                    case TDesign.Arrondi:
-                        btn.Shape = CButton.eShape.Rectangle;
-                        btn.Corners.All = 6;
-                        break;
-                    case TDesign.Rectangle:
-                        btn.Shape = CButton.eShape.Rectangle;
-                        btn.Corners.All = 0;
-                        break;
-                    case TDesign.Cercle:
-                        btn.Shape = CButton.eShape.Ellipse;
-                        btn.Size = new Size(this.Height, this.Height);
-                        this.Size = btn.Size;
-                        break;
-                }
-            }
-        }
-
-        [Category("Orthodyne"), Description("Niveau minimum pour rendre l'objet visible (si 0, toujours visible)")]
-        public int LevelVisible
-        {
-            get { return _LevelVisible; }
-            set { _LevelVisible = value; }
-        }
-
-        [Category("Orthodyne"), Description("Niveau minimum pour rendre l'objet accessible (si 0, toujours accessible)")]
-        public int LevelEnabled
-        {
-            get { return _LevelEnabled; }
-            set { _LevelEnabled = value; }
-        }
-
-        [Category("Orthodyne"), Description("Couleur lorsque actif")]
-        public Color ColorOn
-        {
-            get { return _ColorOn; }
-            set { _ColorOn = value; }
-        }
-
-        [Category("Orthodyne"), Description("Couleur lorsque non actif")]
-        public Color ColorOff
-        {
-            get { return _ColorOff; }
-            set { _ColorOff = value; }
-        }
-
-        [Category("Orthodyne"), Description("Couleur lorsque en erreur")]
-        public Color ColorErr
-        {
-            get { return _ColorErr; }
-            set { _ColorErr = value; }
-        }
-
-        [Category("Texte"), Description("Nom de la variable qui donne le texte.")]
-        public string VarText
-        {
-            get { return _VarText; }
-            set { _VarText = value; }
-        }
-
-        [Category("Texte"), Description("Nom de la variable qui donne la couleur d'arrière plan.")]
-        public string VarBackColor
-        {
-            get { return _VarBackColor; }
-            set { _VarBackColor = value; }
-        }
-
-        [Category("Texte"), Description("Nom de la variable qui donne la couleur du texte.")]
-        public string VarForeColor
-        {
-            get { return _VarForeColor; }
-            set { _VarForeColor = value; }
-        }
-
-        [Category("Orthodyne")]
-        [Description("If 0 or will be hidden, if #VarName will depend on variable value")]
-        public string Visibility
-        {
-            get { return _visibility; }
-            set
-            {
-                VisibilityChanging?.Invoke(this, EventArgs.Empty);
-
-                // Set the new value of _visibility
-                _visibility = string.IsNullOrEmpty(value) ? "1" : value;
-
-                // Raise the VisibilityChanged event
-                VisibilityChanged?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
-        #endregion
-
-        #region "Hiding useless Properties"
-        [Browsable(false)]
-        public AccessibleRole AccessibleRole
-        {
-            get { return base.AccessibleRole; }
-            set { base.AccessibleRole = value; }
-        }
-
-        [Browsable(false)]
-        public string AccessibleDescription
-        {
-            get { return AccessibleDescription; }
-            set { base.AccessibleDescription = value; }
-        }
-
-        [Browsable(false)]
-        public string AccessibleName
-        {
-            get { return AccessibleName; }
-            set { AccessibleName = value; }
-        }
-
-        [Browsable(false)]
-        public override Image BackgroundImage
-        {
-            get { return BackgroundImage; }
-            set { BackgroundImage = value; }
-        }
-
-        [Browsable(false)]
-        public override ImageLayout BackgroundImageLayout
-        {
-            get { return BackgroundImageLayout; }
-            set { BackgroundImageLayout = value; }
-        }
-
-        [Browsable(false)]
-        public BorderStyle BorderStyle
-        {
-            get { return BorderStyle; }
-            set { BorderStyle = value; }
-        }
-
-
-        [Browsable(false)]
-        public override Cursor Cursor
-        {
-            get { return Cursor; }
-            set { Cursor = value; }
-        }
-
-        [Browsable(false)]
-        public override RightToLeft RightToLeft
-        {
-            get { return RightToLeft; }
-            set { RightToLeft = value; }
-        }
-
-        [Browsable(false)]
-        public override bool AllowDrop
-        {
-            get { return AllowDrop; }
-            set { base.AllowDrop = value; }
-        }
-
-        [Browsable(false)]
-        public override AutoValidate AutoValidate
-        {
-            get { return base.AutoValidate; }
-            set { base.AutoValidate = value; }
-        }
-
-        [Browsable(false)]
-        public override ContextMenuStrip ContextMenuStrip
-        {
-            get { return ContextMenuStrip; }
-            set { base.ContextMenuStrip = value; }
-        }
-
-        [Browsable(false)]
-        public bool Enabled
-        {
-            get { return base.Enabled; }
-            set { base.Enabled = value; }
-        }
-
-
-        [Browsable(false)]
-        public ImeMode ImeMode
-        {
-            get { return base.ImeMode; }
-            set { base.ImeMode = value; }
-        }
-
-        [Browsable(false)]
-        public int TabIndex
-        {
-            get { return base.TabIndex; }
-            set { base.TabIndex = value; }
-        }
-
-        [Browsable(false)]
-        public bool TabStop
-        {
-            get { return base.TabStop; }
-            set { base.TabStop = value; }
-        }
-
-        [Browsable(false)]
-        public bool Visible
-        {
-            get { return base.Visible; }
-            set { base.Visible = value; }
-        }
-
-        [Browsable(false)]
-        public override AnchorStyles Anchor
-        {
-            get { return base.Anchor; }
-            set { base.Anchor = value; }
-        }
-
-        [Browsable(false)]
-        public override bool AutoScroll
-        {
-            get { return base.AutoScroll; }
-            set { base.AutoScroll = value; }
-        }
-
-        [Browsable(false)]
-        public Size AutoScrollMargin
-        {
-            get { return base.AutoScrollMargin; }
-            set { base.AutoScrollMargin = value; }
-        }
-
-        [Browsable(false)]
-        public Size AutoScrollMinSize
-        {
-            get { return base.AutoScrollMinSize; }
-            set { base.AutoScrollMinSize = value; }
-        }
-
-        [Browsable(false)]
-        public override string Text
-        {
-            get { return base.Text; }
-            set { base.Text = value; }
-        }
-        #endregion
     }
 
     [AttributeUsage(AttributeTargets.Property)]
@@ -622,3 +1025,5 @@ namespace StageCode.LIB
     {
     }
 }
+
+
