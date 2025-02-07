@@ -36,7 +36,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
             Name = "OrthoAD";
-            Size = new Size(800, 450);
             Load += OrthoAD_Load;
             ResumeLayout(false);
         }

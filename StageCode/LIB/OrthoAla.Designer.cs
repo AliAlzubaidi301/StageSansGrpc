@@ -36,7 +36,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
             Name = "OrthoAla";
-            Size = new Size(800, 450);
             Load += OrthoAla_Load;
             ResumeLayout(false);
         }

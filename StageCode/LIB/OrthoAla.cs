@@ -232,6 +232,7 @@ namespace StageCode.LIB
             return this;
         }
 
+
         public string WriteFileXML()
         {
             var xmlContent = new StringBuilder();

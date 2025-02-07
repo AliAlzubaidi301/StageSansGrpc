@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Drawing.Design;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using static StageCode.Other.Langs;
 
 namespace StageCode.LIB
@@ -115,82 +116,95 @@ namespace StageCode.LIB
         }
 
         #region Read/Write on .syn file
-        public object ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
+        public static OrthoAD ReadFileXML(string xmlText)
         {
-            var StyleText = new FontStyle();
-            TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(splitPvirgule[3]));
+            XElement xml = XElement.Parse(xmlText);
+            OrthoAD OrthoADControl = new OrthoAD();
 
-            if (splitPvirgule[9] == "True")
+            // Récupérer l'attribut 'type' et 'name' du composant
+            string? type = xml.Attribute("type")?.Value;
+            OrthoADControl.Name = xml.Attribute("name")?.Value;
+
+            // Parse the <Apparence> section
+            XElement? appearance = xml.Element("Apparence");
+            if (appearance != null)
             {
-                StyleText |= FontStyle.Strikeout;  // Utilisation de l'opérateur bitwise OR
-            }
-            if (splitPvirgule[10] == "True")
-            {
-                StyleText |= FontStyle.Underline;  // Utilisation de l'opérateur bitwise OR
-            }
-            if (splitPvirgule[11] == "True")
-            {
-                StyleText |= FontStyle.Bold;       // Utilisation de l'opérateur bitwise OR
-            }
-            if (splitPvirgule[12] == "True")
-            {
-                StyleText |= FontStyle.Italic;     // Utilisation de l'opérateur bitwise OR
+                // Récupérer tous les attributs de la section Apparence
+                OrthoADControl.Caption = appearance.Element("Caption")?.Value ?? string.Empty;
+                OrthoADControl.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(appearance.Element("TextAlign")?.Value ?? "0"));
+                OrthoADControl.Format = appearance.Element("Format")?.Value ?? string.Empty;
+
+                // Récupérer les couleurs
+                OrthoADControl.BackColor = FromOlInve(appearance.Element("BackColor")?.Value);
+                OrthoADControl.ForeColor = FromOlInve(appearance.Element("ForeColor")?.Value);
+
+                // Récupérer les propriétés de la police
+                string fontName = appearance.Element("FontName")?.Value ?? "Arial";
+                float fontSize = float.Parse(appearance.Element("FontSize")?.Value ?? "12");
+                FontStyle fontStyle = FontStyle.Regular;
+
+                if (appearance.Element("FontStrikeout")?.Value == "True") fontStyle |= FontStyle.Strikeout;
+                if (appearance.Element("FontUnderline")?.Value == "True") fontStyle |= FontStyle.Underline;
+                if (appearance.Element("FontBold")?.Value == "True") fontStyle |= FontStyle.Bold;
+                if (appearance.Element("FontItalic")?.Value == "True") fontStyle |= FontStyle.Italic;
+
+                OrthoADControl.Font = new Font(fontName, fontSize, fontStyle);
+
+                // Récupérer les informations de type de design
+                var typeDesignValue = appearance.Element("TypeDesign")?.Value;
+                if (Enum.IsDefined(typeof(TDesign), typeDesignValue))
+                {
+                    OrthoADControl.TypeDesign = (TDesign)Enum.Parse(typeof(TDesign), typeDesignValue);
+                }
+
+                // Récupérer les dimensions et position
+                OrthoADControl.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "0");
+                OrthoADControl.Size = new Size(
+                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+                );
+                OrthoADControl.Location = new Point(
+                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+                );
+
+                // Variables additionnelles
+                OrthoADControl.VarText = appearance.Element("VarText")?.Value ?? string.Empty;
+                OrthoADControl.VarBackColor = appearance.Element("VarBackColor")?.Value ?? string.Empty;
+                OrthoADControl.VarForeColor = appearance.Element("VarForeColor")?.Value ?? string.Empty;
+                OrthoADControl.VarValMax = appearance.Element("VarValMax")?.Value ?? string.Empty;
+                OrthoADControl.VarTextMax = appearance.Element("VarTextMax")?.Value ?? string.Empty;
+                OrthoADControl.VarValMin = appearance.Element("VarValMin")?.Value ?? string.Empty;
+                OrthoADControl.VarTextMin = appearance.Element("VarTextMin")?.Value ?? string.Empty;
+
+                // Récupérer les valeurs VL7 et VL8
+                OrthoADControl._VL[7] = appearance.Element("VL7")?.Value ?? string.Empty;
+                OrthoADControl._VL[8] = appearance.Element("VL8")?.Value ?? string.Empty;
+
+                // Récupérer les couleurs d'état
+                OrthoADControl.ColorOn = FromOlInve(appearance.Element("ColorOn")?.Value);
+                OrthoADControl.ColorOff = FromOlInve(appearance.Element("ColorOff")?.Value);
+                OrthoADControl.ColorErr = FromOlInve(appearance.Element("ColorErr")?.Value);
+
+                // Récupérer les niveaux de visibilité et d'activation
+                OrthoADControl.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
+                OrthoADControl.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
+
+                // Récupérer la visibilité
+                OrthoADControl.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";
             }
 
-
-            this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
-            this.comment = comment;
-            Caption = splitPvirgule[2];
-            Format = splitPvirgule[4];
-            Font = new Font(splitPvirgule[7], int.Parse(splitPvirgule[8]), StyleText);
-            this.Text = splitPvirgule[2];
-            BackColor = FromOle(splitPvirgule[5]);
-            ForeColor = FromOle(splitPvirgule[6]);
-            if (Enum.IsDefined(typeof(TDesign), splitPvirgule[13]))
-            {
-                // Si la valeur est valide, effectuez le casting
-                TypeDesign = (TDesign)Enum.Parse(typeof(TDesign), splitPvirgule[13]);
-            }
-            else
-            {
-                // Si la valeur n'est pas valide, vous pouvez gérer l'erreur ici
-                MessageBox.Show("La valeur pour TypeDesign est invalide.");
-            }
-            BorderWidth = int.Parse(splitPvirgule[14]);
-            this.Size = new Size(int.Parse(splitPvirgule[16]), int.Parse(splitPvirgule[15]));
-            if (FromCopy)
-            {
-                this.Location = new Point((int)Math.Round(Double.Parse(splitPvirgule[18]) + 10d), (int)Math.Round(Double.Parse(splitPvirgule[17]) + 10d));
-            }
-            else
-            {
-                this.Location = new Point(int.Parse(splitPvirgule[18]), int.Parse(splitPvirgule[17]));
-            }
-            VarText = splitPvirgule[19];
-            VarBackColor = splitPvirgule[20];
-            VarForeColor = splitPvirgule[21];
-            VarValMax = splitPvirgule[22];
-            VarTextMax = splitPvirgule[23];
-            VarValMin = splitPvirgule[24];
-            VarTextMin = splitPvirgule[25];
-            _VL[7] = splitPvirgule[26];
-            _VL[8] = splitPvirgule[27];
-            ColorOn = FromOle(splitPvirgule[28]);
-            ColorOff = FromOle(splitPvirgule[29]);
-            ColorErr = FromOle(splitPvirgule[30]);
-            LevelVisible = int.Parse(splitPvirgule[31]);
-            LevelEnabled = int.Parse(splitPvirgule[32]);
-            if (splitPvirgule.Length >= 34)
-            {
-                Visibility = splitPvirgule[33];
-            }
-            return this;
+            return OrthoADControl;
         }
 
-        public string WriteFile()
+        private static Color FromOlInve(string oleColor)
         {
-            return "ORTHO;AD;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Format + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + VarText + ";" + VarBackColor + ";" + VarForeColor + ";" + VarValMax + ";" + VarTextMax + ";" + VarValMin + ";" + VarTextMin + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+            // Implémentation pour convertir une couleur Ole en couleur .NET
+            if (string.IsNullOrEmpty(oleColor)) return Color.Transparent;
+            return ColorTranslator.FromHtml(oleColor);  // On suppose que les couleurs sont au format hexadécimal
         }
+
+
         public string WriteFileXML()
         {
             var xmlContent = new StringBuilder();
@@ -240,6 +254,12 @@ namespace StageCode.LIB
             // Retourner le contenu XML généré
             return xmlContent.ToString();
         }
+
+        public string WriteFile()
+        {
+            return "ORTHO;AD;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Format + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + VarText + ";" + VarBackColor + ";" + VarForeColor + ";" + VarValMax + ";" + VarTextMax + ";" + VarValMin + ";" + VarTextMin + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+        }
+
 
         #endregion
 

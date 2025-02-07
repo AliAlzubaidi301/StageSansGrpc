@@ -51,6 +51,41 @@ namespace StageCode
             }
             return this;
         }
+        public static INTEG ReadFileXML(string xmlText)
+        {
+            XElement xml = XElement.Parse(xmlText);
+
+            // Création de l'objet INTEG
+            INTEG integControl = new INTEG();
+
+            // Récupérer les attributs du composant
+            integControl.Name = xml.Attribute("name")?.Value;
+
+            // Récupérer la section <Apparence>
+            XElement? appearance = xml.Element("Apparence");
+            if (appearance != null)
+            {
+                // Extraire et assigner les propriétés de l'Apparence
+                integControl.Size = new Size(
+                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),   // Valeur par défaut 100 si manquante
+                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")  // Valeur par défaut 100 si manquante
+                );
+
+                integControl.Location = new Point(
+                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),   // Valeur par défaut 0 si manquante
+                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")    // Valeur par défaut 0 si manquante
+                );
+
+                integControl.Detecteur = appearance.Element("Detecteur")?.Value ?? ""; // Valeur par défaut vide
+                integControl.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");  // Valeur par défaut 0
+                integControl.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");  // Valeur par défaut 0
+                integControl.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";  // Valeur par défaut "Visible"
+            }
+
+            // Retourner l'objet INTEG avec les valeurs lues du XML
+            return integControl;
+        }
+
         public string WriteFile()
         {
             return "INTEG;" + this.Name + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() +

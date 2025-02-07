@@ -11,6 +11,7 @@ using Microsoft.VisualBasic;
 using System.Windows.Forms;
 using StageCode.Other;
 using System;
+using OrthoDesigner;
 
 namespace StageCode
 {
@@ -309,12 +310,12 @@ namespace StageCode
         public void ExportFormToTXT()
         {
             // Créer un StringBuilder pour accumuler le texte de tous les contrôles
-           
+
 
             // Appeler la méthode SaveAs pour accumuler tous les contrôles dans xmlContent
             StringBuilder accumulatedText = SaveAsTXT(); // Récupère le texte accumulé des contrôles
 
-            
+
 
             // Ouvrir un SaveFileDialog pour choisir l'emplacement et le nom du fichier .syn
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
@@ -787,7 +788,7 @@ namespace StageCode
                 MessageBox.Show(a);
                 RecupererContenuXML(a);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
@@ -851,7 +852,7 @@ namespace StageCode
                             // Ajouter le contrôle AM60 à la PictureBox
                             frame.Controls.Add(am60Control);
 
-                            am60Control.Click+= NewControl_Click;
+                            am60Control.Click += NewControl_Click;
                             am60Control.MouseEnter += NewControl_MouseEnter;
 
                             // Ajouter la PictureBox au conteneur principal
@@ -896,6 +897,83 @@ namespace StageCode
                             pnlViewHost.Controls.Add(frame);
                         }
                     }
+                    else if (type == "INTEG")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet INTEG
+                        INTEG integControl = INTEG.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle INTEG
+                            integControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox frame = new PictureBox
+                            {
+                                Size = new Size(integControl.Size.Width + 10, integControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            // Ajouter le contrôle INTEG à la PictureBox
+                            frame.Controls.Add(integControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet INTEG si nécessaire
+                            integControl.MouseEnter += NewControl_MouseEnter;
+                            frame.MouseLeave += Frame_MouseLeave;
+
+                            integControl.Click += NewControl_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            pnlViewHost.Controls.Add(frame);
+                        }
+                    }
+                    else if (type == "OrthoAD")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAD
+                        OrthoAD orthoADControl = OrthoAD.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAD
+                            orthoADControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox frame = new PictureBox
+                            {
+                                Size = new Size(orthoADControl.Size.Width + 10, orthoADControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            // Ajouter le contrôle OrthoAD à la PictureBox
+                            frame.Controls.Add(orthoADControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAD si nécessaire
+                            orthoADControl.MouseEnter += NewControl_MouseEnter;
+                            frame.MouseLeave += Frame_MouseLeave;
+
+                            orthoADControl.Click += NewControl_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            pnlViewHost.Controls.Add(frame);
+                        }
+                    }
+
                 }
             }
             catch (Exception ex)
@@ -1595,7 +1673,7 @@ namespace StageCode
 
                 frame.MouseLeave += Frame_MouseLeave;
 
-               // frame.Bufer
+                // frame.Bufer
                 // Ajouter la PictureBox au conteneur principal
                 pnlViewHost.Controls.Add(frame);
 
@@ -1609,7 +1687,7 @@ namespace StageCode
         private void Frame_MouseLeave(object? sender, EventArgs e)
         {
             PictureBox? p = sender as PictureBox;
-            foreach(Control ctrl in p.Controls)
+            foreach (Control ctrl in p.Controls)
             {
                 p.Size = ctrl.Size;
 
@@ -1617,7 +1695,7 @@ namespace StageCode
                 p.Height += 10;
             }
 
-            p.Paint-= Frame_Paint;
+            p.Paint -= Frame_Paint;
             p.Invalidate();
 
             this.Cursor = DefaultCursor;
@@ -1917,5 +1995,59 @@ namespace StageCode
                 return dialogResult;
             }
         }
+
+        private void controlCommentToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(SelectedPictureBox))
+            {
+                MessageBox.Show("Aucun PictureBox sélectionné.");
+                return; 
+            }
+
+            Control? control = null;
+
+            foreach (PictureBox ctrl in this.pnlViewHost.Controls)
+            {
+                if (ctrl.Name == SelectedPictureBox)
+                {
+                    foreach (Control childControl in ctrl.Controls)
+                    {
+                        Type controlType = childControl.GetType();
+
+                        if (childControl.Name == selectedControl)
+                        {
+                            control = childControl;
+                            break; 
+                        }
+                    }
+
+                    if (control != null)
+                    {
+                        var commentWindow = new ControlComment();
+                        commentWindow.ShowDialog(); 
+
+                        string commentaire = ControlComment.commentaire;
+
+                        object? newControl = Activator.CreateInstance(control.GetType());
+
+                        if (newControl is Control newCtrl)
+                        {
+                            newCtrl.GetType().GetProperty("Comment")?.SetValue(newCtrl, commentaire);
+                        }
+
+                        return;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Aucun contrôle trouvé dans le PictureBox sélectionné.");
+                        return;
+                    }
+                }
+            }
+
+            // Si aucune PictureBox avec le nom spécifié n'a été trouvée
+            MessageBox.Show("Aucune PictureBox correspondante n'a été trouvée.");
+        }
+
     }
 }
