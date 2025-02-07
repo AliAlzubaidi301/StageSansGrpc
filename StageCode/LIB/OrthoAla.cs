@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using static StageCode.LIB.OrthoAD;
 
 namespace StageCode.LIB
@@ -231,6 +232,111 @@ namespace StageCode.LIB
 
             return this;
         }
+        public static OrthoAla ReadFileXML(string xmlText)
+        {
+            // Charger le texte XML dans un XElement
+            XElement xml = XElement.Parse(xmlText);
+
+            // Créer une instance de OrthoAla
+            OrthoAla orthoAlaControl = new OrthoAla();
+
+            // Extraire l'attribut "name" et "type"
+            string? type = xml.Attribute("type")?.Value;
+            orthoAlaControl.Name = xml.Attribute("name")?.Value;
+
+            // Extraire la section des propriétés du composant
+            XElement? properties = xml.Element("Apparence");
+            if (properties != null)
+            {
+                // Extraire des valeurs des éléments du XML
+                orthoAlaControl.Caption = properties.Element("Caption")?.Value ?? string.Empty;
+                orthoAlaControl.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(properties.Element("TextAlign")?.Value ?? "0"));
+                orthoAlaControl.Precision = properties.Element("Precision")?.Value ?? "0";
+                orthoAlaControl.BackColor = FromOle2(properties.Element("BackColor")?.Value ?? "Transparent");
+                orthoAlaControl.ForeColor = FromOle2(properties.Element("ForeColor")?.Value ?? "Transparent");
+
+                // Extraction de la police
+                orthoAlaControl.Font = new Font(
+                    properties.Element("FontName")?.Value ?? "Arial",
+                    float.Parse(properties.Element("FontSize")?.Value ?? "10"),
+                    (FontStyle)Enum.Parse(typeof(FontStyle), properties.Element("FontStyle")?.Value ?? "Regular")
+                );
+
+                // Extraction des autres propriétés
+                orthoAlaControl.TypeDesign = (TDesign)Enum.Parse(typeof(TDesign), properties.Element("TypeDesign")?.Value ?? "0");
+                orthoAlaControl.BorderWidth = int.Parse(properties.Element("BorderWidth")?.Value ?? "1");
+                orthoAlaControl.Size = new Size(
+                    int.Parse(properties.Element("SizeWidth")?.Value ?? "100"),
+                    int.Parse(properties.Element("SizeHeight")?.Value ?? "100")
+                );
+                orthoAlaControl.Location = new Point(
+                    int.Parse(properties.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(properties.Element("LocationY")?.Value ?? "0")
+                );
+                orthoAlaControl.Etat = properties.Element("Etat")?.Value ?? string.Empty;
+                orthoAlaControl.VarLink2 = properties.Element("VarLink2")?.Value ?? string.Empty;
+                orthoAlaControl.NomFichier = properties.Element("NomFichier")?.Value ?? string.Empty;
+
+                // Extraire les variables VL
+                orthoAlaControl._VL[3] = properties.Element("VL3")?.Value ?? string.Empty;
+                orthoAlaControl._VL[4] = properties.Element("VL4")?.Value ?? string.Empty;
+                orthoAlaControl._VL[5] = properties.Element("VL5")?.Value ?? string.Empty;
+                orthoAlaControl._VL[6] = properties.Element("VL6")?.Value ?? string.Empty;
+
+                // Extraction des commandes et liens
+                orthoAlaControl.Commande = properties.Element("Commande")?.Value ?? string.Empty;
+                orthoAlaControl.VarLink9 = properties.Element("VarLink9")?.Value ?? string.Empty;
+
+                // Couleurs
+                orthoAlaControl.ColorOn = FromOle2(properties.Element("ColorOn")?.Value ?? "Transparent");
+                orthoAlaControl.ColorOff = FromOle2(properties.Element("ColorOff")?.Value ?? "Transparent");
+                orthoAlaControl.ColorErr = FromOle2(properties.Element("ColorErr")?.Value ?? "Transparent");
+
+                // Niveaux de visibilité et activation
+                orthoAlaControl.LevelVisible = int.Parse(properties.Element("LevelVisible")?.Value ?? "0");
+                orthoAlaControl.LevelEnabled = int.Parse(properties.Element("LevelEnabled")?.Value ?? "0");
+                orthoAlaControl.Visibility = properties.Element("Visibility")?.Value ?? "Visible";
+            }
+
+            // Retourner l'objet OrthoAla avec toutes les propriétés remplies
+            return orthoAlaControl;
+        }
+
+        public static System.Drawing.Color FromOle2(string oleColor)
+        {
+            // Vérifier si la chaîne est vide ou nulle
+            if (string.IsNullOrEmpty(oleColor))
+            {
+                return System.Drawing.Color.Transparent;  // Retourne une couleur transparente si la valeur est vide ou nulle
+            }
+
+            // Enlever les caractères non numériques (comme "H" ou "0x") dans le cas d'un format OLE classique
+            if (oleColor.StartsWith("0x"))
+            {
+                oleColor = oleColor.Substring(2);  // Enlever le "0x"
+            }
+            else if (oleColor.StartsWith("&H"))
+            {
+                oleColor = oleColor.Substring(2);  // Enlever le "&H"
+            }
+
+            // Convertir la valeur hexadécimale en entier
+            int colorValue;
+            if (int.TryParse(oleColor, System.Globalization.NumberStyles.HexNumber, null, out colorValue))
+            {
+                // Retourner la couleur correspondante (Alpha, Red, Green, Blue)
+                return System.Drawing.Color.FromArgb(
+                    (colorValue >> 24) & 0xFF,   // Extraire le canal Alpha (transparence)
+                    (colorValue >> 16) & 0xFF,   // Extraire le canal Rouge
+                    (colorValue >> 8) & 0xFF,    // Extraire le canal Vert
+                    colorValue & 0xFF            // Extraire le canal Bleu
+                );
+            }
+
+            // Si la conversion échoue, retourner une couleur transparente par défaut
+            return System.Drawing.Color.Transparent;
+        }
+
 
 
         public string WriteFileXML()

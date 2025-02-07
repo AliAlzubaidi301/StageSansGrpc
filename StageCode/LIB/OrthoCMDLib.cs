@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using static StageCode.LIB.OrthoAD;
 namespace StageCode.LIB
 {
@@ -153,6 +154,70 @@ namespace StageCode.LIB
 
             return this;
         }
+        public static OrthoCMDLib ReadFileXML(string xmlText)
+        {
+            XElement xml = XElement.Parse(xmlText);
+
+            OrthoCMDLib orthoCMDLibControl = new OrthoCMDLib();
+
+            // Extraire le type et le nom du composant
+            orthoCMDLibControl.Name = xml.Attribute("name")?.Value;
+
+            // Extraire les informations de la section principale
+            XElement? appearance = xml.Element("Apparence");
+            if (appearance != null)
+            {
+                // Extraire les propriétés de l'apparence
+                orthoCMDLibControl.Caption = appearance.Element("Caption")?.Value;
+
+                // Utiliser ContentAlignment_Parser pour obtenir l'alignement
+                int textAlignValue = int.Parse(appearance.Element("TextAlign")?.Value ?? "2");
+                orthoCMDLibControl.TextAlign = ContentAlignment_Parser.Get_Alignment(textAlignValue);
+
+                orthoCMDLibControl.Precision = appearance.Element("Precision")?.Value ?? "0";
+                orthoCMDLibControl.BackColor = Color.FromName(appearance.Element("BackColor")?.Value ?? "Transparent");
+                orthoCMDLibControl.ForeColor = Color.FromName(appearance.Element("ForeColor")?.Value ?? "Transparent");
+
+                orthoCMDLibControl.Font = new Font(
+                    appearance.Element("FontName")?.Value ?? "Arial",
+                    float.Parse(appearance.Element("FontSize")?.Value ?? "10"),
+                    (FontStyle)Enum.Parse(typeof(FontStyle), appearance.Element("FontStyle")?.Value ?? "Regular")
+                );
+
+                // Extraire TypeDesign en tant qu'énumération
+                string typeDesignValue = appearance.Element("TypeDesign")?.Value ?? "0"; // Valeur par défaut
+                orthoCMDLibControl.TypeDesign = (TDesign)Enum.Parse(typeof(TDesign), typeDesignValue);
+
+                orthoCMDLibControl.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "1");
+                orthoCMDLibControl.Size = new Size(
+                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+                );
+                orthoCMDLibControl.Location = new Point(
+                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+                );
+                orthoCMDLibControl.Commande = appearance.Element("Commande")?.Value;
+
+                // Extraire les VarLink
+                orthoCMDLibControl._VarLink = new string[10]; // Ajuste la taille si nécessaire
+                for (int i = 0; i < 10; i++)
+                {
+                    orthoCMDLibControl._VarLink[i] = appearance.Element($"VarLink{i}")?.Value ?? string.Empty;
+                }
+
+                orthoCMDLibControl.ColorOn = Color.FromName(appearance.Element("ColorOn")?.Value ?? "Transparent");
+                orthoCMDLibControl.ColorOff = Color.FromName(appearance.Element("ColorOff")?.Value ?? "Transparent");
+                orthoCMDLibControl.ColorErr = Color.FromName(appearance.Element("ColorErr")?.Value ?? "Transparent");
+                orthoCMDLibControl.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
+                orthoCMDLibControl.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
+                orthoCMDLibControl.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";
+            }
+
+            // Retourner l'objet OrthoCMDLib avec les données extraites
+            return orthoCMDLibControl;
+        }
+
 
         public string WriteFile()
         {
@@ -967,6 +1032,8 @@ namespace StageCode.LIB
                 if (str.Length > idx)
                 {
                     btn.Text = str[idx];
+
+                    //Ajouter OrthoLib
                 }
                 else
                 {

@@ -35,9 +35,14 @@
             // 
             // textBox1
             // 
+            textBox1.AcceptsReturn = true;
+            textBox1.AcceptsTab = true;
+            textBox1.AllowDrop = true;
+            textBox1.BorderStyle = BorderStyle.FixedSingle;
             textBox1.Location = new Point(9, 12);
             textBox1.Multiline = true;
             textBox1.Name = "textBox1";
+            textBox1.ScrollBars = ScrollBars.Both;
             textBox1.Size = new Size(532, 169);
             textBox1.TabIndex = 0;
             // 

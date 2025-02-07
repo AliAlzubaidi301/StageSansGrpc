@@ -20,6 +20,8 @@ namespace StageCode
         public static int Langue = 1; // 1 = English, 2 = Chinese, 3 = German, 4 = French, 5 = Lithuanian
         private Form1 frm;
 
+        FormVide forme;
+
         private string selectedControl = "";
 
         private string SelectedPictureBox = "";
@@ -39,12 +41,25 @@ namespace StageCode
         {
             InitializeComponent();
 
+            this.forme = new FormVide();
+
+            pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
+
+            AfficherFormDansPanel(forme, pnlViewHost);
+
             this.DoubleBuffered = true;
 
             this.ClientSizeChanged += Form1_ClientSizeChanged;
-            pnlViewHost.MouseClick += pnlViewHost_Click;
+            forme.panel1.MouseClick += pnlViewHost_Click;
         }
+        private void AfficherFormDansPanel(Form form, Panel panel)
+        {
+            form.TopLevel = false;  // Le formulaire n'est pas un formulaire principal
+           // panel.Controls.Clear();  // Supprime les contrôles existants dans le panel
+            panel.Controls.Add(form);  // Ajoute le formulaire dans le panel
 
+            form.Show();  // Affiche le formulaire
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
             string tmp = Application.ProductVersion[0].ToString();
@@ -226,7 +241,7 @@ namespace StageCode
             StringBuilder accumulatedText = new StringBuilder();
 
             // Parcours tous les contrôles dans le panneau ou le conteneur (ici pnlViewHost)
-            foreach (Control controle in pnlViewHost.Controls)
+            foreach (Control controle in forme.panel1.Controls)
             {
                 // Vérifier si le contrôle est une PictureBox
                 if (controle is PictureBox pictureBox)
@@ -341,7 +356,7 @@ namespace StageCode
             StringBuilder accumulatedText = new StringBuilder();
 
             // Parcours tous les contrôles dans le panneau ou le conteneur (ici pnlViewHost)
-            foreach (Control controle in pnlViewHost.Controls)
+            foreach (Control controle in forme.panel1.Controls)
             {
                 // Vérifier si le contrôle est une PictureBox
                 if (controle is PictureBox pictureBox)
@@ -501,7 +516,7 @@ namespace StageCode
                 return;
             }
 
-            pnlViewHost.Controls.Clear();
+            forme.panel1.Controls.Clear();
 
         }
 
@@ -509,7 +524,7 @@ namespace StageCode
         private void Couper(object sender, EventArgs e)
         {
             // Trouver la PictureBox sélectionnée
-            PictureBox? frame = pnlViewHost.Controls.OfType<PictureBox>()
+            PictureBox? frame = forme.panel1.Controls.OfType<PictureBox>()
                                               .FirstOrDefault(p => p.Name == SelectedPictureBox);
 
             if (frame != null)
@@ -547,7 +562,7 @@ namespace StageCode
 
                 // Supprimer uniquement les contrôles internes
                 frame.Controls.Clear();
-                pnlViewHost.Controls.Remove(frame);
+                forme.panel1.Controls.Remove(frame);
             }
         }
 
@@ -559,7 +574,7 @@ namespace StageCode
         private void Copier(object sender, EventArgs e)
         {
             // Trouver la PictureBox sélectionnée
-            PictureBox? frame = pnlViewHost.Controls.OfType<PictureBox>()
+            PictureBox? frame = forme.panel1.Controls.OfType<PictureBox>()
                                               .FirstOrDefault(p => p.Name == SelectedPictureBox);
 
             if (frame != null)
@@ -609,7 +624,7 @@ namespace StageCode
             if (Clipboard.ContainsData("ControlsData"))
             {
                 // Récupérer la position de la souris relative à pnlViewHost
-                Point mousePosition = pnlViewHost.PointToClient(Cursor.Position);
+                Point mousePosition = forme.panel1.PointToClient(Cursor.Position);
 
                 // Récupérer les données du presse-papiers
                 byte[] rawData = (byte[])Clipboard.GetData("ControlsData")!;
@@ -652,7 +667,7 @@ namespace StageCode
                     }
 
                     // Ajouter la nouvelle PictureBox à pnlViewHost
-                    pnlViewHost.Controls.Add(newFrame);
+                    forme.panel1.Controls.Add(newFrame);
                     newFrame.Invalidate(); // Redessiner
                     SelectedPictureBox = "";
                 }
@@ -661,12 +676,12 @@ namespace StageCode
 
         private void Supprimer(object sender, EventArgs e)
         {
-            PictureBox? frame = pnlViewHost.Controls.OfType<PictureBox>()
+            PictureBox? frame = forme.panel1.Controls.OfType<PictureBox>()
                                       .FirstOrDefault(p => p.Name == SelectedPictureBox);
 
             if (frame != null)
             {
-                pnlViewHost.Controls.Remove(frame);
+                forme.panel1.Controls.Remove(frame);
                 frame.Dispose(); // Libérer la mémoire utilisée par la PictureBox
             }
             else
@@ -777,7 +792,7 @@ namespace StageCode
                     ExportFormToXml();
                 }
 
-                pnlViewHost.Controls.Clear();
+                forme.panel1.Controls.Clear();
 
                 OpenFileDialog file = new OpenFileDialog();
                 file.Filter = "Fichier SYN (*.syn)|*.syn";
@@ -856,7 +871,7 @@ namespace StageCode
                             am60Control.MouseEnter += NewControl_MouseEnter;
 
                             // Ajouter la PictureBox au conteneur principal
-                            pnlViewHost.Controls.Add(frame);
+                            forme.panel1.Controls.Add(frame);
                         }
                     }
                     else if (type == "CONT1")
@@ -894,7 +909,7 @@ namespace StageCode
 
 
                             // Ajouter la PictureBox au conteneur principal
-                            pnlViewHost.Controls.Add(frame);
+                            forme.panel1.Controls.Add(frame);
                         }
                     }
                     else if (type == "INTEG")
@@ -932,7 +947,7 @@ namespace StageCode
                             integControl.Click += NewControl_Click;
 
                             // Ajouter la PictureBox au conteneur principal
-                            pnlViewHost.Controls.Add(frame);
+                            forme.panel1.Controls.Add(frame);
                         }
                     }
                     else if (type == "OrthoAD")
@@ -970,10 +985,46 @@ namespace StageCode
                             orthoADControl.Click += NewControl_Click;
 
                             // Ajouter la PictureBox au conteneur principal
-                            pnlViewHost.Controls.Add(frame);
+                            forme.panel1.Controls.Add(frame);
                         }
                     }
+                    else if (type == "OrthoAla")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
+                        OrthoAla orthoAlaControl = OrthoAla.ReadFileXML(componentText);
 
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAla
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox frame = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            // Ajouter le contrôle OrthoAla à la PictureBox
+                            frame.Controls.Add(orthoAlaControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
+                            orthoAlaControl.MouseEnter += NewControl_MouseEnter;
+                            frame.MouseLeave += Frame_MouseLeave;
+                            orthoAlaControl.Click += NewControl_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            forme.panel1.Controls.Add(frame);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -1564,7 +1615,7 @@ namespace StageCode
             if (this.Cursor == DefaultCursor)
             {
                 // Parcours toutes les PictureBox dans le pnlViewHost et supprime les bordures pointillées
-                foreach (Control control in pnlViewHost.Controls)
+                foreach (Control control in forme.panel1.Controls)
                 {
                     if (control is PictureBox frame)
                     {
@@ -1675,7 +1726,7 @@ namespace StageCode
 
                 // frame.Bufer
                 // Ajouter la PictureBox au conteneur principal
-                pnlViewHost.Controls.Add(frame);
+                forme.panel1.Controls.Add(frame);
 
                 // Réinitialiser le curseur
                 this.Cursor = DefaultCursor;
@@ -1928,7 +1979,7 @@ namespace StageCode
         {
             PictureBox? frame = sender as PictureBox;
 
-            int pictureBoxCount = pnlViewHost.Controls.OfType<PictureBox>().Count();
+            int pictureBoxCount = forme.panel1.Controls.OfType<PictureBox>().Count();
 
             // Mettre à jour le nom du PictureBox avec un numéro unique
             frame.Name = "PictureBox" + (pictureBoxCount + 1);  // Exemple : PictureBox1, PictureBox2, etc.
@@ -2000,13 +2051,13 @@ namespace StageCode
         {
             if (string.IsNullOrEmpty(SelectedPictureBox))
             {
-                MessageBox.Show("Aucun PictureBox sélectionné.");
-                return; 
+                MessageBox.Show("Aucun element sélectionné.");
+                return;
             }
 
             Control? control = null;
 
-            foreach (PictureBox ctrl in this.pnlViewHost.Controls)
+            foreach (PictureBox ctrl in this.forme.panel1.Controls)
             {
                 if (ctrl.Name == SelectedPictureBox)
                 {
@@ -2017,14 +2068,14 @@ namespace StageCode
                         if (childControl.Name == selectedControl)
                         {
                             control = childControl;
-                            break; 
+                            break;
                         }
                     }
 
                     if (control != null)
                     {
                         var commentWindow = new ControlComment();
-                        commentWindow.ShowDialog(); 
+                        commentWindow.ShowDialog();
 
                         string commentaire = ControlComment.commentaire;
 
@@ -2045,9 +2096,21 @@ namespace StageCode
                 }
             }
 
-            // Si aucune PictureBox avec le nom spécifié n'a été trouvée
             MessageBox.Show("Aucune PictureBox correspondante n'a été trouvée.");
         }
 
+        private void newFormeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
+
+            FormVide forme = new FormVide();
+
+            forme.Location = new Point(0, 0);
+            forme.panel1 = this.forme.panel1;
+
+            forme.panel1.MouseClick += pnlViewHost_Click;
+
+            AfficherFormDansPanel(forme, pnlViewHost);
+        }
     }
 }
