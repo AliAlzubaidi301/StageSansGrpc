@@ -28,28 +28,63 @@ namespace StageCode
 
             this.label1.Anchor = AnchorStyles.Top | AnchorStyles.Left;
             this.label2.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-            this.label5.Anchor = AnchorStyles.Top | AnchorStyles.Left;
-            this.label6.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            this.label5.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            this.label6.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+
             this.textBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             this.textBox2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         }
 
         private void FormResize_SizeChanged(object sender, EventArgs e)
         {
-            int groupBoxHeight = (int)(this.ClientSize.Height * 0.34); 
+            int margin = 10;
+            int groupBoxHeight = (int)(this.ClientSize.Height * 0.34);
+
             this.groupBoxAvant.Height = groupBoxHeight;
             this.groupBoxApres.Height = groupBoxHeight;
+            this.groupBoxApres.Top = this.groupBoxAvant.Bottom + margin;
 
-            this.groupBoxApres.Top = this.groupBoxAvant.Bottom + 10;
+            int buttonSpacing = 10;
+            int buttonWidth = this.btnOK.Width;
 
-            this.btnOK.Top = this.ClientSize.Height - this.btnOK.Height - 20;
-            this.btnResize.Top = this.ClientSize.Height - this.btnResize.Height - 20;
+            this.btnOK.Top = this.ClientSize.Height - this.btnOK.Height - buttonSpacing;
+            this.btnResize.Top = this.btnOK.Top;
+            this.btnOK.Left = this.ClientSize.Width - buttonWidth * 2 - buttonSpacing;
+            this.btnResize.Left = this.ClientSize.Width - buttonWidth - buttonSpacing;
+
+            // Ajuster la taille de police
+            float fontSize = Math.Max(8, this.ClientSize.Width / 50);
+            this.label1.Font = new Font(this.label1.Font.FontFamily, fontSize);
+            this.label2.Font = new Font(this.label2.Font.FontFamily, fontSize);
+            this.label5.Font = new Font(this.label5.Font.FontFamily, fontSize);
+            this.label6.Font = new Font(this.label6.Font.FontFamily, fontSize);
+            this.textBox1.Font = new Font(this.textBox1.Font.FontFamily, fontSize);
+            this.textBox2.Font = new Font(this.textBox2.Font.FontFamily, fontSize);
+
+            // Repositionner les labels et textboxes
+            int labelSpacing = 10;
+            int textBoxWidth = this.groupBoxApres.Width / 2 - margin * 2;
+
+            this.label3.Left = margin;
+            this.label3.Top = margin*2;
+            this.textBox1.Left = this.groupBoxApres.Width - textBoxWidth - margin;
+            this.textBox1.Top = this.label3.Top;
+            this.textBox1.Width = textBoxWidth;
+
+            this.label4.Left = margin;
+            this.label4.Top = this.label3.Bottom + labelSpacing;
+            this.textBox2.Left = this.groupBoxApres.Width - textBoxWidth - margin;
+            this.textBox2.Top = this.label4.Top;
+            this.textBox2.Width = textBoxWidth;
 
             ConfigureAnchors();
         }
 
+
         private void FormResize_Load(object sender, EventArgs e)
         {
+            this.MaximizeBox = true;
+
             this.groupBoxAvant.Text = "Old Size";
             this.groupBoxApres.Text = "New Size";
 

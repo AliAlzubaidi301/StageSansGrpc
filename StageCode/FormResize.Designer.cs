@@ -144,7 +144,7 @@
             btnOK.Name = "btnOK";
             btnOK.Size = new Size(75, 23);
             btnOK.TabIndex = 2;
-            btnOK.Text = "button1";
+            btnOK.Text = "OK";
             btnOK.UseVisualStyleBackColor = true;
             btnOK.Click += btnOK_Click;
             // 
@@ -154,7 +154,7 @@
             btnResize.Name = "btnResize";
             btnResize.Size = new Size(75, 23);
             btnResize.TabIndex = 3;
-            btnResize.Text = "button2";
+            btnResize.Text = "Cancel";
             btnResize.UseVisualStyleBackColor = true;
             btnResize.Click += btnResize_Click;
             // 
@@ -167,6 +167,7 @@
             Controls.Add(btnOK);
             Controls.Add(groupBoxApres);
             Controls.Add(groupBoxAvant);
+            MaximumSize = new Size(241, 316);
             Name = "FormResize";
             Text = "FormResize";
             Load += FormResize_Load;
