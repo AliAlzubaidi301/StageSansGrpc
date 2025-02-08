@@ -35,7 +35,6 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             Name = "Reticule";
-            Size = new Size(800, 450);
             Load += Reticule_Load;
             ResumeLayout(false);
         }

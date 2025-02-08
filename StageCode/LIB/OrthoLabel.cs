@@ -119,6 +119,93 @@ namespace StageCode.LIB
             return ColorTranslator.ToOle(Datain).ToString();
         }
         #region Read/Write on .syn file
+
+        public OrthoLabel ReadFileXML(string xmlText)
+        {
+            XElement xml = XElement.Parse(xmlText);
+            OrthoLabel orthoLabelControl = new OrthoLabel();
+
+            // Parse le type et le nom de l'objet
+            orthoLabelControl.Name = xml.Attribute("name")?.Value;
+
+            // Parse la section <Apparence>
+            XElement? appearance = xml.Element("Apparence");
+            if (appearance != null)
+            {
+                // Extraire les couleurs de fond et de texte multiples
+                orthoLabelControl._backColorList = appearance.Element("MultiBackColor")?
+                    .Elements("Color")
+                    .Select(c => Color.FromArgb(int.Parse(c.Value)))
+                    .ToList() ?? new List<Color>();
+
+                orthoLabelControl._foreColorList = appearance.Element("MultiForeColor")?
+                    .Elements("Color")
+                    .Select(c => Color.FromArgb(int.Parse(c.Value)))
+                    .ToList() ?? new List<Color>();
+
+                // Extraire les couleurs principales
+                orthoLabelControl.BackColor = Color.FromArgb(int.Parse(appearance.Element("BackColor")?.Value ?? "0"));
+                orthoLabelControl.ForeColor = Color.FromArgb(int.Parse(appearance.Element("ForeColor")?.Value ?? "0"));
+
+                // Extraire la taille et la localisation
+                orthoLabelControl.Size = new Size(
+                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+                );
+                orthoLabelControl.Location = new Point(
+                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+                );
+
+                // Extraire les autres propriétés
+                orthoLabelControl.Caption = appearance.Element("Caption")?.Value ?? string.Empty;
+                orthoLabelControl.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(appearance.Element("TextAlign")?.Value ?? "MiddleCenter"));
+                orthoLabelControl.Format = appearance.Element("Format")?.Value ?? string.Empty;
+
+                // Extraire les propriétés de la police
+                orthoLabelControl.Font = new Font(
+                    appearance.Element("FontName")?.Value ?? "Arial",
+                    float.Parse(appearance.Element("FontSize")?.Value ?? "12"),
+                    FontStyle.Regular
+                );
+
+                if (bool.TryParse(appearance.Element("FontBold")?.Value, out bool fontBold) && fontBold)
+                    orthoLabelControl.Font = new Font(orthoLabelControl.Font, orthoLabelControl.Font.Style | FontStyle.Bold);
+
+                if (bool.TryParse(appearance.Element("FontItalic")?.Value, out bool fontItalic) && fontItalic)
+                    orthoLabelControl.Font = new Font(orthoLabelControl.Font, orthoLabelControl.Font.Style | FontStyle.Italic);
+
+                if (bool.TryParse(appearance.Element("FontStrikeout")?.Value, out bool fontStrikeout) && fontStrikeout)
+                    orthoLabelControl.Font = new Font(orthoLabelControl.Font, orthoLabelControl.Font.Style | FontStyle.Strikeout);
+
+                if (bool.TryParse(appearance.Element("FontUnderline")?.Value, out bool fontUnderline) && fontUnderline)
+                    orthoLabelControl.Font = new Font(orthoLabelControl.Font, orthoLabelControl.Font.Style | FontStyle.Underline);
+
+                // Extraire les autres propriétés spécifiques
+                orthoLabelControl.TypeDesign = (TDesign)int.Parse(appearance.Element("TypeDesign")?.Value ?? "0");
+                orthoLabelControl.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "1");
+                orthoLabelControl.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
+                orthoLabelControl.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
+                orthoLabelControl.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";
+
+                // Extraire les couleurs spécifiques
+                orthoLabelControl.ColorOn = Color.FromArgb(int.Parse(appearance.Element("ColorOn")?.Value ?? "0"));
+                orthoLabelControl.ColorOff = Color.FromArgb(int.Parse(appearance.Element("ColorOff")?.Value ?? "0"));
+                orthoLabelControl.ColorErr = Color.FromArgb(int.Parse(appearance.Element("ColorErr")?.Value ?? "0"));
+
+                // Extraire les valeurs VL
+                var vlElements = appearance.Elements().Where(e => e.Name.ToString().StartsWith("VL"));
+                orthoLabelControl._VL = new string[vlElements.Count()];
+                foreach (var vl in vlElements)
+                {
+                    int index = int.Parse(vl.Name.ToString().Replace("VL", ""));
+                    orthoLabelControl._VL[index] = vl.Value;
+                }
+            }
+
+            return orthoLabelControl;
+        }
+
         public object ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
         {
             var StyleText = new FontStyle();

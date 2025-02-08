@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace StageCode.LIB
 {
@@ -72,6 +73,32 @@ namespace StageCode.LIB
             {
                 Visibility = splitPvirgule[9];
             }
+
+            return this;
+        }
+        public OrthoImage ReadFileXML(string txt)
+        {
+            XElement component = new XElement(txt);
+
+            var appearance = component.Element("Apparence");
+
+            ImageLocation = appearance.Element("ImageLocation")?.Value ?? "";
+
+            // Convert BorderStyle from int (0 = None, 1 = Other)
+            BorderStyle = (int.Parse(appearance.Element("BorderStyle")?.Value ?? "0") == 0) ? BorderStyle.None : BorderStyle.FixedSingle;
+
+            Size = new Size(
+                int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+            );
+            Location = new Point(
+                int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+            );
+
+            LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
+            LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
+            Visibility = (appearance.Element("Visibility")?.Value ?? "true");
 
             return this;
         }

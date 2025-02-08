@@ -9,6 +9,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace StageCode.LIB
@@ -100,6 +101,53 @@ namespace StageCode.LIB
                 }
             }
             return this;
+        }
+        public OrthoPbar ReadFileXML(string xmlText)
+        {
+            XElement xml = XElement.Parse(xmlText);
+            OrthoPbar orthoPbarControl = new OrthoPbar();
+
+            // Parse le type et le nom de l'objet
+            orthoPbarControl.Name = xml.Attribute("name")?.Value;
+
+            // Parse la section <Apparence>
+            XElement? appearance = xml.Element("Apparence");
+            if (appearance != null)
+            {
+                // Extraire les propriétés générales
+                orthoPbarControl.ToolTips = appearance.Element("ToolTips")?.Value ?? string.Empty;
+                orthoPbarControl.Size = new Size(
+                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+                );
+                orthoPbarControl.Location = new Point(
+                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+                );
+
+                // Extraire les valeurs de progression
+                orthoPbarControl.Minimum = (appearance.Element("Minimum")?.Value ?? "0");
+                orthoPbarControl.Maximum = (appearance.Element("Maximum")?.Value ?? "100");
+                orthoPbarControl.Value = (appearance.Element("Value")?.Value ?? "0");
+
+                // Extraire les niveaux
+                orthoPbarControl.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
+                orthoPbarControl.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
+
+                // Extraire les valeurs VL
+                var vlElements = appearance.Elements().Where(e => e.Name.ToString().StartsWith("VL"));
+                orthoPbarControl._VL = new string[vlElements.Count()];
+                foreach (var vl in vlElements)
+                {
+                    int index = int.Parse(vl.Name.ToString().Replace("VL", ""));
+                    orthoPbarControl._VL[index] = vl.Value;
+                }
+
+                // Extraire la visibilité
+                orthoPbarControl.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";
+            }
+
+            return orthoPbarControl;
         }
 
         public string WriteFile()

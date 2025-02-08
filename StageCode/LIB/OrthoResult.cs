@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using static StageCode.LIB.OrthoAD;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
@@ -167,6 +168,87 @@ namespace StageCode.LIB
             }
 
             return this;
+        }
+        public OrthoResult ReadFileXML(string xmlText)
+        {
+            XElement xml = XElement.Parse(xmlText);
+            OrthoResult orthoResultControl = new OrthoResult();
+
+            // Parse le type et le nom de l'objet
+            orthoResultControl.Name = xml.Attribute("name")?.Value;
+
+            // Parse la section <Apparence>
+            XElement? appearance = xml.Element("Apparence");
+            if (appearance != null)
+            {
+                // Extraire les propriétés générales
+                orthoResultControl.Text = appearance.Element("Text")?.Value ?? string.Empty;
+                orthoResultControl.TextAlign = (HorizontalAlignment)(ContentAlignment)int.Parse(appearance.Element("TextAlign")?.Value ?? "0");
+                orthoResultControl.Format = appearance.Element("Format")?.Value ?? string.Empty;
+                orthoResultControl.BackColor = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("BackColor")?.Value ?? "0"));
+                orthoResultControl.ForeColor = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ForeColor")?.Value ?? "0"));
+
+                // Extraire les propriétés de la police
+                orthoResultControl.Font = new Font(
+                    appearance.Element("FontName")?.Value ?? "Arial",
+                    float.Parse(appearance.Element("FontSize")?.Value ?? "12"),
+                    FontStyle.Regular
+                );
+                if (bool.TryParse(appearance.Element("FontBold")?.Value, out bool fontBold) && fontBold)
+                {
+                    orthoResultControl.Font = new Font(orthoResultControl.Font, FontStyle.Bold);
+                }
+                if (bool.TryParse(appearance.Element("FontItalic")?.Value, out bool fontItalic) && fontItalic)
+                {
+                    orthoResultControl.Font = new Font(orthoResultControl.Font, FontStyle.Italic);
+                }
+                if (bool.TryParse(appearance.Element("FontStrikeout")?.Value, out bool fontStrikeout) && fontStrikeout)
+                {
+                    orthoResultControl.Font = new Font(orthoResultControl.Font, FontStyle.Strikeout);
+                }
+                if (bool.TryParse(appearance.Element("FontUnderline")?.Value, out bool fontUnderline) && fontUnderline)
+                {
+                    orthoResultControl.Font = new Font(orthoResultControl.Font, FontStyle.Underline);
+                }
+
+                // Extraire les autres propriétés
+                orthoResultControl.TypeDesign = (TDesign)int.Parse(appearance.Element("TypeDesign")?.Value ?? "0");
+                orthoResultControl.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "1");
+                orthoResultControl.Size = new Size(
+                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+                );
+                orthoResultControl.Location = new Point(
+                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+                );
+                orthoResultControl.VarText = appearance.Element("VarText")?.Value ?? string.Empty;
+                orthoResultControl.VarBackColor = appearance.Element("VarBackColor")?.Value ?? string.Empty;
+                orthoResultControl.VarForeColor = appearance.Element("VarForeColor")?.Value ?? string.Empty;
+                orthoResultControl.VarValMax = appearance.Element("VarValMax")?.Value ?? string.Empty;
+                orthoResultControl.VarTextMax = appearance.Element("VarTextMax")?.Value ?? string.Empty;
+                orthoResultControl.VarValMin = appearance.Element("VarValMin")?.Value ?? string.Empty;
+                orthoResultControl.VarTextMin = appearance.Element("VarTextMin")?.Value ?? string.Empty;
+
+                // Extraire les valeurs VL
+                var vlElements = appearance.Elements().Where(e => e.Name.ToString().StartsWith("VL"));
+                orthoResultControl._VL = new string[vlElements.Count()];
+                foreach (var vl in vlElements)
+                {
+                    int index = int.Parse(vl.Name.ToString().Replace("VL", ""));
+                    orthoResultControl._VL[index] = vl.Value;
+                }
+
+                // Extraire les couleurs et niveaux
+                orthoResultControl.ColorOn = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorOn")?.Value ?? "0"));
+                orthoResultControl.ColorOff = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorOff")?.Value ?? "0"));
+                orthoResultControl.ColorErr = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorErr")?.Value ?? "0"));
+                orthoResultControl.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
+                orthoResultControl.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
+                orthoResultControl.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";
+            }
+
+            return orthoResultControl;
         }
 
         public string WriteFile()

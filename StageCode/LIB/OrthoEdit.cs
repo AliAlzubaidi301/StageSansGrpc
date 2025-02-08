@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Linq;
 using static StageCode.LIB.OrthoAD;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
@@ -150,6 +152,55 @@ namespace StageCode.LIB
             {
                 Visibility = splitPvirgule[33];
             }
+            return this;
+        }
+        public OrthoEdit ReadFileXML(string txt)
+        {
+            XElement component = XElement.Parse(txt);
+
+            var appearance = component.Element("Apparence");
+
+            Text = appearance.Element("Text")?.Value ?? "";
+            TextAlign = (HorizontalAlignment)(ContentAlignment)Enum.Parse(typeof(ContentAlignment), appearance.Element("TextAlign")?.Value ?? "MiddleCenter");
+            Format = appearance.Element("Format")?.Value ?? "";
+            BackColor = ColorTranslator.FromOle(int.Parse(appearance.Element("BackColor")?.Value ?? "0"));
+            ForeColor = ColorTranslator.FromOle(int.Parse(appearance.Element("ForeColor")?.Value ?? "0"));
+            Font = new Font(
+                appearance.Element("FontName")?.Value ?? "Arial",
+                float.Parse(appearance.Element("FontSize")?.Value ?? "10"),
+                (FontStyle)
+                ((bool.Parse(appearance.Element("FontBold")?.Value ?? "false") ? FontStyle.Bold : 0) |
+                 (bool.Parse(appearance.Element("FontItalic")?.Value ?? "false") ? FontStyle.Italic : 0) |
+                 (bool.Parse(appearance.Element("FontUnderline")?.Value ?? "false") ? FontStyle.Underline : 0) |
+                 (bool.Parse(appearance.Element("FontStrikeout")?.Value ?? "false") ? FontStyle.Strikeout : 0))
+            );
+
+            BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "1");
+            Size = new Size(
+                int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                int.Parse(appearance.Element("SizeHeight")?.Value ?? "30")
+            );
+            Location = new Point(
+                int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+            );
+            VarMeM = appearance.Element("VarMeM")?.Value ?? "";
+            FieldType = (FieldType)Enum.Parse(typeof(FieldType), appearance.Element("FieldType")?.Value ?? "0");
+            ValMin = (appearance.Element("ValMin")?.Value ?? "0");
+            ValMax = (appearance.Element("ValMax")?.Value ?? "100");
+            MaxLength = int.Parse(appearance.Element("MaxLength")?.Value ?? "255");
+            PasswordChar = appearance.Element("PasswordChar")?.Value ?? "";
+            TextVirtualKeyboard = appearance.Element("TextVirtualKeyboard")?.Value ?? "";
+            Det = (appearance.Element("Det")?.Value ?? "false");
+
+            ColorOn = ColorTranslator.FromOle(int.Parse(appearance.Element("ColorOn")?.Value ?? "0"));
+            ColorOff = ColorTranslator.FromOle(int.Parse(appearance.Element("ColorOff")?.Value ?? "0"));
+            ColorErr = ColorTranslator.FromOle(int.Parse(appearance.Element("ColorErr")?.Value ?? "0"));
+
+            LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
+            LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
+            Visibility = (appearance.Element("Visibility")?.Value ?? "true");
+
             return this;
         }
 

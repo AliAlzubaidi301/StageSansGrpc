@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace StageCode.LIB
 {
@@ -102,6 +103,42 @@ namespace StageCode.LIB
                 Visibility = splitPvirgule[16];
             }
             return this;
+        }
+        public Reticule ReadFileXML(string xmlText)
+        {
+            XElement xml = XElement.Parse(xmlText);
+            Reticule reticuleControl = new Reticule();
+
+            // Parse le type et le nom de l'objet
+            reticuleControl.Name = xml.Attribute("name")?.Value;
+
+            // Parse la section <Reticule>
+            XElement? reticuleElement = xml.Element("Reticule");
+            if (reticuleElement != null)
+            {
+                // Extraire les propriétés générales
+                reticuleControl.Size = new Size(
+                    int.Parse(reticuleElement.Element("SizeWidth")?.Value ?? "100"),
+                    int.Parse(reticuleElement.Element("SizeHeight")?.Value ?? "100")
+                );
+                reticuleControl.Location = new Point(
+                    int.Parse(reticuleElement.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(reticuleElement.Element("LocationY")?.Value ?? "0")
+                );
+                reticuleControl.Detecteur = reticuleElement.Element("Detecteur")?.Value ?? string.Empty;
+                reticuleControl.LabX = reticuleElement.Element("LabX")?.Value ?? string.Empty;
+                reticuleControl.UnitX = reticuleElement.Element("UnitX")?.Value ?? string.Empty;
+                reticuleControl.LabY = reticuleElement.Element("LabY")?.Value ?? string.Empty;
+                reticuleControl.UnitY = reticuleElement.Element("UnitY")?.Value ?? string.Empty;
+                reticuleControl.LabS = reticuleElement.Element("LabS")?.Value ?? string.Empty;
+                reticuleControl.UnitS = reticuleElement.Element("UnitS")?.Value ?? string.Empty;
+                reticuleControl.LabW = reticuleElement.Element("LabW")?.Value ?? string.Empty;
+                reticuleControl.LevelVisible = int.Parse(reticuleElement.Element("LevelVisible")?.Value ?? "0");
+                reticuleControl.LevelEnabled = int.Parse(reticuleElement.Element("LevelEnabled")?.Value ?? "0");
+                reticuleControl.Visibility = reticuleElement.Element("Visibility")?.Value ?? "Visible";
+            }
+
+            return reticuleControl;
         }
 
         public string WriteFile()

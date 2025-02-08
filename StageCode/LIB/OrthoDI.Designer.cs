@@ -35,7 +35,6 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             Name = "OrthoDI";
-            Size = new Size(800, 450);
             Load += OrthoDI_Load_1;
             ResumeLayout(false);
         }

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using static StageCode.LIB.OrthoAD;
 
 namespace StageCode.LIB
@@ -179,6 +180,63 @@ namespace StageCode.LIB
                 Visibility = splitPvirgule[33];
             }
             return this;
+        }
+        public static OrthoDI ReadFileXML(string xmlText)
+        {
+            XElement xml = XElement.Parse(xmlText);
+
+            OrthoDI orthoCombo = new OrthoDI
+            {
+                Name = xml.Attribute("name")?.Value
+            };
+
+            // Parse the <Apparence> section
+            XElement? appearance = xml.Element("Apparence");
+            if (appearance != null)
+            {
+                orthoCombo.Caption = appearance.Element("Caption")?.Value ?? "";
+                orthoCombo.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(appearance.Element("TextAlign")?.Value ?? "0"));
+                orthoCombo.Precision = (appearance.Element("Precision")?.Value ?? "0");
+                orthoCombo.BackColor = System.Drawing.ColorTranslator.FromOle(int.Parse(appearance.Element("BackColor")?.Value ?? "0"));
+                orthoCombo.ForeColor = System.Drawing.ColorTranslator.FromOle(int.Parse(appearance.Element("ForeColor")?.Value ?? "0"));
+                orthoCombo.Font = new System.Drawing.Font(
+                    appearance.Element("FontName")?.Value ?? "Arial",
+                    float.Parse(appearance.Element("FontSize")?.Value ?? "10"),
+                    (bool.Parse(appearance.Element("FontBold")?.Value ?? "False") ? System.Drawing.FontStyle.Bold : 0) |
+                    (bool.Parse(appearance.Element("FontItalic")?.Value ?? "False") ? System.Drawing.FontStyle.Italic : 0) |
+                    (bool.Parse(appearance.Element("FontUnderline")?.Value ?? "False") ? System.Drawing.FontStyle.Underline : 0) |
+                    (bool.Parse(appearance.Element("FontStrikeout")?.Value ?? "False") ? System.Drawing.FontStyle.Strikeout : 0)
+                );
+                orthoCombo.TypeDesign = (TDesign)Enum.ToObject(typeof(TDesign), int.Parse(appearance.Element("TypeDesign")?.Value ?? "0"));
+                orthoCombo.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "0");
+                orthoCombo.Size = new Size(
+                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+                );
+                orthoCombo.Location = new Point(
+                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+                );
+            }
+
+            // Read Variables _VL
+            List<string> vlList = new List<string>();
+            for (int i = 0; ; i++)
+            {
+                XElement? vlElement = xml.Element($"VL{i}");
+                if (vlElement == null) break;
+                vlList.Add(vlElement.Value);
+            }
+            orthoCombo._VL = vlList.ToArray();
+
+            orthoCombo.ColorOn = System.Drawing.ColorTranslator.FromOle(int.Parse(xml.Element("ColorOn")?.Value ?? "0"));
+            orthoCombo.ColorOff = System.Drawing.ColorTranslator.FromOle(int.Parse(xml.Element("ColorOff")?.Value ?? "0"));
+            orthoCombo.ColorErr = System.Drawing.ColorTranslator.FromOle(int.Parse(xml.Element("ColorErr")?.Value ?? "0"));
+            orthoCombo.LevelVisible = int.Parse(xml.Element("LevelVisible")?.Value ?? "0");
+            orthoCombo.LevelEnabled = int.Parse(xml.Element("LevelEnabled")?.Value ?? "0");
+            orthoCombo.Visibility = xml.Element("Visibility")?.Value ?? "Visible";
+
+            return orthoCombo;
         }
 
         public string WriteFile()

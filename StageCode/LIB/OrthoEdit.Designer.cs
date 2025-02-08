@@ -46,7 +46,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(TextBox1);
             Name = "OrthoEdit";
-            Size = new Size(101, 25);
+            Size = new Size(112, 35);
             Load += OrthoEdit_Load;
             ResumeLayout(false);
             PerformLayout();

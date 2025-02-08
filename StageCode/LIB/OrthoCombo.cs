@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using static StageCode.LIB.OrthoAD;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
@@ -171,6 +172,68 @@ namespace StageCode.LIB
                 Visibility = splitPvirgule[33];
             }
             return this;
+        }
+        public static OrthoCombo ReadFileXML(string xmlText)
+        {
+            XElement xml = XElement.Parse(xmlText);
+
+            OrthoCombo orthoCombo = new OrthoCombo();
+
+            orthoCombo.Name = xml.Attribute("name")?.Value;
+
+            // Parse the <Apparence> section
+            XElement? appearance = xml.Element("Apparence");
+            if (appearance != null)
+            {
+                orthoCombo.Text = appearance.Element("Text")?.Value ?? "";
+                orthoCombo.TextAlign = (HorizontalAlignment)(ContentAlignment)Enum.Parse(typeof(ContentAlignment), appearance.Element("TextAlign")?.Value ?? "MiddleCenter");
+                orthoCombo.Format = appearance.Element("Format")?.Value ?? "";
+                orthoCombo.BackColor = ColorTranslator.FromOle(int.Parse(appearance.Element("BackColor")?.Value ?? "16777215"));
+                orthoCombo.ForeColor = ColorTranslator.FromOle(int.Parse(appearance.Element("ForeColor")?.Value ?? "0"));
+                orthoCombo.Font = new Font(
+                    appearance.Element("FontName")?.Value ?? "Microsoft Sans Serif",
+                    float.Parse(appearance.Element("FontSize")?.Value ?? "8.25"),
+                    (FontStyle)(
+                        (bool.Parse(appearance.Element("FontBold")?.Value ?? "False") ? FontStyle.Bold : 0) |
+                        (bool.Parse(appearance.Element("FontItalic")?.Value ?? "False") ? FontStyle.Italic : 0) |
+                        (bool.Parse(appearance.Element("FontUnderline")?.Value ?? "False") ? FontStyle.Underline : 0) |
+                        (bool.Parse(appearance.Element("FontStrikeout")?.Value ?? "False") ? FontStyle.Strikeout : 0)
+                    )
+                );
+                orthoCombo.TypeDesign = (TDesign)Enum.Parse(typeof(TDesign), appearance.Element("TypeDesign")?.Value ?? "0");
+                orthoCombo.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "1");
+                orthoCombo.Size = new Size(
+                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+                );
+                orthoCombo.Location = new Point(
+                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+                );
+            }
+
+            orthoCombo.Variable = xml.Element("Variable")?.Value ?? "";
+            orthoCombo.Value = xml.Element("Value")?.Value ?? "";
+
+            // Variables _VL
+            List<string> vlList = new List<string>();
+            for (int i = 2; ; i++)
+            {
+                XElement? vlElement = xml.Element($"VL{i}");
+                if (vlElement == null) break;
+                vlList.Add(vlElement.Value);
+            }
+            orthoCombo._VL = vlList.ToArray();
+
+            orthoCombo.Det = xml.Element("Det")?.Value ?? "";
+            orthoCombo.ColorOn = ColorTranslator.FromOle(int.Parse(xml.Element("ColorOn")?.Value ?? "0"));
+            orthoCombo.ColorOff = ColorTranslator.FromOle(int.Parse(xml.Element("ColorOff")?.Value ?? "0"));
+            orthoCombo.ColorErr = ColorTranslator.FromOle(int.Parse(xml.Element("ColorErr")?.Value ?? "0"));
+            orthoCombo.LevelVisible = int.Parse(xml.Element("LevelVisible")?.Value ?? "0");
+            orthoCombo.LevelEnabled = int.Parse(xml.Element("LevelEnabled")?.Value ?? "0");
+            orthoCombo.Visibility = xml.Element("Visibility")?.Value ?? "Visible";
+
+            return orthoCombo;
         }
 
         public string WriteFile()

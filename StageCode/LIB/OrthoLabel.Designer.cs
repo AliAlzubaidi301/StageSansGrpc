@@ -46,7 +46,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(Label1);
             Name = "OrthoLabel";
-            Size = new Size(800, 450);
             Load += OrthoLabel_Load;
             ResumeLayout(false);
             PerformLayout();

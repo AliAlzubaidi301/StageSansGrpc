@@ -1085,6 +1085,425 @@ namespace StageCode
                             forme.panel1.Controls.Add(pic);
                         }
                     }
+                    else if (type == "OrthoCombo")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
+                        OrthoCombo orthoAlaControl = OrthoCombo.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAla
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            // Ajouter le contrôle OrthoAla à la PictureBox
+                            pic.Controls.Add(orthoAlaControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+                    else if (type == "OrthoDI")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
+                        OrthoDI orthoAlaControl = OrthoDI.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAla
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            // Ajouter le contrôle OrthoAla à la PictureBox
+                            pic.Controls.Add(orthoAlaControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+                    else if (type == "OrthoEdit")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
+                        OrthoEdit orthoAlaControl = new OrthoEdit();
+
+                        orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAla
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            // Ajouter le contrôle OrthoAla à la PictureBox
+                            pic.Controls.Add(orthoAlaControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+                    else if (type == "OrthoImage")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
+                        OrthoImage orthoAlaControl = new OrthoImage();
+
+                        orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAla
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            // Ajouter le contrôle OrthoAla à la PictureBox
+                            pic.Controls.Add(orthoAlaControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+                    else if (type == "OrthoLabel")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
+                        OrthoLabel orthoAlaControl = new OrthoLabel();
+
+                        orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAla
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            // Ajouter le contrôle OrthoAla à la PictureBox
+                            pic.Controls.Add(orthoAlaControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+                    else if (type == "OrthoPbar")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
+                        OrthoPbar orthoAlaControl = new OrthoPbar();
+
+                        orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAla
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            // Ajouter le contrôle OrthoAla à la PictureBox
+                            pic.Controls.Add(orthoAlaControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+                    else if (type == "OrthoRel")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
+                        OrthoRel orthoAlaControl = new OrthoRel();
+
+                        orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAla
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            // Ajouter le contrôle OrthoAla à la PictureBox
+                            pic.Controls.Add(orthoAlaControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+                    else if (type == "OrthoResult")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
+                        OrthoResult orthoAlaControl = new OrthoResult();
+
+                        orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAla
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            // Ajouter le contrôle OrthoAla à la PictureBox
+                            pic.Controls.Add(orthoAlaControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+                    else if (type == "OrthoVarname")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
+                        OrthoVarname orthoAlaControl = new OrthoVarname();
+
+                        orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAla
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            // Ajouter le contrôle OrthoAla à la PictureBox
+                            pic.Controls.Add(orthoAlaControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+                    else if (type == "Reticule")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
+                        Reticule orthoAlaControl = new Reticule();
+
+                        orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAla
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            // Ajouter le contrôle OrthoAla à la PictureBox
+                            pic.Controls.Add(orthoAlaControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+
+
+
 
                 }
             }

@@ -11,6 +11,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using static StageCode.LIB.OrthoAD;
 
 namespace StageCode.LIB
@@ -163,6 +164,88 @@ namespace StageCode.LIB
             }
             return this;
         }
+        public OrthoVarname ReadFileXML(string xmlText)
+        {
+            XElement xml = XElement.Parse(xmlText);
+            OrthoVarname orthoVarnameControl = new OrthoVarname();
+
+            // Parse le type et le nom de l'objet
+            orthoVarnameControl.Name = xml.Attribute("name")?.Value;
+
+            // Parse la section <Apparence>
+            XElement? appearance = xml.Element("Apparence");
+            if (appearance != null)
+            {
+                // Extraire les propriétés générales
+                orthoVarnameControl.Text = appearance.Element("Text")?.Value ?? string.Empty;
+                orthoVarnameControl.TextAlign = (ContentAlignment)Enum.Parse(typeof(HorizontalAlignment), appearance.Element("TextAlign")?.Value ?? "Left");
+                orthoVarnameControl.Format = appearance.Element("Format")?.Value ?? string.Empty;
+                orthoVarnameControl.BackColor = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("BackColor")?.Value ?? "0"));
+                orthoVarnameControl.ForeColor = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ForeColor")?.Value ?? "0"));
+
+                // Extraire les propriétés de la police
+                orthoVarnameControl.Font = new Font(
+                    appearance.Element("FontName")?.Value ?? "Arial",
+                    float.Parse(appearance.Element("FontSize")?.Value ?? "12"),
+                    FontStyle.Regular
+                );
+                if (bool.TryParse(appearance.Element("FontBold")?.Value, out bool fontBold) && fontBold)
+                {
+                    orthoVarnameControl.Font = new Font(orthoVarnameControl.Font, FontStyle.Bold);
+                }
+                if (bool.TryParse(appearance.Element("FontItalic")?.Value, out bool fontItalic) && fontItalic)
+                {
+                    orthoVarnameControl.Font = new Font(orthoVarnameControl.Font, FontStyle.Italic);
+                }
+                if (bool.TryParse(appearance.Element("FontStrikeout")?.Value, out bool fontStrikeout) && fontStrikeout)
+                {
+                    orthoVarnameControl.Font = new Font(orthoVarnameControl.Font, FontStyle.Strikeout);
+                }
+                if (bool.TryParse(appearance.Element("FontUnderline")?.Value, out bool fontUnderline) && fontUnderline)
+                {
+                    orthoVarnameControl.Font = new Font(orthoVarnameControl.Font, FontStyle.Underline);
+                }
+
+                // Extraire les autres propriétés
+                orthoVarnameControl.TypeDesign = (TDesign)int.Parse(appearance.Element("TypeDesign")?.Value ?? "0");
+                orthoVarnameControl.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "1");
+                orthoVarnameControl.Size = new Size(
+                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+                );
+                orthoVarnameControl.Location = new Point(
+                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+                );
+                orthoVarnameControl.VarText = appearance.Element("VarText")?.Value ?? string.Empty;
+                orthoVarnameControl.VarBackColor = appearance.Element("VarBackColor")?.Value ?? string.Empty;
+                orthoVarnameControl.VarForeColor = appearance.Element("VarForeColor")?.Value ?? string.Empty;
+                orthoVarnameControl.VarTest = appearance.Element("VarTest")?.Value ?? string.Empty;
+                orthoVarnameControl.VarInfo = appearance.Element("VarInfo")?.Value ?? string.Empty;
+                orthoVarnameControl.VarInfoBackColor = appearance.Element("VarInfoBackColor")?.Value ?? string.Empty;
+                orthoVarnameControl.VarInfoForeColor = appearance.Element("VarInfoForeColor")?.Value ?? string.Empty;
+
+                // Extraire les valeurs VL
+                var vlElements = appearance.Elements().Where(e => e.Name.ToString().StartsWith("VL"));
+                orthoVarnameControl._VL = new string[vlElements.Count()];
+                foreach (var vl in vlElements)
+                {
+                    int index = int.Parse(vl.Name.ToString().Replace("VL", ""));
+                    orthoVarnameControl._VL[index] = vl.Value;
+                }
+
+                // Extraire les couleurs et niveaux
+                orthoVarnameControl.ColorOn = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorOn")?.Value ?? "0"));
+                orthoVarnameControl.ColorOff = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorOff")?.Value ?? "0"));
+                orthoVarnameControl.ColorErr = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorErr")?.Value ?? "0"));
+                orthoVarnameControl.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
+                orthoVarnameControl.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
+                orthoVarnameControl.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";
+            }
+
+            return orthoVarnameControl;
+        }
+
 
         public string WriteFile()
         {
