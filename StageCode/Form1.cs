@@ -646,6 +646,7 @@ namespace StageCode
                     // Ajouter les événements à newFrame (et non à un autre contrôle)
                     newFrame.Paint += Frame_Paint;
                     newFrame.Click += NewControl_Click;
+                    newFrame.MouseLeave += Frame_MouseLeave;
 
                     // Restaurer les contrôles dans la nouvelle PictureBox
                     foreach (var controlData in controlsData)
@@ -661,6 +662,12 @@ namespace StageCode
                             else newControl.Text = controlData.Text;
 
                             newFrame.Controls.Add(newControl);
+
+                            newControl.MouseEnter += NewControl_MouseEnter;
+
+                            newControl.Click += NewControl_Click;
+
+                            newControl.MouseClick += NewControl_MouseClick;
                         }
                     }
 
@@ -1690,7 +1697,7 @@ namespace StageCode
                 case "OrthoRel":
                     newControl = new OrthoRel();
                     break;
-
+                    
                 case "OrthoResult":
                     newControl = new OrthoResult();
                     break;
@@ -1779,7 +1786,9 @@ namespace StageCode
                         foreach (PictureBox c in listPic)
                         {
                             c.Location = new Point(spacing, yPosition);
-                            spacing += c.Width + 10; 
+                            spacing += c.Width + 10;
+
+                            c.Paint -= Frame_Paint; 
                         }
                     });
 
@@ -1793,7 +1802,9 @@ namespace StageCode
                         foreach (PictureBox c in listPic)
                         {
                             c.Location = new Point(xPosition, spacing);
-                            spacing += c.Height + 10; 
+                            spacing += c.Height + 10;
+
+                            c.Paint -= Frame_Paint;
                         }
                     });
 
