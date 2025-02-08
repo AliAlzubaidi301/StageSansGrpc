@@ -13,6 +13,7 @@ namespace StageCode
         private Form1 frm;
 
         public static FormVide forme;
+        private bool peutViderListe = false;
 
         private string selectedControl = "";
 
@@ -26,8 +27,13 @@ namespace StageCode
         // Variables globales
         private bool isMovable = false;
 
+        private bool Aligner = false;
+
+        List<PictureBox> listPic = new List<PictureBox>();
+
         //A corriger
         //TabName a faire
+        //Copier Coller et les commentaire et allignement
 
         public Form1()
         {
@@ -699,7 +705,9 @@ namespace StageCode
             {
                 this.ClientSize = new Size(largeur, hauteur);
 
-                Form1_ClientSizeChanged(new object(), new EventArgs());
+                this.Invalidate();
+
+               // Form1_ClientSizeChanged(new object(), new EventArgs());
             }
         }
 
@@ -1600,9 +1608,12 @@ namespace StageCode
         #endregion
 
         #region PnlView
-
         private void pnlViewHost_Click(object sender, MouseEventArgs e)
         {
+            if(Aligner)
+            {
+                return;
+            }
             // Si le curseur est dans son état par défaut, on désactive les bordures pointillées sur toutes les PictureBox
             if (this.Cursor == DefaultCursor)
             {
@@ -1724,8 +1735,73 @@ namespace StageCode
                 this.Cursor = DefaultCursor;
 
                 newControl.Click += NewControl_Click;
+
+                newControl.MouseClick += NewControl_MouseClick;
             }
         }
+
+        private void NewControl_MouseClick(object? sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left && (Control.ModifierKeys & Keys.Control) == Keys.Control)
+            {
+                if(peutViderListe)
+                {
+                    listPic.Clear();
+                }
+
+                Aligner = true;
+
+                Control? Con = sender as Control;
+                if (Con != null)
+                {
+                    PictureBox? parentPictureBox = Con.Parent as PictureBox;
+                    if (parentPictureBox != null)
+                    {
+                        peutViderListe = false;
+
+                        this.listPic.Add(parentPictureBox);
+                    }
+                }
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                if (Aligner)
+                {
+                    ContextMenuStrip contextMenu = new ContextMenuStrip();
+
+                    contextMenu.Items.Add("Horizontalement", null, (s, ev) =>
+                    {
+                        int yPosition = 10;
+                        int spacing = 10;
+
+                        peutViderListe = true;
+
+                        foreach (PictureBox c in listPic)
+                        {
+                            c.Location = new Point(spacing, yPosition);
+                            spacing += c.Width + 10; 
+                        }
+                    });
+
+                    contextMenu.Items.Add("Verticalement", null, (s, ev) =>
+                    {
+                        peutViderListe = true;
+
+                        int xPosition = 10;
+                        int spacing = 10;
+
+                        foreach (PictureBox c in listPic)
+                        {
+                            c.Location = new Point(xPosition, spacing);
+                            spacing += c.Height + 10; 
+                        }
+                    });
+
+                    contextMenu.Show(forme, e.Location);
+                }
+            }
+        }
+
 
         private void Frame_MouseLeave(object? sender, EventArgs e)
         {

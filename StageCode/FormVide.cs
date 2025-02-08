@@ -31,6 +31,8 @@ namespace OrthoDesigner
         private void FormVide_MouseEnter(object? sender, EventArgs e)
         {
             Form1.forme = this;
+
+            this.BringToFront();
         }
 
         private void FormVide_ClientSizeChanged(object? sender, EventArgs e)
