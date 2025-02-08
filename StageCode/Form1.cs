@@ -2247,7 +2247,8 @@ namespace StageCode
 
                     contextMenu.Items.Add("Verticalement", null, Verticale);
 
-                    contextMenu.Show(forme, e.Location);
+                    if(parentPictureBox != null)
+                    contextMenu.Show(parentPictureBox, e.Location);
                 }
             }
         }
@@ -2255,9 +2256,10 @@ namespace StageCode
         private void Verticale(object? sender, EventArgs e)
         {
             peutViderListe = true;
+            Aligner = false;
 
-            int xPosition = 10;
-            int spacing = 10;
+            int xPosition = listPic[0].Location.X;
+            int spacing = listPic[0].Location.Y;
 
             foreach (PictureBox c in listPic)
             {
@@ -2266,14 +2268,17 @@ namespace StageCode
 
                 c.Paint -= pic_Paint;
             }
+
+            listPic.Clear();
         }
 
         private void Horizontale(object? sender, EventArgs e)
         {
-            int yPosition = 10;
-            int Espace = 10;
+            int yPosition = listPic[0].Location.Y;
+            int Espace = listPic[0].Location.X;
 
             peutViderListe = true;
+            Aligner = false;
 
             foreach (PictureBox c in listPic)
             {
@@ -2282,6 +2287,8 @@ namespace StageCode
 
                 c.Paint -= pic_Paint;
             }
+
+            listPic.Clear();
         }
 
         private void pic_MouseLeave(object? sender, EventArgs e)
