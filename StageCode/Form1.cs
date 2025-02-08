@@ -15,17 +15,16 @@ namespace StageCode
         public static FormVide forme;
         private bool peutViderListe = false;
 
-        private string selectedControl = "";
+        private string ControlSelectionner = "";
 
-        private string SelectedPictureBox = "";
+        private string PictureBoxSelectonner = "";
 
-        private PictureBox? resizingFrame = null;
-        private Point mouseOffset;
-        private bool isResizing = false;
-        private bool isMoving = false;
+        private PictureBox? ChangerPicture = null;
+        private Point SourisDecalage;
+        private bool Changement = false;
+        private bool Bouger = false;
 
-        // Variables globales
-        private bool isMovable = false;
+        private bool EnMoouvement = false;
 
         private bool Aligner = false;
 
@@ -33,7 +32,7 @@ namespace StageCode
 
         //A corriger
         //TabName a faire
-        //Copier Coller et les commentaire et allignement
+        //les commentaire et position des controls + la bd
 
         public Form1()
         {
@@ -53,7 +52,7 @@ namespace StageCode
         private void AfficherFormDansPanel(Form form, Panel panel)
         {
             form.TopLevel = false;  // Le formulaire n'est pas un formulaire principal
-           // panel.Controls.Clear();  // Supprime les contrôles existants dans le panel
+                                    // panel.Controls.Clear();  // Supprime les contrôles existants dans le panel
             panel.Controls.Add(form);  // Ajoute le formulaire dans le panel
 
             form.Show();  // Affiche le formulaire
@@ -74,9 +73,6 @@ namespace StageCode
             AppliquerLangue();
 
             Initialize();
-
-
-            //this.WindowState = FormWindowState.Maximized;
         }
 
         #region Ajouter Menu File
@@ -247,6 +243,8 @@ namespace StageCode
                     // Parcourir les contrôles enfants de la PictureBox
                     foreach (Control childControl in pictureBox.Controls)
                     {
+                        childControl.Location = pictureBox.Location;
+
                         // Vérifier le type de contrôle enfant et appeler la méthode WriteFile correspondante
                         if (childControl is AM60 am60Control)
                         {
@@ -362,6 +360,8 @@ namespace StageCode
                     // Parcourir les contrôles enfants de la PictureBox
                     foreach (Control childControl in pictureBox.Controls)
                     {
+                        childControl.Location = pictureBox.Location;
+
                         // Vérifier le type de contrôle enfant et appeler la méthode WriteFile correspondante
                         if (childControl is AM60 am60Control)
                         {
@@ -514,23 +514,28 @@ namespace StageCode
                 return;
             }
 
-            forme.panel1.Controls.Clear();
+            pnlViewHost.Controls.Clear();
 
+            forme = new FormVide();
+
+            pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
+
+            AfficherFormDansPanel(forme, pnlViewHost);
         }
 
 
         private void Couper(object sender, EventArgs e)
         {
             // Trouver la PictureBox sélectionnée
-            PictureBox? frame = forme.panel1.Controls.OfType<PictureBox>()
-                                              .FirstOrDefault(p => p.Name == SelectedPictureBox);
+            PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
+                                              .FirstOrDefault(p => p.Name == PictureBoxSelectonner);
 
-            if (frame != null)
+            if (pic != null)
             {
                 // Liste des informations des contrôles contenus dans la PictureBox
                 List<SerializableControl> controlsData = new List<SerializableControl>();
 
-                foreach (Control ctrl in frame.Controls)
+                foreach (Control ctrl in pic.Controls)
                 {
                     controlsData.Add(new SerializableControl
                     {
@@ -559,8 +564,8 @@ namespace StageCode
                 Clipboard.SetDataObject(data, true);
 
                 // Supprimer uniquement les contrôles internes
-                frame.Controls.Clear();
-                forme.panel1.Controls.Remove(frame);
+                pic.Controls.Clear();
+                forme.panel1.Controls.Remove(pic);
             }
         }
 
@@ -572,15 +577,15 @@ namespace StageCode
         private void Copier(object sender, EventArgs e)
         {
             // Trouver la PictureBox sélectionnée
-            PictureBox? frame = forme.panel1.Controls.OfType<PictureBox>()
-                                              .FirstOrDefault(p => p.Name == SelectedPictureBox);
+            PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
+                                              .FirstOrDefault(p => p.Name == PictureBoxSelectonner);
 
-            if (frame != null)
+            if (pic != null)
             {
                 // Liste des informations des contrôles contenus dans la PictureBox
                 List<SerializableControl> controlsData = new List<SerializableControl>();
 
-                foreach (Control ctrl in frame.Controls)
+                foreach (Control ctrl in pic.Controls)
                 {
                     controlsData.Add(new SerializableControl
                     {
@@ -634,7 +639,7 @@ namespace StageCode
                     List<SerializableControl> controlsData = (List<SerializableControl>)bf.Deserialize(ms);
 
                     // Créer une nouvelle PictureBox pour contenir les contrôles collés
-                    PictureBox newFrame = new PictureBox
+                    PictureBox newpic = new PictureBox
                     {
                         BorderStyle = BorderStyle.None,
                         BackColor = Color.White,
@@ -643,10 +648,10 @@ namespace StageCode
                         AllowDrop = true // Pour gérer éventuellement le drag & drop
                     };
 
-                    // Ajouter les événements à newFrame (et non à un autre contrôle)
-                    newFrame.Paint += Frame_Paint;
-                    newFrame.Click += NewControl_Click;
-                    newFrame.MouseLeave += Frame_MouseLeave;
+                    // Ajouter les événements à newpic (et non à un autre contrôle)
+                    newpic.Paint += pic_Paint;
+                    newpic.Click += Control_Click;
+                    newpic.MouseLeave += pic_MouseLeave;
 
                     // Restaurer les contrôles dans la nouvelle PictureBox
                     foreach (var controlData in controlsData)
@@ -654,40 +659,40 @@ namespace StageCode
                         Type? controlType = Type.GetType(controlData.TypeName);
                         if (controlType != null)
                         {
-                            Control newControl = (Control)Activator.CreateInstance(controlType)!;
-                            newControl.Name = controlData.Name;
-                            newControl.Location = new Point(controlData.X, controlData.Y);
-                            newControl.Size = new Size(controlData.Width, controlData.Height);
-                            if (newControl is TextBox textBox) textBox.Text = controlData.Text;
-                            else newControl.Text = controlData.Text;
+                            Control Control = (Control)Activator.CreateInstance(controlType)!;
+                            Control.Name = controlData.Name;
+                            Control.Location = new Point(controlData.X, controlData.Y);
+                            Control.Size = new Size(controlData.Width, controlData.Height);
+                            if (Control is TextBox textBox) textBox.Text = controlData.Text;
+                            else Control.Text = controlData.Text;
 
-                            newFrame.Controls.Add(newControl);
+                            newpic.Controls.Add(Control);
 
-                            newControl.MouseEnter += NewControl_MouseEnter;
+                            Control.MouseEnter += Control_MouseEnter;
 
-                            newControl.Click += NewControl_Click;
+                            Control.Click += Control_Click;
 
-                            newControl.MouseClick += NewControl_MouseClick;
+                            Control.MouseClick += Control_MouseClick;
                         }
                     }
 
                     // Ajouter la nouvelle PictureBox à pnlViewHost
-                    forme.panel1.Controls.Add(newFrame);
-                    newFrame.Invalidate(); // Redessiner
-                    SelectedPictureBox = "";
+                    forme.panel1.Controls.Add(newpic);
+                    newpic.Invalidate(); // Redessiner
+                    PictureBoxSelectonner = "";
                 }
             }
         }
 
         private void Supprimer(object sender, EventArgs e)
         {
-            PictureBox? frame = forme.panel1.Controls.OfType<PictureBox>()
-                                      .FirstOrDefault(p => p.Name == SelectedPictureBox);
+            PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
+                                      .FirstOrDefault(p => p.Name == PictureBoxSelectonner);
 
-            if (frame != null)
+            if (pic != null)
             {
-                forme.panel1.Controls.Remove(frame);
-                frame.Dispose(); // Libérer la mémoire utilisée par la PictureBox
+                forme.panel1.Controls.Remove(pic);
+                pic.Dispose(); // Libérer la mémoire utilisée par la PictureBox
             }
             else
             {
@@ -712,9 +717,9 @@ namespace StageCode
             {
                 this.ClientSize = new Size(largeur, hauteur);
 
-                this.Invalidate();
+                // pnlViewHost.Controls.Clear();
 
-               // Form1_ClientSizeChanged(new object(), new EventArgs());
+                //  Form1_ClientSizeChanged(new object(), new EventArgs());
             }
         }
 
@@ -858,27 +863,25 @@ namespace StageCode
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            // Définir la taille du contrôle AM60
                             am60Control.Size = new Size(sizeWidth, sizeHeight);
 
-                            // Créer une PictureBox pour contenir le contrôle
-                            PictureBox frame = new PictureBox
+                            //Mes
+                            PictureBox pic = new PictureBox
                             {
                                 Size = new Size(am60Control.Size.Width + 10, am60Control.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
 
+                            am60Control.Location = new Point(5, 5);
 
-                            frame.MouseLeave += Frame_MouseLeave;
+                            pic.MouseLeave += pic_MouseLeave;
 
-                            // Ajouter le contrôle AM60 à la PictureBox
-                            frame.Controls.Add(am60Control);
+                            pic.Controls.Add(am60Control);
 
-                            am60Control.Click += NewControl_Click;
-                            am60Control.MouseEnter += NewControl_MouseEnter;
+                            am60Control.Click += Control_Click;
+                            am60Control.MouseEnter += Control_MouseEnter;
 
-                            // Ajouter la PictureBox au conteneur principal
-                            forme.panel1.Controls.Add(frame);
+                            forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "CONT1")
@@ -900,23 +903,26 @@ namespace StageCode
                             cont1Control.Size = new Size(sizeWidth, sizeHeight);
 
                             // Créer une PictureBox pour contenir le contrôle
-                            PictureBox frame = new PictureBox
+                            PictureBox pic = new PictureBox
                             {
                                 Size = new Size(cont1Control.Size.Width + 10, cont1Control.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
 
+                            cont1Control.Location = new Point(5, 5);
+
+
                             // Ajouter le contrôle Cont1 à la PictureBox
-                            frame.Controls.Add(cont1Control);
+                            pic.Controls.Add(cont1Control);
 
-                            cont1Control.MouseEnter += NewControl_MouseEnter;
-                            frame.MouseLeave += Frame_MouseLeave;
+                            cont1Control.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
 
-                            cont1Control.Click += NewControl_Click;
+                            cont1Control.Click += Control_Click;
 
 
                             // Ajouter la PictureBox au conteneur principal
-                            forme.panel1.Controls.Add(frame);
+                            forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "INTEG")
@@ -938,23 +944,25 @@ namespace StageCode
                             integControl.Size = new Size(sizeWidth, sizeHeight);
 
                             // Créer une PictureBox pour contenir le contrôle
-                            PictureBox frame = new PictureBox
+                            PictureBox pic = new PictureBox
                             {
                                 Size = new Size(integControl.Size.Width + 10, integControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
 
+                            integControl.Location = new Point(5, 5);
+
                             // Ajouter le contrôle INTEG à la PictureBox
-                            frame.Controls.Add(integControl);
+                            pic.Controls.Add(integControl);
 
                             // Ajouter des gestionnaires d'événements à l'objet INTEG si nécessaire
-                            integControl.MouseEnter += NewControl_MouseEnter;
-                            frame.MouseLeave += Frame_MouseLeave;
+                            integControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
 
-                            integControl.Click += NewControl_Click;
+                            integControl.Click += Control_Click;
 
                             // Ajouter la PictureBox au conteneur principal
-                            forme.panel1.Controls.Add(frame);
+                            forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "OrthoAD")
@@ -976,23 +984,25 @@ namespace StageCode
                             orthoADControl.Size = new Size(sizeWidth, sizeHeight);
 
                             // Créer une PictureBox pour contenir le contrôle
-                            PictureBox frame = new PictureBox
+                            PictureBox pic = new PictureBox
                             {
                                 Size = new Size(orthoADControl.Size.Width + 10, orthoADControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
 
+                            orthoADControl.Location = new Point(5, 5);
+
                             // Ajouter le contrôle OrthoAD à la PictureBox
-                            frame.Controls.Add(orthoADControl);
+                            pic.Controls.Add(orthoADControl);
 
                             // Ajouter des gestionnaires d'événements à l'objet OrthoAD si nécessaire
-                            orthoADControl.MouseEnter += NewControl_MouseEnter;
-                            frame.MouseLeave += Frame_MouseLeave;
+                            orthoADControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
 
-                            orthoADControl.Click += NewControl_Click;
+                            orthoADControl.Click += Control_Click;
 
                             // Ajouter la PictureBox au conteneur principal
-                            forme.panel1.Controls.Add(frame);
+                            forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "OrthoAla")
@@ -1014,24 +1024,68 @@ namespace StageCode
                             orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
 
                             // Créer une PictureBox pour contenir le contrôle
-                            PictureBox frame = new PictureBox
+                            PictureBox pic = new PictureBox
                             {
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
 
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
                             // Ajouter le contrôle OrthoAla à la PictureBox
-                            frame.Controls.Add(orthoAlaControl);
+                            pic.Controls.Add(orthoAlaControl);
 
                             // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
-                            orthoAlaControl.MouseEnter += NewControl_MouseEnter;
-                            frame.MouseLeave += Frame_MouseLeave;
-                            orthoAlaControl.Click += NewControl_Click;
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
 
                             // Ajouter la PictureBox au conteneur principal
-                            forme.panel1.Controls.Add(frame);
+                            forme.panel1.Controls.Add(pic);
                         }
                     }
+                    else if (type == "OrthoCMDLib")
+                    {
+                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
+                        OrthoCMDLib orthoAlaControl = OrthoCMDLib.ReadFileXML(componentText);
+
+                        // Extraire les informations de position et de taille depuis le XML
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            // Définir la taille du contrôle OrthoAla
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            // Créer une PictureBox pour contenir le contrôle
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            // Ajouter le contrôle OrthoAla à la PictureBox
+                            pic.Controls.Add(orthoAlaControl);
+
+                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
+
+                            // Ajouter la PictureBox au conteneur principal
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+
                 }
             }
             catch (Exception ex)
@@ -1041,143 +1095,143 @@ namespace StageCode
             }
         }
 
-        private void NewControl_MouseEnter(object? sender, EventArgs e)
+        private void Control_MouseEnter(object? sender, EventArgs e)
         {
             // Activer ou désactiver le mode déplacement
-            isMovable = !isMovable;
+            EnMoouvement = !EnMoouvement;
 
             // Récupérer le contrôle qui a déclenché l'événement
             Control? ctrl = sender as Control;
 
             // Vérifier si le contrôle a un parent de type PictureBox
-            PictureBox? frame = ctrl?.Parent as PictureBox;
+            PictureBox? pic = ctrl?.Parent as PictureBox;
 
             // Modifier le curseur selon l'état du déplacement
-            frame.Cursor = isMovable ? Cursors.SizeAll : Cursors.Default;
+            pic.Cursor = EnMoouvement ? Cursors.SizeAll : Cursors.Default;
 
             if (IsMdiChild)
             {
                 // Ajouter les événements aux enfants pour permettre le déplacement
-                foreach (Control child in frame.Controls)
+                foreach (Control child in pic.Controls)
                 {
-                    child.MouseDown -= Frame_MouseDown;
-                    child.MouseMove -= Frame_MouseMove;
-                    child.MouseUp -= Frame_MouseUp;
+                    child.MouseDown -= pic_MouseDown;
+                    child.MouseMove -= pic_MouseMove;
+                    child.MouseUp -= pic_MouseUp;
 
-                    child.MouseDown += Frame_MouseDown;
-                    child.MouseMove += Frame_MouseMove;
-                    child.MouseUp += Frame_MouseUp;
+                    child.MouseDown += pic_MouseDown;
+                    child.MouseMove += pic_MouseMove;
+                    child.MouseUp += pic_MouseUp;
                 }
             }
             else
             {
                 // Ajouter les événements aux enfants pour permettre le déplacement
-                foreach (Control child in frame.Controls)
+                foreach (Control child in pic.Controls)
                 {
 
-                    child.MouseDown -= Frame_MouseDown;
-                    child.MouseMove -= Frame_MouseMove;
-                    child.MouseUp -= Frame_MouseUp;
+                    child.MouseDown -= pic_MouseDown;
+                    child.MouseMove -= pic_MouseMove;
+                    child.MouseUp -= pic_MouseUp;
 
-                    child.MouseDown += Frame_MouseDown;
-                    child.MouseMove += Frame_MouseMove;
-                    child.MouseUp += Frame_MouseUp;
+                    child.MouseDown += pic_MouseDown;
+                    child.MouseMove += pic_MouseMove;
+                    child.MouseUp += pic_MouseUp;
 
                 }
             }
         }
 
 
-        private void RecupererContenuTXT(string xmlContent)
-        {
-            //try
-            //{
-            //    XElement xml = XElement.Parse(xmlContent);
+        //private void RecupererContenuTXT(string xmlContent)
+        //{
+        //    try
+        //    {
+        //        XElement xml = XElement.Parse(xmlContent);
 
-            //    // Parcourir tous les éléments <Component> du XML
-            //    foreach (XElement component in xml.Elements("Component"))
-            //    {
-            //        string? type = component.Attribute("type")?.Value;
+        //        // Parcourir tous les éléments <Component> du XML
+        //        foreach (XElement component in xml.Elements("Component"))
+        //        {
+        //            string? type = component.Attribute("type")?.Value;
 
-            //        if (type == "AM60")
-            //        {
-            //            AM60 am60Control = new AM60();
-            //            am60Control = am60Control.ReadFileXML(component.ToString());
-            //            Controls.Add(am60Control);
-            //        }
-            //        else if (type == "CONT1")
-            //        {
-            //            CONT1 reticuleControl = new CONT1();
-            //            reticuleControl = reticuleControl.ReadFileXML(component.ToString());
-            //            Controls.Add(reticuleControl);
-            //        }
-            //        else if (type == "INTEG")
-            //        {
-            //            ProgressBar pbarControl = new ProgressBar();
-            //            pbarControl = pbarControl.ReadFileXML(component.ToString());
-            //            Controls.Add(pbarControl);
-            //        }
-            //        else if (type == "RESULT")
-            //        {
-            //            Result resultControl = new Result();
-            //            resultControl = resultControl.ReadFileXML(component.ToString());
-            //            Controls.Add(resultControl);
-            //        }
-            //        else if (type == "VARNAME")
-            //        {
-            //            VarName varNameControl = new VarName();
-            //            varNameControl = varNameControl.ReadFileXML(component.ToString());
-            //            Controls.Add(varNameControl);
-            //        }
-            //        else if (type == "REL")
-            //        {
-            //            Relais relaisControl = new Relais();
-            //            relaisControl = relaisControl.ReadFileXML(component.ToString());
-            //            Controls.Add(relaisControl);
-            //        }
-            //        else if (type == "RESULT")
-            //        {
-            //            Result resultControl = new Result();
-            //            resultControl = resultControl.ReadFileXML(component.ToString());
-            //            Controls.Add(resultControl);
-            //        }
-            //        else if (type == "LABEL")
-            //        {
-            //            LabelControl labelControl = new LabelControl();
-            //            labelControl = labelControl.ReadFileXML(component.ToString());
-            //            Controls.Add(labelControl);
-            //        }
-            //        else if (type == "DI")
-            //        {
-            //            DiControl diControl = new DiControl();
-            //            diControl = diControl.ReadFileXML(component.ToString());
-            //            Controls.Add(diControl);
-            //        }
-            //        else if (type == "COMBO")
-            //        {
-            //            ComboBoxControl comboBoxControl = new ComboBoxControl();
-            //            comboBoxControl = comboBoxControl.ReadFileXML(component.ToString());
-            //            Controls.Add(comboBoxControl);
-            //        }
-            //        else if (type == "EDIT")
-            //        {
-            //            EditControl editControl = new EditControl();
-            //            editControl = editControl.ReadFileXML(component.ToString());
-            //            Controls.Add(editControl);
-            //        }
-            //        else if (type == "IMAGE")
-            //        {
-            //            ImageControl imageControl = new ImageControl();
-            //            imageControl = imageControl.ReadFileXML(component.ToString());
-            //            Controls.Add(imageControl);
-            //        }
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show($"Une erreur est survenue lors du traitement du fichier XML : {ex.Message}", "Erreur");
-            //}
-        }
+        //            if (type == "AM60")
+        //            {
+        //                AM60 am60Control = new AM60();
+        //                am60Control = am60Control.ReadFile(component.ToString());
+        //                Controls.Add(am60Control);
+        //            }
+        //            else if (type == "CONT1")
+        //            {
+        //                CONT1 reticuleControl = new CONT1();
+        //                reticuleControl = reticuleControl.ReadFileXML(component.ToString());
+        //                Controls.Add(reticuleControl);
+        //            }
+        //            else if (type == "INTEG")
+        //            {
+        //                ProgressBar pbarControl = new ProgressBar();
+        //                pbarControl = pbarControl.ReadFileXML(component.ToString());
+        //                Controls.Add(pbarControl);
+        //            }
+        //            else if (type == "RESULT")
+        //            {
+        //                Result resultControl = new Result();
+        //                resultControl = resultControl.ReadFileXML(component.ToString());
+        //                Controls.Add(resultControl);
+        //            }
+        //            else if (type == "VARNAME")
+        //            {
+        //                VarName varNameControl = new VarName();
+        //                varNameControl = varNameControl.ReadFileXML(component.ToString());
+        //                Controls.Add(varNameControl);
+        //            }
+        //            else if (type == "REL")
+        //            {
+        //                Relais relaisControl = new Relais();
+        //                relaisControl = relaisControl.ReadFileXML(component.ToString());
+        //                Controls.Add(relaisControl);
+        //            }
+        //            else if (type == "RESULT")
+        //            {
+        //                Result resultControl = new Result();
+        //                resultControl = resultControl.ReadFileXML(component.ToString());
+        //                Controls.Add(resultControl);
+        //            }
+        //            else if (type == "LABEL")
+        //            {
+        //                LabelControl labelControl = new LabelControl();
+        //                labelControl = labelControl.ReadFileXML(component.ToString());
+        //                Controls.Add(labelControl);
+        //            }
+        //            else if (type == "DI")
+        //            {
+        //                DiControl diControl = new DiControl();
+        //                diControl = diControl.ReadFileXML(component.ToString());
+        //                Controls.Add(diControl);
+        //            }
+        //            else if (type == "COMBO")
+        //            {
+        //                ComboBoxControl comboBoxControl = new ComboBoxControl();
+        //                comboBoxControl = comboBoxControl.ReadFileXML(component.ToString());
+        //                Controls.Add(comboBoxControl);
+        //            }
+        //            else if (type == "EDIT")
+        //            {
+        //                EditControl editControl = new EditControl();
+        //                editControl = editControl.ReadFileXML(component.ToString());
+        //                Controls.Add(editControl);
+        //            }
+        //            else if (type == "IMAGE")
+        //            {
+        //                ImageControl imageControl = new ImageControl();
+        //                imageControl = imageControl.ReadFileXML(component.ToString());
+        //                Controls.Add(imageControl);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Une erreur est survenue lors du traitement du fichier XML : {ex.Message}", "Erreur");
+        //    }
+        //}
 
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1557,17 +1611,14 @@ namespace StageCode
                 item.Font = new Font(item.Font.FontFamily, fontSize);
             }
 
-            // Adapter pnlViewHost pour occuper tout l'espace en dessous du menu
             pnlViewHost.Location = new Point(0, MainMenu.Bottom);
             pnlViewHost.Width = (int)(this.ClientSize.Width * 0.8);
             pnlViewHost.Height = this.ClientSize.Height - pnlViewHost.Top;
 
-            // Ajuster lstToolbox (à gauche du pnlViewHost)
             lstToolbox.Width = (int)(pnlViewHost.Width * 0.3);
-            lstToolbox.Height = pnlViewHost.Height / 2; // moitié de pnlViewHost
+            lstToolbox.Height = pnlViewHost.Height / 2;
             lstToolbox.Location = new Point(pnlViewHost.Right, pnlViewHost.Top);
 
-            // Ajuster propertyGrid1 (sous lstToolbox, même largeur)
             propertyGrid1.Width = lstToolbox.Width;
             propertyGrid1.Height = pnlViewHost.Height - lstToolbox.Height;
             propertyGrid1.Location = new Point(lstToolbox.Left, lstToolbox.Bottom);
@@ -1606,7 +1657,7 @@ namespace StageCode
         {
             if (lstToolbox.SelectedItem != null)
             {
-                selectedControl = lstToolbox.SelectedItem.ToString();
+                ControlSelectionner = lstToolbox.SelectedItem.ToString();
 
                 this.Cursor = Cursors.Cross;
             }
@@ -1617,7 +1668,7 @@ namespace StageCode
         #region PnlView
         private void pnlViewHost_Click(object sender, MouseEventArgs e)
         {
-            if(Aligner)
+            if (Aligner)
             {
                 return;
             }
@@ -1627,141 +1678,138 @@ namespace StageCode
                 // Parcours toutes les PictureBox dans le pnlViewHost et supprime les bordures pointillées
                 foreach (Control control in forme.panel1.Controls)
                 {
-                    if (control is PictureBox frame)
+                    if (control is PictureBox pic)
                     {
                         // Supprimer le handler d'événement Paint pour ne plus dessiner la bordure
-                        frame.Paint -= Frame_Paint;
+                        pic.Paint -= pic_Paint;
 
-                        SelectedPictureBox = "";
+                        PictureBoxSelectonner = "";
 
-                        frame.Invalidate();
+                        pic.Invalidate();
                     }
                 }
                 return; // Sortir de la méthode si le curseur est par défaut
             }
 
             // Si un contrôle est sélectionné, on procède à l'ajout
-            Control? newControl = null;
+            Control? Ctrl = null;
 
             // Vérifier si un contrôle est sélectionné avant de créer un nouveau contrôle
-            switch (selectedControl)
+            switch (ControlSelectionner)
             {
                 case "AM60":
-                    newControl = new AM60();
+                    Ctrl = new AM60();
                     break;
 
                 case "Cont1":
-                    newControl = new CONT1();
+                    Ctrl = new CONT1();
                     break;
 
                 case "INTEG":
-                    newControl = new INTEG();
+                    Ctrl = new INTEG();
                     break;
 
                 case "OrthoAD":
-                    newControl = new OrthoAD();
+                    Ctrl = new OrthoAD();
                     break;
 
                 case "OrthoAla":
-                    newControl = new OrthoAla();
+                    Ctrl = new OrthoAla();
                     break;
 
                 case "OrthoCMDLib":
-                    newControl = new OrthoCMDLib();
+                    Ctrl = new OrthoCMDLib();
                     break;
 
                 case "OrthoCombo":
-                    newControl = new OrthoCombo();
+                    Ctrl = new OrthoCombo();
                     break;
 
                 case "OrthoDI":
-                    newControl = new OrthoDI();
+                    Ctrl = new OrthoDI();
                     break;
 
                 case "OrthoEdit":
-                    newControl = new OrthoEdit();
+                    Ctrl = new OrthoEdit();
                     break;
 
                 case "Ortholmage":
-                    newControl = new OrthoImage();
+                    Ctrl = new OrthoImage();
                     break;
 
                 case "OrthoLabel":
-                    newControl = new OrthoLabel();
+                    Ctrl = new OrthoLabel();
                     break;
 
                 case "OrthoPbar":
-                    newControl = new OrthoPbar();
+                    Ctrl = new OrthoPbar();
                     break;
 
                 case "OrthoRel":
-                    newControl = new OrthoRel();
+                    Ctrl = new OrthoRel();
                     break;
-                    
+
                 case "OrthoResult":
-                    newControl = new OrthoResult();
+                    Ctrl = new OrthoResult();
                     break;
 
                 case "OrthoVarname":
-                    newControl = new OrthoVarname();
+                    Ctrl = new OrthoVarname();
                     break;
 
                 case "Reticule":
-                    newControl = new Reticule();
+                    Ctrl = new Reticule();
                     break;
 
                 default:
                     return;
             }
 
-            if (newControl != null)
+            if (Ctrl != null)
             {
                 // Création de la PictureBox qui servira de cadre
-                PictureBox frame = new PictureBox
+                PictureBox pic = new PictureBox
                 {
-                    Size = new Size(newControl.Width + 10, newControl.Height + 10), // Ajuste la taille
+                    Size = new Size(Ctrl.Width + 10, Ctrl.Height + 10), // Ajuste la taille
                     Location = new Point(e.X - 5, e.Y - 5) // Position ajustée par rapport au clic
                 };
 
                 // Gérer le dessin personnalisé pour la bordure en pointillés
-                frame.Paint += Frame_Paint;
+                pic.Paint += pic_Paint;
 
-                newControl.MouseEnter += NewControl_MouseEnter;
+                Ctrl.MouseEnter += Control_MouseEnter;
 
                 // Ajouter le contrôle à l'intérieur de la PictureBox
-                newControl.Location = new Point(5, 5);
-                frame.Controls.Add(newControl);
+                Ctrl.Location = new Point(5, 5);
+                pic.Controls.Add(Ctrl);
 
-                frame.MouseLeave += Frame_MouseLeave;
+                pic.MouseLeave += pic_MouseLeave;
 
-                // frame.Bufer
-                // Ajouter la PictureBox au conteneur principal
-                forme.panel1.Controls.Add(frame);
+                forme.panel1.Controls.Add(pic);
 
-                // Réinitialiser le curseur
                 this.Cursor = DefaultCursor;
 
-                newControl.Click += NewControl_Click;
+                Ctrl.Click += Control_Click;
 
-                newControl.MouseClick += NewControl_MouseClick;
+                Ctrl.MouseClick += Control_MouseClick;
             }
         }
-
-        private void NewControl_MouseClick(object? sender, MouseEventArgs e)
+        private void Control_MouseClick(object? sender, MouseEventArgs e)
         {
+            Control? Con = sender as Control;
+            PictureBox? parentPictureBox = Con.Parent as PictureBox;
+
             if (e.Button == MouseButtons.Left && (Control.ModifierKeys & Keys.Control) == Keys.Control)
             {
-                if(peutViderListe)
+                if (peutViderListe)
                 {
                     listPic.Clear();
                 }
 
                 Aligner = true;
 
-                Control? Con = sender as Control;
                 if (Con != null)
                 {
-                    PictureBox? parentPictureBox = Con.Parent as PictureBox;
                     if (parentPictureBox != null)
                     {
                         peutViderListe = false;
@@ -1776,45 +1824,48 @@ namespace StageCode
                 {
                     ContextMenuStrip contextMenu = new ContextMenuStrip();
 
-                    contextMenu.Items.Add("Horizontalement", null, (s, ev) =>
-                    {
-                        int yPosition = 10;
-                        int spacing = 10;
+                    contextMenu.Items.Add("Horizontalement", null, Horizontale);
 
-                        peutViderListe = true;
-
-                        foreach (PictureBox c in listPic)
-                        {
-                            c.Location = new Point(spacing, yPosition);
-                            spacing += c.Width + 10;
-
-                            c.Paint -= Frame_Paint; 
-                        }
-                    });
-
-                    contextMenu.Items.Add("Verticalement", null, (s, ev) =>
-                    {
-                        peutViderListe = true;
-
-                        int xPosition = 10;
-                        int spacing = 10;
-
-                        foreach (PictureBox c in listPic)
-                        {
-                            c.Location = new Point(xPosition, spacing);
-                            spacing += c.Height + 10;
-
-                            c.Paint -= Frame_Paint;
-                        }
-                    });
+                    contextMenu.Items.Add("Verticalement", null, Verticale);
 
                     contextMenu.Show(forme, e.Location);
                 }
             }
         }
 
+        private void Verticale(object? sender, EventArgs e)
+        {
+            peutViderListe = true;
 
-        private void Frame_MouseLeave(object? sender, EventArgs e)
+            int xPosition = 10;
+            int spacing = 10;
+
+            foreach (PictureBox c in listPic)
+            {
+                c.Location = new Point(xPosition, spacing);
+                spacing += c.Height + 10;
+
+                c.Paint -= pic_Paint;
+            }
+        }
+
+        private void Horizontale(object? sender, EventArgs e)
+        {
+            int yPosition = 10;
+            int Espace = 10;
+
+            peutViderListe = true;
+
+            foreach (PictureBox c in listPic)
+            {
+                c.Location = new Point(Espace, yPosition);
+                Espace += c.Width + 10;
+
+                c.Paint -= pic_Paint;
+            }
+        }
+
+        private void pic_MouseLeave(object? sender, EventArgs e)
         {
             PictureBox? p = sender as PictureBox;
             foreach (Control ctrl in p.Controls)
@@ -1825,33 +1876,33 @@ namespace StageCode
                 p.Height += 10;
             }
 
-            p.Paint -= Frame_Paint;
+            p.Paint -= pic_Paint;
             p.Invalidate();
 
             this.Cursor = DefaultCursor;
 
-            this.isMoving = false;
-            this.isMovable = false;
+            this.Bouger = false;
+            this.EnMoouvement = false;
 
         }
 
-        private void NewControl_Click(object? sender, EventArgs e)
+        private void Control_Click(object? sender, EventArgs e)
         {
             Control? controle = sender as Control;
 
             // Vérifier si le contrôle est un contrôle enfant d'une PictureBox
-            PictureBox? frame = controle?.Parent as PictureBox;
+            PictureBox? pic = controle?.Parent as PictureBox;
 
-            if (frame != null)
+            if (pic != null)
             {
                 // Ajouter des gestionnaires d'événements pour déplacer ou redimensionner
-                frame.MouseDown += Frame_MouseDown2;
-                frame.MouseMove += Frame_MouseMove2;
-                frame.MouseUp += Frame_MouseUp2;
+                pic.MouseDown += pic_MouseDown2;
+                pic.MouseMove += pic_MouseMove2;
+                pic.MouseUp += pic_MouseUp2;
 
                 // Ajouter la gestion du dessin des bordures pointillées
-                frame.Paint += Frame_Paint;
-                frame.Invalidate(); // Cela va déclencher l'événement Paint pour redessiner
+                pic.Paint += pic_Paint;
+                pic.Invalidate(); // Cela va déclencher l'événement Paint pour redessiner
 
                 // Si un contrôle est sélectionné, afficher ses propriétés dans le PropertyGrid
                 if (controle is AM60 am60Control)
@@ -1919,6 +1970,10 @@ namespace StageCode
                 {
                     propertyGrid1.SelectedObject = reticuleControl;
                 }
+                else
+                {
+                    propertyGrid1.SelectedObject = forme;
+                }
 
                 // Ajouter des vérifications pour les autres types de contrôles
 
@@ -1931,109 +1986,108 @@ namespace StageCode
 
         #region Mouse
 
-        private void Frame_MouseDown(object sender, MouseEventArgs e)
+        private void pic_MouseDown(object sender, MouseEventArgs e)
         {
-            // Vérifier que le déplacement est activé
-            if (!isMovable) return;
+            if (!EnMoouvement) return;
 
             // Récupérer la PictureBox, même si on clique sur un élément à l’intérieur
-            PictureBox? frame = (sender as PictureBox) ?? (sender as Control)?.Parent as PictureBox;
+            PictureBox? picturebox = (sender as PictureBox) ?? (sender as Control)?.Parent as PictureBox;
 
-            if (frame != null)
+            if (picturebox != null)
             {
-                isMoving = true;
-                mouseOffset = e.Location;
+                Bouger = true;
+                SourisDecalage = e.Location;
             }
         }
 
-        private void Frame_MouseMove(object sender, MouseEventArgs e)
+        private void pic_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!isMoving) return;
+            if (!Bouger) return;
 
-            PictureBox? frame = (sender as PictureBox) ?? (sender as Control)?.Parent as PictureBox;
+            PictureBox? pictureBox = (sender as PictureBox) ?? (sender as Control)?.Parent as PictureBox;
 
-            if (frame != null)
+            if (pictureBox != null)
             {
-                frame.Left += e.X - mouseOffset.X;
-                frame.Top += e.Y - mouseOffset.Y;
+                pictureBox.Left += e.X - SourisDecalage.X;
+                pictureBox.Top += e.Y - SourisDecalage.Y;
             }
         }
 
-        private void Frame_MouseUp(object sender, MouseEventArgs e)
+        private void pic_MouseUp(object sender, MouseEventArgs e)
         {
-            isMoving = false;
+            Bouger = false;
         }
 
 
 
-        private void Frame_MouseDown2(object sender, MouseEventArgs e)
+        private void pic_MouseDown2(object sender, MouseEventArgs e)
         {
-            PictureBox? frame = sender as PictureBox;
+            PictureBox? pictureBox = sender as PictureBox;
 
-            if (frame != null)
+            if (pictureBox != null)
             {
                 // Détecter si on clique sur une bordure pour le redimensionnement
-                if (IsNearBorder(e.Location, frame))
+                if (IsNearBorder(e.Location, pictureBox))
                 {
-                    resizingFrame = frame;
-                    mouseOffset = e.Location;
-                    isResizing = true;
-                    frame.Cursor = Cursors.SizeNWSE; // Curseur de redimensionnement
+                    ChangerPicture = pictureBox;
+                    SourisDecalage = e.Location;
+                    Changement = true;
+                    pictureBox.Cursor = Cursors.SizeNWSE; // Curseur de redimensionnement
                 }
             }
         }
 
-        private void Frame_MouseMove2(object sender, MouseEventArgs e)
+        private void pic_MouseMove2(object sender, MouseEventArgs e)
         {
-            PictureBox? frame = sender as PictureBox;
+            PictureBox? pic = sender as PictureBox;
 
-            if (isResizing && resizingFrame != null)
+            if (Changement && ChangerPicture != null)
             {
                 // Ajuster la taille de la PictureBox en fonction du mouvement de la souris
-                int deltaX = e.X - mouseOffset.X;
-                int deltaY = e.Y - mouseOffset.Y;
+                int deltaX = e.X - SourisDecalage.X;
+                int deltaY = e.Y - SourisDecalage.Y;
 
-                resizingFrame.Width = Math.Max(10, resizingFrame.Width + deltaX);
-                resizingFrame.Height = Math.Max(10, resizingFrame.Height + deltaY);
+                ChangerPicture.Width = Math.Max(10, ChangerPicture.Width + deltaX);
+                ChangerPicture.Height = Math.Max(10, ChangerPicture.Height + deltaY);
 
                 // Redimensionner l'objet à l'intérieur de la PictureBox pour qu'il prenne toute la taille
-                if (resizingFrame.Controls.Count > 0)
+                if (ChangerPicture.Controls.Count > 0)
                 {
-                    Control child = resizingFrame.Controls[0];
-                    child.Width = resizingFrame.Width;
-                    child.Height = resizingFrame.Height;
+                    Control child = ChangerPicture.Controls[0];
+                    child.Width = ChangerPicture.Width;
+                    child.Height = ChangerPicture.Height;
                 }
 
                 // Mise à jour de la position de la souris
-                mouseOffset = e.Location;
+                SourisDecalage = e.Location;
 
                 // Redessiner la bordure de la PictureBox
-                resizingFrame.Invalidate();
+                ChangerPicture.Invalidate();
             }
             else
             {
                 // Modifier le curseur en fonction de la position de la souris
-                if (frame != null && IsNearBorder(e.Location, frame))
+                if (pic != null && IsNearBorder(e.Location, pic))
                 {
-                    frame.Cursor = Cursors.SizeNWSE; // Curseur de redimensionnement
+                    pic.Cursor = Cursors.SizeNWSE; // Curseur de redimensionnement
                 }
                 else
                 {
-                    frame.Cursor = Cursors.Default; // Curseur par défaut
+                    pic.Cursor = Cursors.Default; // Curseur par défaut
                 }
             }
         }
 
-        private void Frame_MouseUp2(object sender, MouseEventArgs e)
+        private void pic_MouseUp2(object sender, MouseEventArgs e)
         {
             // Réinitialiser les indicateurs de redimensionnement
-            resizingFrame = null;
-            isResizing = false;
+            ChangerPicture = null;
+            Changement = false;
 
-            PictureBox? frame = sender as PictureBox;
-            if (frame != null)
+            PictureBox? pic = sender as PictureBox;
+            if (pic != null)
             {
-                frame.Cursor = Cursors.Default; // Remettre le curseur par défaut
+                pic.Cursor = Cursors.Default; // Remettre le curseur par défaut
             }
         }
 
@@ -2043,92 +2097,43 @@ namespace StageCode
 
         #region Border
 
-        private bool IsNearBorder(Point mousePosition, PictureBox frame)
+        private bool IsNearBorder(Point mousePosition, PictureBox pic)
         {
             // Vérifier si la souris est proche des bords de la PictureBox
             int borderDistance = 10; // Distance de la bordure pour le redimensionnement
-            return mousePosition.X >= frame.Width - borderDistance ||
+            return mousePosition.X >= pic.Width - borderDistance ||
                    mousePosition.X <= borderDistance ||
-                   mousePosition.Y >= frame.Height - borderDistance ||
+                   mousePosition.Y >= pic.Height - borderDistance ||
                    mousePosition.Y <= borderDistance;
         }
 
         // Méthode pour dessiner les bordures pointillées sur les PictureBox
-        private void Frame_Paint(object sender, PaintEventArgs e)
+        private void pic_Paint(object sender, PaintEventArgs e)
         {
-            PictureBox? frame = sender as PictureBox;
+            PictureBox? pic = sender as PictureBox;
 
             int pictureBoxCount = forme.panel1.Controls.OfType<PictureBox>().Count();
 
             // Mettre à jour le nom du PictureBox avec un numéro unique
-            frame.Name = "PictureBox" + (pictureBoxCount + 1);  // Exemple : PictureBox1, PictureBox2, etc.
+            pic.Name = "PictureBox" + (pictureBoxCount + 1);  // Exemple : PictureBox1, PictureBox2, etc.
 
-            SelectedPictureBox = frame.Name;
+            PictureBoxSelectonner = pic.Name;
 
-            if (frame != null)
+            if (pic != null)
             {
                 using (Pen pen = new Pen(Color.Black))
                 {
                     pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot; // Bordure en pointillés
-                    e.Graphics.DrawRectangle(pen, 0, 0, frame.Width - 1, frame.Height - 1);
+                    e.Graphics.DrawRectangle(pen, 0, 0, pic.Width - 1, pic.Height - 1);
 
                 }
             }
         }
 
         #endregion
-
-        // Fonction pour afficher un MessageBox personnalisé
-        private DialogResult ShowCustomMessageBox(string message, string title, string yesText, string noText)
-        {
-            using (Form customDialog = new Form())
-            {
-                customDialog.Text = title;
-                customDialog.FormBorderStyle = FormBorderStyle.FixedDialog;
-                customDialog.StartPosition = FormStartPosition.CenterScreen;
-                customDialog.MinimizeBox = false;
-                customDialog.MaximizeBox = false;
-                customDialog.ClientSize = new Size(300, 150);
-
-                // Ajouter un label pour afficher le message
-                Label messageLabel = new Label()
-                {
-                    Text = message,
-                    Location = new Point(50, 30),
-                    AutoSize = true
-                };
-                customDialog.Controls.Add(messageLabel);
-
-                // Bouton "Oui"
-                Button btnYes = new Button()
-                {
-                    Text = yesText,
-                    DialogResult = DialogResult.Yes,
-                    Location = new Point(30, 80)
-                };
-                customDialog.Controls.Add(btnYes);
-
-                // Bouton "Non"
-                Button btnNo = new Button()
-                {
-                    Text = noText,
-                    DialogResult = DialogResult.No,
-                    Location = new Point(110, 80)
-                };
-                customDialog.Controls.Add(btnNo);
-
-                customDialog.AcceptButton = btnYes; // Le bouton par défaut pour "Oui"
-                customDialog.CancelButton = btnNo;  // Le bouton "Non" comme bouton d'annulation
-
-                // Affichage du formulaire personnalisé
-                DialogResult dialogResult = customDialog.ShowDialog();
-                return dialogResult;
-            }
-        }
-
         private void controlCommentToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(SelectedPictureBox))
+            if (string.IsNullOrEmpty(PictureBoxSelectonner))
             {
                 MessageBox.Show("Aucun element sélectionné.");
                 return;
@@ -2138,13 +2143,13 @@ namespace StageCode
 
             foreach (PictureBox ctrl in forme.panel1.Controls)
             {
-                if (ctrl.Name == SelectedPictureBox)
+                if (ctrl.Name == PictureBoxSelectonner)
                 {
                     foreach (Control childControl in ctrl.Controls)
                     {
                         Type controlType = childControl.GetType();
 
-                        if (childControl.Name == selectedControl)
+                        if (childControl.Name == ControlSelectionner)
                         {
                             control = childControl;
                             break;
@@ -2158,9 +2163,9 @@ namespace StageCode
 
                         string commentaire = ControlComment.commentaire;
 
-                        object? newControl = Activator.CreateInstance(control.GetType());
+                        object? Control = Activator.CreateInstance(control.GetType());
 
-                        if (newControl is Control newCtrl)
+                        if (Control is Control newCtrl)
                         {
                             newCtrl.GetType().GetProperty("Comment")?.SetValue(newCtrl, commentaire);
                         }

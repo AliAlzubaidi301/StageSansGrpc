@@ -160,17 +160,13 @@ namespace StageCode.LIB
 
             OrthoCMDLib orthoCMDLibControl = new OrthoCMDLib();
 
-            // Extraire le type et le nom du composant
             orthoCMDLibControl.Name = xml.Attribute("name")?.Value;
 
-            // Extraire les informations de la section principale
             XElement? appearance = xml.Element("Apparence");
             if (appearance != null)
             {
-                // Extraire les propriétés de l'apparence
                 orthoCMDLibControl.Caption = appearance.Element("Caption")?.Value;
 
-                // Utiliser ContentAlignment_Parser pour obtenir l'alignement
                 int textAlignValue = int.Parse(appearance.Element("TextAlign")?.Value ?? "2");
                 orthoCMDLibControl.TextAlign = ContentAlignment_Parser.Get_Alignment(textAlignValue);
 
@@ -199,7 +195,6 @@ namespace StageCode.LIB
                 );
                 orthoCMDLibControl.Commande = appearance.Element("Commande")?.Value;
 
-                // Extraire les VarLink
                 orthoCMDLibControl._VarLink = new string[10]; // Ajuste la taille si nécessaire
                 for (int i = 0; i < 10; i++)
                 {
@@ -227,7 +222,6 @@ namespace StageCode.LIB
         {
             var xmlContent = new StringBuilder();
 
-            // Début du composant spécifique
             xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
 
             // Section des propriétés du composant
