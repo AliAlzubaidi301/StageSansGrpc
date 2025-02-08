@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StageCode;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -21,6 +22,15 @@ namespace OrthoDesigner
         private void FormVide_Load(object sender, EventArgs e)
         {
             this.ClientSizeChanged += FormVide_ClientSizeChanged;
+
+            this.MouseEnter += FormVide_MouseEnter;
+
+            this.panel1.MouseEnter += FormVide_MouseEnter;
+        }
+
+        private void FormVide_MouseEnter(object? sender, EventArgs e)
+        {
+            Form1.forme = this;
         }
 
         private void FormVide_ClientSizeChanged(object? sender, EventArgs e)

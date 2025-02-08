@@ -3,14 +3,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using OrthoDesigner.Other;
 using System.Xml.Linq;
-using System.Diagnostics;
-using System.ComponentModel.Design;
-using System.Threading.Channels;
-using System.Windows.Forms.VisualStyles;
-using Microsoft.VisualBasic;
-using System.Windows.Forms;
-using StageCode.Other;
-using System;
 using OrthoDesigner;
 
 namespace StageCode
@@ -20,7 +12,7 @@ namespace StageCode
         public static int Langue = 1; // 1 = English, 2 = Chinese, 3 = German, 4 = French, 5 = Lithuanian
         private Form1 frm;
 
-        FormVide forme;
+        public static FormVide forme;
 
         private string selectedControl = "";
 
@@ -41,7 +33,7 @@ namespace StageCode
         {
             InitializeComponent();
 
-            this.forme = new FormVide();
+            forme = new FormVide();
 
             pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
 
@@ -2057,7 +2049,7 @@ namespace StageCode
 
             Control? control = null;
 
-            foreach (PictureBox ctrl in this.forme.panel1.Controls)
+            foreach (PictureBox ctrl in forme.panel1.Controls)
             {
                 if (ctrl.Name == SelectedPictureBox)
                 {
@@ -2103,14 +2095,13 @@ namespace StageCode
         {
             pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
 
-            FormVide forme = new FormVide();
+            FormVide tmp = new FormVide();
 
-            forme.Location = new Point(0, 0);
-            forme.panel1 = this.forme.panel1;
+            tmp.Location = new Point(0, 0);
 
-            forme.panel1.MouseClick += pnlViewHost_Click;
+            tmp.panel1.MouseClick += pnlViewHost_Click;
 
-            AfficherFormDansPanel(forme, pnlViewHost);
+            AfficherFormDansPanel(tmp, pnlViewHost);
         }
     }
 }
