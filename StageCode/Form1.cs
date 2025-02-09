@@ -648,7 +648,6 @@ namespace StageCode
                         AllowDrop = true // Pour gérer éventuellement le drag & drop
                     };
 
-                    // Ajouter les événements à newpic (et non à un autre contrôle)
                     newpic.Paint += pic_Paint;
                     newpic.Click += Control_Click;
                     newpic.MouseLeave += pic_MouseLeave;
@@ -676,7 +675,6 @@ namespace StageCode
                         }
                     }
 
-                    // Ajouter la nouvelle PictureBox à pnlViewHost
                     forme.panel1.Controls.Add(newpic);
                     newpic.Invalidate(); // Redessiner
                     PictureBoxSelectonner = "";
@@ -1116,34 +1114,27 @@ namespace StageCode
                             // Ajouter le contrôle OrthoAla à la PictureBox
                             pic.Controls.Add(orthoAlaControl);
 
-                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
                             orthoAlaControl.MouseEnter += Control_MouseEnter;
                             pic.MouseLeave += pic_MouseLeave;
                             orthoAlaControl.Click += Control_Click;
 
-                            // Ajouter la PictureBox au conteneur principal
                             forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "OrthoDI")
                     {
-                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
                         OrthoDI orthoAlaControl = OrthoDI.ReadFileXML(componentText);
 
-                        // Extraire les informations de position et de taille depuis le XML
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
-                            // Assurez-vous de définir la taille et la position
                             int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
                             int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            // Définir la taille du contrôle OrthoAla
                             orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
 
-                            // Créer une PictureBox pour contenir le contrôle
                             PictureBox pic = new PictureBox
                             {
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
@@ -1152,40 +1143,31 @@ namespace StageCode
 
                             orthoAlaControl.Location = new Point(5, 5);
 
-
-                            // Ajouter le contrôle OrthoAla à la PictureBox
                             pic.Controls.Add(orthoAlaControl);
 
-                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
                             orthoAlaControl.MouseEnter += Control_MouseEnter;
                             pic.MouseLeave += pic_MouseLeave;
                             orthoAlaControl.Click += Control_Click;
 
-                            // Ajouter la PictureBox au conteneur principal
                             forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "OrthoEdit")
                     {
-                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
                         OrthoEdit orthoAlaControl = new OrthoEdit();
 
                         orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
 
-                        // Extraire les informations de position et de taille depuis le XML
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
-                            // Assurez-vous de définir la taille et la position
                             int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
                             int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            // Définir la taille du contrôle OrthoAla
                             orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
 
-                            // Créer une PictureBox pour contenir le contrôle
                             PictureBox pic = new PictureBox
                             {
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
@@ -1194,40 +1176,31 @@ namespace StageCode
 
                             orthoAlaControl.Location = new Point(5, 5);
 
-
-                            // Ajouter le contrôle OrthoAla à la PictureBox
                             pic.Controls.Add(orthoAlaControl);
 
-                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
                             orthoAlaControl.MouseEnter += Control_MouseEnter;
                             pic.MouseLeave += pic_MouseLeave;
                             orthoAlaControl.Click += Control_Click;
 
-                            // Ajouter la PictureBox au conteneur principal
                             forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "OrthoImage")
                     {
-                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
                         OrthoImage orthoAlaControl = new OrthoImage();
 
                         orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
 
-                        // Extraire les informations de position et de taille depuis le XML
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
-                            // Assurez-vous de définir la taille et la position
                             int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
                             int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            // Définir la taille du contrôle OrthoAla
                             orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
 
-                            // Créer une PictureBox pour contenir le contrôle
                             PictureBox pic = new PictureBox
                             {
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
@@ -1236,40 +1209,31 @@ namespace StageCode
 
                             orthoAlaControl.Location = new Point(5, 5);
 
-
-                            // Ajouter le contrôle OrthoAla à la PictureBox
                             pic.Controls.Add(orthoAlaControl);
 
-                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
                             orthoAlaControl.MouseEnter += Control_MouseEnter;
                             pic.MouseLeave += pic_MouseLeave;
                             orthoAlaControl.Click += Control_Click;
 
-                            // Ajouter la PictureBox au conteneur principal
                             forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "OrthoLabel")
                     {
-                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
                         OrthoLabel orthoAlaControl = new OrthoLabel();
 
                         orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
 
-                        // Extraire les informations de position et de taille depuis le XML
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
-                            // Assurez-vous de définir la taille et la position
                             int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
                             int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            // Définir la taille du contrôle OrthoAla
                             orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
 
-                            // Créer une PictureBox pour contenir le contrôle
                             PictureBox pic = new PictureBox
                             {
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
@@ -1279,39 +1243,31 @@ namespace StageCode
                             orthoAlaControl.Location = new Point(5, 5);
 
 
-                            // Ajouter le contrôle OrthoAla à la PictureBox
                             pic.Controls.Add(orthoAlaControl);
 
-                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
                             orthoAlaControl.MouseEnter += Control_MouseEnter;
                             pic.MouseLeave += pic_MouseLeave;
                             orthoAlaControl.Click += Control_Click;
 
-                            // Ajouter la PictureBox au conteneur principal
                             forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "OrthoPbar")
                     {
-                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
                         OrthoPbar orthoAlaControl = new OrthoPbar();
 
                         orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
 
-                        // Extraire les informations de position et de taille depuis le XML
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
-                            // Assurez-vous de définir la taille et la position
                             int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
                             int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            // Définir la taille du contrôle OrthoAla
                             orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
 
-                            // Créer une PictureBox pour contenir le contrôle
                             PictureBox pic = new PictureBox
                             {
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
@@ -1320,40 +1276,31 @@ namespace StageCode
 
                             orthoAlaControl.Location = new Point(5, 5);
 
-
-                            // Ajouter le contrôle OrthoAla à la PictureBox
                             pic.Controls.Add(orthoAlaControl);
 
-                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
                             orthoAlaControl.MouseEnter += Control_MouseEnter;
                             pic.MouseLeave += pic_MouseLeave;
                             orthoAlaControl.Click += Control_Click;
 
-                            // Ajouter la PictureBox au conteneur principal
                             forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "OrthoRel")
                     {
-                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
                         OrthoRel orthoAlaControl = new OrthoRel();
 
                         orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
 
-                        // Extraire les informations de position et de taille depuis le XML
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
-                            // Assurez-vous de définir la taille et la position
                             int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
                             int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            // Définir la taille du contrôle OrthoAla
                             orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
 
-                            // Créer une PictureBox pour contenir le contrôle
                             PictureBox pic = new PictureBox
                             {
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
@@ -1362,40 +1309,31 @@ namespace StageCode
 
                             orthoAlaControl.Location = new Point(5, 5);
 
-
-                            // Ajouter le contrôle OrthoAla à la PictureBox
                             pic.Controls.Add(orthoAlaControl);
 
-                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
                             orthoAlaControl.MouseEnter += Control_MouseEnter;
                             pic.MouseLeave += pic_MouseLeave;
                             orthoAlaControl.Click += Control_Click;
 
-                            // Ajouter la PictureBox au conteneur principal
                             forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "OrthoResult")
                     {
-                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
                         OrthoResult orthoAlaControl = new OrthoResult();
 
                         orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
 
-                        // Extraire les informations de position et de taille depuis le XML
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
-                            // Assurez-vous de définir la taille et la position
                             int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
                             int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            // Définir la taille du contrôle OrthoAla
                             orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
 
-                            // Créer une PictureBox pour contenir le contrôle
                             PictureBox pic = new PictureBox
                             {
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
@@ -1405,99 +1343,78 @@ namespace StageCode
                             orthoAlaControl.Location = new Point(5, 5);
 
 
-                            // Ajouter le contrôle OrthoAla à la PictureBox
                             pic.Controls.Add(orthoAlaControl);
 
-                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
                             orthoAlaControl.MouseEnter += Control_MouseEnter;
                             pic.MouseLeave += pic_MouseLeave;
                             orthoAlaControl.Click += Control_Click;
 
-                            // Ajouter la PictureBox au conteneur principal
                             forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "OrthoVarname")
                     {
-                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
                         OrthoVarname orthoAlaControl = new OrthoVarname();
 
                         orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
 
-                        // Extraire les informations de position et de taille depuis le XML
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
-                            // Assurez-vous de définir la taille et la position
                             int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
                             int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            // Définir la taille du contrôle OrthoAla
                             orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
 
-                            // Créer une PictureBox pour contenir le contrôle
                             PictureBox pic = new PictureBox
                             {
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
-                                Location = new Point(locationX, locationY) // Appliquer la position
+                                Location = new Point(locationX, locationY)
                             };
 
                             orthoAlaControl.Location = new Point(5, 5);
 
-
-                            // Ajouter le contrôle OrthoAla à la PictureBox
                             pic.Controls.Add(orthoAlaControl);
 
-                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
                             orthoAlaControl.MouseEnter += Control_MouseEnter;
                             pic.MouseLeave += pic_MouseLeave;
                             orthoAlaControl.Click += Control_Click;
 
-                            // Ajouter la PictureBox au conteneur principal
                             forme.panel1.Controls.Add(pic);
                         }
                     }
                     else if (type == "Reticule")
                     {
-                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet OrthoAla
                         Reticule orthoAlaControl = new Reticule();
 
                         orthoAlaControl = orthoAlaControl.ReadFileXML(componentText);
 
-                        // Extraire les informations de position et de taille depuis le XML
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
-                            // Assurez-vous de définir la taille et la position
                             int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
                             int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            // Définir la taille du contrôle OrthoAla
                             orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
 
-                            // Créer une PictureBox pour contenir le contrôle
                             PictureBox pic = new PictureBox
                             {
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
-                                Location = new Point(locationX, locationY) // Appliquer la position
+                                Location = new Point(locationX, locationY)
                             };
 
                             orthoAlaControl.Location = new Point(5, 5);
 
-
-                            // Ajouter le contrôle OrthoAla à la PictureBox
                             pic.Controls.Add(orthoAlaControl);
 
-                            // Ajouter des gestionnaires d'événements à l'objet OrthoAla si nécessaire
                             orthoAlaControl.MouseEnter += Control_MouseEnter;
                             pic.MouseLeave += pic_MouseLeave;
                             orthoAlaControl.Click += Control_Click;
 
-                            // Ajouter la PictureBox au conteneur principal
                             forme.panel1.Controls.Add(pic);
                         }
                     }
@@ -1509,28 +1426,22 @@ namespace StageCode
             }
             catch (Exception ex)
             {
-                // Gestion des erreurs
                 MessageBox.Show($"Erreur : {ex.Message}");
             }
         }
 
         private void Control_MouseEnter(object? sender, EventArgs e)
         {
-            // Activer ou désactiver le mode déplacement
             EnMoouvement = !EnMoouvement;
 
-            // Récupérer le contrôle qui a déclenché l'événement
             Control? ctrl = sender as Control;
 
-            // Vérifier si le contrôle a un parent de type PictureBox
             PictureBox? pic = ctrl?.Parent as PictureBox;
 
-            // Modifier le curseur selon l'état du déplacement
             pic.Cursor = EnMoouvement ? Cursors.SizeAll : Cursors.Default;
 
             if (IsMdiChild)
             {
-                // Ajouter les événements aux enfants pour permettre le déplacement
                 foreach (Control child in pic.Controls)
                 {
                     child.MouseDown -= pic_MouseDown;
@@ -1544,7 +1455,6 @@ namespace StageCode
             }
             else
             {
-                // Ajouter les événements aux enfants pour permettre le déplacement
                 foreach (Control child in pic.Controls)
                 {
 
@@ -1655,7 +1565,6 @@ namespace StageCode
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Demande si l'utilisateur souhaite sauvegarder en XML ou non
             string saveMessage = "";
             string saveTitle = "";
 
@@ -1683,55 +1592,42 @@ namespace StageCode
                     break;
             }
 
-            // Affichage de la boîte de dialogue pour le choix de sauvegarde en XML
             DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
 
             if (saveResult == DialogResult.Yes)
             {
-                // Créer un StringBuilder pour accumuler le texte de tous les contrôles
                 StringBuilder xmlContent = new StringBuilder();
 
-                // Début du fichier XML
                 xmlContent.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
                 xmlContent.AppendLine("<Syno name=\"settings\">");
 
                 xmlContent.AppendLine("  <Controls>");
 
-                // Appeler la méthode SaveAs pour accumuler tous les contrôles dans xmlContent
-                StringBuilder accumulatedText = SaveAsXML(); // Récupère le texte accumulé des contrôles
+                StringBuilder accumulatedText = SaveAsXML();
 
-                // Ajouter le texte accumulé (contenu des contrôles) dans le XML
-                xmlContent.AppendLine(accumulatedText.ToString());  // Ajouter le contenu des contrôles au XML
+                xmlContent.AppendLine(accumulatedText.ToString());
                 xmlContent.AppendLine("  </Controls>");
 
-                // Clôturer l'élément principal <Syno>
                 xmlContent.AppendLine("</Syno>");
 
-                // Ouvrir un stream pour écrire dans le fichier choisi
                 using (StreamWriter writer = new StreamWriter("Save.syno"))
                 {
-                    // Écrire le texte XML accumulé dans le fichier
                     writer.Write(xmlContent.ToString());
                 }
 
-                // Message de confirmation
                 MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                // Créer un StringBuilder pour accumuler le texte de tous les contrôles
 
 
-                // Appeler la méthode SaveAs pour accumuler tous les contrôles dans xmlContent
-                StringBuilder accumulatedText = SaveAsTXT(); // Récupère le texte accumulé des contrôles
+                StringBuilder accumulatedText = SaveAsTXT();
 
                 using (StreamWriter writer = new StreamWriter("A.syno"))
                 {
-                    // Écrire le texte XML accumulé dans le fichier
                     writer.Write(accumulatedText.ToString());
                 }
 
-                // Message de confirmation
                 MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -1741,7 +1637,6 @@ namespace StageCode
             string message = "";
             string title = "";
 
-            // Message de confirmation pour sauvegarder les changements
             switch (Langue)
             {
                 case 1: // English
@@ -1770,7 +1665,6 @@ namespace StageCode
 
             if (r == DialogResult.Yes)
             {
-                // Demande si l'utilisateur souhaite sauvegarder en XML ou non
                 string saveMessage = "";
                 string saveTitle = "";
 
@@ -1798,12 +1692,11 @@ namespace StageCode
                         break;
                 }
 
-                // Affichage de la boîte de dialogue pour le choix de sauvegarde en XML
                 DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
 
                 if (saveResult == DialogResult.Yes)
                 {
-                    ExportFormToXml();  // Sauvegarder en XML
+                    ExportFormToXml();
                 }
                 else
                 {
@@ -1812,7 +1705,6 @@ namespace StageCode
             }
             else if (r == DialogResult.Cancel)
             {
-                // Si l'utilisateur choisit "Annuler", empêcher la fermeture du formulaire
                 e.Cancel = true;
             }
         }
@@ -1820,12 +1712,10 @@ namespace StageCode
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Déclaration des variables
             string message = "";
             string title = "";
 
 
-            // Définir les messages et les textes des boutons en fonction de la langue
             switch (Langue)
             {
                 case 1: // English
@@ -1855,18 +1745,15 @@ namespace StageCode
                     break;
             }
 
-            // Affichage d'un MessageBox personnalisé avec des boutons textuels en fonction de la langue
             DialogResult r = MessageBox.Show($"{message}", title, MessageBoxButtons.YesNo);  //ShowCustomMessageBox(message, title, yesText, noText);
 
             if (r == DialogResult.Yes)
             {
-                // Si l'utilisateur choisit "Oui", alors enregistrer le fichier XML
                 ExportFormToXml();
             }
             else if (r == DialogResult.No)
             {
                 ExportFormToTXT();
-                // Si l'utilisateur choisit "Non", ne rien faire
                 return;
             }
         }
@@ -2091,15 +1978,12 @@ namespace StageCode
             {
                 return;
             }
-            // Si le curseur est dans son état par défaut, on désactive les bordures pointillées sur toutes les PictureBox
             if (this.Cursor == DefaultCursor)
             {
-                // Parcours toutes les PictureBox dans le pnlViewHost et supprime les bordures pointillées
                 foreach (Control control in forme.panel1.Controls)
                 {
                     if (control is PictureBox pic)
                     {
-                        // Supprimer le handler d'événement Paint pour ne plus dessiner la bordure
                         pic.Paint -= pic_Paint;
 
                         PictureBoxSelectonner = "";
@@ -2107,13 +1991,11 @@ namespace StageCode
                         pic.Invalidate();
                     }
                 }
-                return; // Sortir de la méthode si le curseur est par défaut
+                return;
             }
 
-            // Si un contrôle est sélectionné, on procède à l'ajout
             Control? Ctrl = null;
 
-            // Vérifier si un contrôle est sélectionné avant de créer un nouveau contrôle
             switch (ControlSelectionner)
             {
                 case "AM60":
@@ -2186,19 +2068,16 @@ namespace StageCode
 
             if (Ctrl != null)
             {
-                // Création de la PictureBox qui servira de cadre
                 PictureBox pic = new PictureBox
                 {
-                    Size = new Size(Ctrl.Width + 10, Ctrl.Height + 10), // Ajuste la taille
-                    Location = new Point(e.X - 5, e.Y - 5) // Position ajustée par rapport au clic
+                    Size = new Size(Ctrl.Width + 10, Ctrl.Height + 10),
+                    Location = new Point(e.X - 5, e.Y - 5)
                 };
 
-                // Gérer le dessin personnalisé pour la bordure en pointillés
                 pic.Paint += pic_Paint;
 
                 Ctrl.MouseEnter += Control_MouseEnter;
 
-                // Ajouter le contrôle à l'intérieur de la PictureBox
                 Ctrl.Location = new Point(5, 5);
                 pic.Controls.Add(Ctrl);
 
@@ -2247,8 +2126,8 @@ namespace StageCode
 
                     contextMenu.Items.Add("Verticalement", null, Verticale);
 
-                    if(parentPictureBox != null)
-                    contextMenu.Show(parentPictureBox, e.Location);
+                    if (parentPictureBox != null)
+                        contextMenu.Show(parentPictureBox, e.Location);
                 }
             }
         }
@@ -2316,25 +2195,22 @@ namespace StageCode
         {
             Control? controle = sender as Control;
 
-            // Vérifier si le contrôle est un contrôle enfant d'une PictureBox
             PictureBox? pic = controle?.Parent as PictureBox;
 
             if (pic != null)
             {
-                // Ajouter des gestionnaires d'événements pour déplacer ou redimensionner
                 pic.MouseDown += pic_MouseDown2;
                 pic.MouseMove += pic_MouseMove2;
                 pic.MouseUp += pic_MouseUp2;
 
-                // Ajouter la gestion du dessin des bordures pointillées
                 pic.Paint += pic_Paint;
-                pic.Invalidate(); // Cela va déclencher l'événement Paint pour redessiner
+                pic.Invalidate();
 
-                // Si un contrôle est sélectionné, afficher ses propriétés dans le PropertyGrid
                 if (controle is AM60 am60Control)
                 {
-                    // Mettre à jour le PropertyGrid avec l'objet AM60 sélectionné
+
                     propertyGrid1.SelectedObject = am60Control;
+
                 }
                 else if (controle is CONT1 cont1Control)
                 {
@@ -2401,9 +2277,6 @@ namespace StageCode
                     propertyGrid1.SelectedObject = forme;
                 }
 
-                // Ajouter des vérifications pour les autres types de contrôles
-
-                // Réinitialiser le curseur
                 this.Cursor = Cursors.Default;
             }
         }
@@ -2416,7 +2289,6 @@ namespace StageCode
         {
             if (!EnMoouvement) return;
 
-            // Récupérer la PictureBox, même si on clique sur un élément à l’intérieur
             PictureBox? picturebox = (sender as PictureBox) ?? (sender as Control)?.Parent as PictureBox;
 
             if (picturebox != null)
@@ -2452,13 +2324,12 @@ namespace StageCode
 
             if (pictureBox != null)
             {
-                // Détecter si on clique sur une bordure pour le redimensionnement
                 if (IsNearBorder(e.Location, pictureBox))
                 {
                     ChangerPicture = pictureBox;
                     SourisDecalage = e.Location;
                     Changement = true;
-                    pictureBox.Cursor = Cursors.SizeNWSE; // Curseur de redimensionnement
+                    pictureBox.Cursor = Cursors.SizeNWSE; 
                 }
             }
         }
@@ -2469,14 +2340,12 @@ namespace StageCode
 
             if (Changement && ChangerPicture != null)
             {
-                // Ajuster la taille de la PictureBox en fonction du mouvement de la souris
                 int deltaX = e.X - SourisDecalage.X;
                 int deltaY = e.Y - SourisDecalage.Y;
 
                 ChangerPicture.Width = Math.Max(10, ChangerPicture.Width + deltaX);
                 ChangerPicture.Height = Math.Max(10, ChangerPicture.Height + deltaY);
 
-                // Redimensionner l'objet à l'intérieur de la PictureBox pour qu'il prenne toute la taille
                 if (ChangerPicture.Controls.Count > 0)
                 {
                     Control child = ChangerPicture.Controls[0];
@@ -2484,36 +2353,32 @@ namespace StageCode
                     child.Height = ChangerPicture.Height;
                 }
 
-                // Mise à jour de la position de la souris
                 SourisDecalage = e.Location;
 
-                // Redessiner la bordure de la PictureBox
                 ChangerPicture.Invalidate();
             }
             else
             {
-                // Modifier le curseur en fonction de la position de la souris
                 if (pic != null && IsNearBorder(e.Location, pic))
                 {
-                    pic.Cursor = Cursors.SizeNWSE; // Curseur de redimensionnement
+                    pic.Cursor = Cursors.SizeNWSE; 
                 }
                 else
                 {
-                    pic.Cursor = Cursors.Default; // Curseur par défaut
+                    pic.Cursor = Cursors.Default;
                 }
             }
         }
 
         private void pic_MouseUp2(object sender, MouseEventArgs e)
         {
-            // Réinitialiser les indicateurs de redimensionnement
             ChangerPicture = null;
             Changement = false;
 
             PictureBox? pic = sender as PictureBox;
             if (pic != null)
             {
-                pic.Cursor = Cursors.Default; // Remettre le curseur par défaut
+                pic.Cursor = Cursors.Default;
             }
         }
 
@@ -2525,23 +2390,20 @@ namespace StageCode
 
         private bool IsNearBorder(Point mousePosition, PictureBox pic)
         {
-            // Vérifier si la souris est proche des bords de la PictureBox
-            int borderDistance = 10; // Distance de la bordure pour le redimensionnement
+            int borderDistance = 10; 
             return mousePosition.X >= pic.Width - borderDistance ||
                    mousePosition.X <= borderDistance ||
                    mousePosition.Y >= pic.Height - borderDistance ||
                    mousePosition.Y <= borderDistance;
         }
 
-        // Méthode pour dessiner les bordures pointillées sur les PictureBox
         private void pic_Paint(object sender, PaintEventArgs e)
         {
             PictureBox? pic = sender as PictureBox;
 
             int pictureBoxCount = forme.panel1.Controls.OfType<PictureBox>().Count();
 
-            // Mettre à jour le nom du PictureBox avec un numéro unique
-            pic.Name = "PictureBox" + (pictureBoxCount + 1);  // Exemple : PictureBox1, PictureBox2, etc.
+            pic.Name = "PictureBox" + (pictureBoxCount + 1);  
 
             PictureBoxSelectonner = pic.Name;
 
@@ -2620,6 +2482,18 @@ namespace StageCode
             tmp.panel1.MouseClick += pnlViewHost_Click;
 
             AfficherFormDansPanel(tmp, pnlViewHost);
+        }
+
+        private void propertyGrid1_PropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
+        {
+            Control? objet = (Control)sender;
+            PictureBox? pic = objet.Parent as PictureBox;
+
+            if (objet != null && pic != null)
+            {
+                pic.Size = new Size(objet.Size.Width + 10, objet.Size.Height + 10);
+                pic.Location = objet.Location;
+            }
         }
     }
 }
