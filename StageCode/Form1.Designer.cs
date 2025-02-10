@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             MainMenu = new MenuStrip();
             btnFile = new ToolStripMenuItem();
             newToolStripMenuItem = new ToolStripMenuItem();
@@ -61,75 +62,79 @@
             // btnFile
             // 
             btnFile.DropDownItems.AddRange(new ToolStripItem[] { newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, newFormeToolStripMenuItem });
+            btnFile.Image = (Image)resources.GetObject("btnFile.Image");
             btnFile.Name = "btnFile";
-            btnFile.Size = new Size(37, 20);
+            btnFile.Size = new Size(53, 20);
             btnFile.Text = "File";
             // 
             // newToolStripMenuItem
             // 
             newToolStripMenuItem.Name = "newToolStripMenuItem";
-            newToolStripMenuItem.Size = new Size(135, 22);
+            newToolStripMenuItem.Size = new Size(180, 22);
             newToolStripMenuItem.Text = "New";
             newToolStripMenuItem.Click += newToolStripMenuItem_Click;
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(135, 22);
+            openToolStripMenuItem.Size = new Size(180, 22);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(135, 22);
+            saveToolStripMenuItem.Size = new Size(180, 22);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
             // saveAsToolStripMenuItem
             // 
             saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new Size(135, 22);
+            saveAsToolStripMenuItem.Size = new Size(180, 22);
             saveAsToolStripMenuItem.Text = "Save As";
             saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
             // 
             // newFormeToolStripMenuItem
             // 
             newFormeToolStripMenuItem.Name = "newFormeToolStripMenuItem";
-            newFormeToolStripMenuItem.Size = new Size(135, 22);
+            newFormeToolStripMenuItem.Size = new Size(180, 22);
             newFormeToolStripMenuItem.Text = "New Forme";
             newFormeToolStripMenuItem.Click += newFormeToolStripMenuItem_Click;
             // 
             // btnEdition
             // 
+            btnEdition.Image = (Image)resources.GetObject("btnEdition.Image");
             btnEdition.Name = "btnEdition";
-            btnEdition.Size = new Size(56, 20);
+            btnEdition.Size = new Size(72, 20);
             btnEdition.Text = "Edition";
             // 
             // btnView
             // 
+            btnView.Image = (Image)resources.GetObject("btnView.Image");
             btnView.Name = "btnView";
-            btnView.Size = new Size(44, 20);
+            btnView.Size = new Size(60, 20);
             btnView.Text = "View";
             // 
             // btnInfos
             // 
             btnInfos.DropDownItems.AddRange(new ToolStripItem[] { controlCommentToolStripMenuItem, aboutToolStripMenuItem });
+            btnInfos.Image = (Image)resources.GetObject("btnInfos.Image");
             btnInfos.Name = "btnInfos";
-            btnInfos.Size = new Size(45, 20);
+            btnInfos.Size = new Size(61, 20);
             btnInfos.Text = "Infos";
             // 
             // controlCommentToolStripMenuItem
             // 
             controlCommentToolStripMenuItem.Name = "controlCommentToolStripMenuItem";
-            controlCommentToolStripMenuItem.Size = new Size(169, 22);
+            controlCommentToolStripMenuItem.Size = new Size(180, 22);
             controlCommentToolStripMenuItem.Text = "Control comment";
             controlCommentToolStripMenuItem.Click += controlCommentToolStripMenuItem_Click;
             // 
             // aboutToolStripMenuItem
             // 
             aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            aboutToolStripMenuItem.Size = new Size(169, 22);
+            aboutToolStripMenuItem.Size = new Size(180, 22);
             aboutToolStripMenuItem.Text = "About";
             aboutToolStripMenuItem.Click += aboutToolStripMenuItem_Click;
             // 

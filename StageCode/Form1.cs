@@ -31,7 +31,6 @@ namespace StageCode
         List<PictureBox> listPic = new List<PictureBox>();
 
         //A corriger
-        //TabName a faire
         //les commentaire et position des controls + la bd
 
         public Form1()
@@ -792,7 +791,6 @@ namespace StageCode
                     break;
             }
 
-            // Affichage du message avec le titre et la langue correspondante
             DialogResult r = MessageBox.Show(message, title, MessageBoxButtons.YesNo, MessageBoxIcon.Information);
 
             try
@@ -1908,6 +1906,11 @@ namespace StageCode
 
         private void Form1_ClientSizeChanged(object sender, EventArgs e)
         {
+            if(this.WindowState == FormWindowState.Minimized)
+            {
+                return;
+            }
+
             this.MainMenu.Width = this.ClientSize.Width;
             this.MainMenu.Height = (int)(this.ClientSize.Height * 0.08);
 
@@ -2130,6 +2133,10 @@ namespace StageCode
                         contextMenu.Show(parentPictureBox, e.Location);
                 }
             }
+            else
+            {
+                listPic.Clear();
+            }
         }
 
         private void Verticale(object? sender, EventArgs e)
@@ -2206,78 +2213,78 @@ namespace StageCode
                 pic.Paint += pic_Paint;
                 pic.Invalidate();
 
-                if (controle is AM60 am60Control)
-                {
+                //if (controle is AM60 am60Control)
+                //{
 
-                    propertyGrid1.SelectedObject = am60Control;
+                //    propertyGrid1.SelectedObject = am60Control;
 
-                }
-                else if (controle is CONT1 cont1Control)
-                {
-                    propertyGrid1.SelectedObject = cont1Control;
-                }
-                else if (controle is INTEG integControl)
-                {
-                    propertyGrid1.SelectedObject = integControl;
-                }
-                else if (controle is OrthoAD orthoADControl)
-                {
-                    propertyGrid1.SelectedObject = orthoADControl;
-                }
-                else if (controle is OrthoAla orthoAlaControl)
-                {
-                    propertyGrid1.SelectedObject = orthoAlaControl;
-                }
-                else if (controle is OrthoCMDLib orthoCMDLibControl)
-                {
-                    propertyGrid1.SelectedObject = orthoCMDLibControl;
-                }
-                else if (controle is OrthoCombo orthoComboControl)
-                {
-                    propertyGrid1.SelectedObject = orthoComboControl;
-                }
-                else if (controle is OrthoDI orthoDIControl)
-                {
-                    propertyGrid1.SelectedObject = orthoDIControl;
-                }
-                else if (controle is OrthoEdit orthoEditControl)
-                {
-                    propertyGrid1.SelectedObject = orthoEditControl;
-                }
-                else if (controle is OrthoImage orthoImageControl)
-                {
-                    propertyGrid1.SelectedObject = orthoImageControl;
-                }
-                else if (controle is OrthoLabel orthoLabelControl)
-                {
-                    propertyGrid1.SelectedObject = orthoLabelControl;
-                }
-                else if (controle is OrthoPbar orthoPbarControl)
-                {
-                    propertyGrid1.SelectedObject = orthoPbarControl;
-                }
-                else if (controle is OrthoRel orthoRelControl)
-                {
-                    propertyGrid1.SelectedObject = orthoRelControl;
-                }
-                else if (controle is OrthoResult orthoResultControl)
-                {
-                    propertyGrid1.SelectedObject = orthoResultControl;
-                }
-                else if (controle is OrthoVarname orthoVarnameControl)
-                {
-                    propertyGrid1.SelectedObject = orthoVarnameControl;
-                }
-                else if (controle is Reticule reticuleControl)
-                {
-                    propertyGrid1.SelectedObject = reticuleControl;
-                }
-                else
-                {
-                    propertyGrid1.SelectedObject = forme;
-                }
+                //}
+                //else if (controle is CONT1 cont1Control)
+                //{
+                //    propertyGrid1.SelectedObject = cont1Control;
+                //}
+                //else if (controle is INTEG integControl)
+                //{
+                //    propertyGrid1.SelectedObject = integControl;
+                //}
+                //else if (controle is OrthoAD orthoADControl)
+                //{
+                //    propertyGrid1.SelectedObject = orthoADControl;
+                //}
+                //else if (controle is OrthoAla orthoAlaControl)
+                //{
+                //    propertyGrid1.SelectedObject = orthoAlaControl;
+                //}
+                //else if (controle is OrthoCMDLib orthoCMDLibControl)
+                //{
+                //    propertyGrid1.SelectedObject = orthoCMDLibControl;
+                //}
+                //else if (controle is OrthoCombo orthoComboControl)
+                //{
+                //    propertyGrid1.SelectedObject = orthoComboControl;
+                //}
+                //else if (controle is OrthoDI orthoDIControl)
+                //{
+                //    propertyGrid1.SelectedObject = orthoDIControl;
+                //}
+                //else if (controle is OrthoEdit orthoEditControl)
+                //{
+                //    propertyGrid1.SelectedObject = orthoEditControl;
+                //}
+                //else if (controle is OrthoImage orthoImageControl)
+                //{
+                //    propertyGrid1.SelectedObject = orthoImageControl;
+                //}
+                //else if (controle is OrthoLabel orthoLabelControl)
+                //{
+                //    propertyGrid1.SelectedObject = orthoLabelControl;
+                //}
+                //else if (controle is OrthoPbar orthoPbarControl)
+                //{
+                //    propertyGrid1.SelectedObject = orthoPbarControl;
+                //}
+                //else if (controle is OrthoRel orthoRelControl)
+                //{
+                //    propertyGrid1.SelectedObject = orthoRelControl;
+                //}
+                //else if (controle is OrthoResult orthoResultControl)
+                //{
+                //    propertyGrid1.SelectedObject = orthoResultControl;
+                //}
+                //else if (controle is OrthoVarname orthoVarnameControl)
+                //{
+                //    propertyGrid1.SelectedObject = orthoVarnameControl;
+                //}
+                //else if (controle is Reticule reticuleControl)
+                //{
+                //    propertyGrid1.SelectedObject = reticuleControl;
+                //}
+                //else
+                //{
+                //    propertyGrid1.SelectedObject = forme;
+                //}
 
-                this.Cursor = Cursors.Default;
+                propertyGrid1.SelectedObject = controle;
             }
         }
 
@@ -2492,7 +2499,6 @@ namespace StageCode
             if (objet != null && pic != null)
             {
                 pic.Size = new Size(objet.Size.Width + 10, objet.Size.Height + 10);
-                pic.Location = objet.Location;
             }
         }
     }
