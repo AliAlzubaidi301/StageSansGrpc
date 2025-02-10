@@ -4,6 +4,7 @@ using System.Text;
 using OrthoDesigner.Other;
 using System.Xml.Linq;
 using OrthoDesigner;
+using System.Reflection;
 
 namespace StageCode
 {
@@ -58,6 +59,15 @@ namespace StageCode
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            try
+            {
+
+            }
+            catch(Exception ex)
+            {
+              //  new LoggedException(Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Version.ToString(), this.GetType().Name, MethodBase.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
+            }
+
             string tmp = Application.ProductVersion[0].ToString();
             tmp += Application.ProductVersion[1].ToString();
             tmp += Application.ProductVersion[2].ToString();
