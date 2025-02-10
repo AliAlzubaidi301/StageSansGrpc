@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StageCode.Other;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -16,6 +17,80 @@ namespace StageCode
             ConfigureAnchors();
 
             this.SizeChanged += FormResize_SizeChanged;
+
+            ChangeLanguage();
+        }
+
+        private void ChangeLanguage()
+        {
+            switch (Form1.Langue)
+            {
+                case 1: // English
+                    this.groupBoxAvant.Text = "Old Size";
+                    this.groupBoxApres.Text = "New Size";
+                    this.label1.Text = "Width";
+                    this.label2.Text = "Height";
+                    label3.Text = "Width";
+                    label4.Text = "Height";
+                    this.btnOK.Text = "OK";
+                    this.btnResize.Text = "Cancel";
+                    break;
+
+                case 2: // Chinese
+                    this.groupBoxAvant.Text = "旧尺寸";
+                    this.groupBoxApres.Text = "新尺寸";
+                    this.label1.Text = "宽度";
+                    this.label2.Text = "高度";
+                    label3.Text = "宽度";
+                    label4.Text = "高度";
+                    this.btnOK.Text = "确定";
+                    this.btnResize.Text = "取消";
+                    break;
+
+                case 3: // German
+                    this.groupBoxAvant.Text = "Alte Größe";
+                    this.groupBoxApres.Text = "Neue Größe";
+                    this.label1.Text = "Breite";
+                    this.label2.Text = "Höhe";
+                    label3.Text = "Breite";
+                    label4.Text = "Höhe";
+                    this.btnOK.Text = "OK";
+                    this.btnResize.Text = "Abbrechen";
+                    break;
+
+                case 4: // French
+                    this.groupBoxAvant.Text = "Ancienne taille";
+                    this.groupBoxApres.Text = "Nouvelle taille";
+                    this.label1.Text = "Largeur";
+                    this.label2.Text = "Hauteur";
+                    label3.Text = "Largeur";
+                    label4.Text = "Hauteur";
+                    this.btnOK.Text = "OK";
+                    this.btnResize.Text = "Annuler";
+                    break;
+
+                case 5: // Lithuanian
+                    this.groupBoxAvant.Text = "Senas dydis";
+                    this.groupBoxApres.Text = "Naujas dydis";
+                    this.label1.Text = "Plotis";
+                    this.label2.Text = "Aukštis";
+                    label3.Text = "Plotis";
+                    label4.Text = "Aukštis";
+                    this.btnOK.Text = "Gerai";
+                    this.btnResize.Text = "Atšaukti";
+                    break;
+
+                default:
+                    this.groupBoxAvant.Text = "Old Size";
+                    this.groupBoxApres.Text = "New Size";
+                    this.label1.Text = "Width";
+                    this.label2.Text = "Height";
+                    label3.Text = "Width";
+                    label4.Text = "Height";
+                    this.btnOK.Text = "OK";
+                    this.btnResize.Text = "Cancel";
+                    break;
+            }
         }
 
         private void ConfigureAnchors()
@@ -52,7 +127,6 @@ namespace StageCode
             this.btnOK.Left = this.ClientSize.Width - buttonWidth * 2 - buttonSpacing;
             this.btnResize.Left = this.ClientSize.Width - buttonWidth - buttonSpacing;
 
-            // Ajuster la taille de police
             float fontSize = Math.Max(8, this.ClientSize.Width / 50);
             this.label1.Font = new Font(this.label1.Font.FontFamily, fontSize);
             this.label2.Font = new Font(this.label2.Font.FontFamily, fontSize);
@@ -61,12 +135,11 @@ namespace StageCode
             this.textBox1.Font = new Font(this.textBox1.Font.FontFamily, fontSize);
             this.textBox2.Font = new Font(this.textBox2.Font.FontFamily, fontSize);
 
-            // Repositionner les labels et textboxes
             int labelSpacing = 10;
             int textBoxWidth = this.groupBoxApres.Width / 2 - margin * 2;
 
             this.label3.Left = margin;
-            this.label3.Top = margin*2;
+            this.label3.Top = margin * 2;
             this.textBox1.Left = this.groupBoxApres.Width - textBoxWidth - margin;
             this.textBox1.Top = this.label3.Top;
             this.textBox1.Width = textBoxWidth;
@@ -80,33 +153,18 @@ namespace StageCode
             ConfigureAnchors();
         }
 
-
         private void FormResize_Load(object sender, EventArgs e)
         {
             this.MaximizeBox = true;
 
-            this.groupBoxAvant.Text = "Old Size";
-            this.groupBoxApres.Text = "New Size";
-
-            this.label1.Text = "Width";
-            this.label2.Text = "Height";
-
-            label3.Text = "Width";
-            label4.Text = "Height";
-
             this.label5.Text = forme.Width.ToString();
             this.label6.Text = forme.Height.ToString();
 
-            this.textBox1.Text = forme.Width.ToString();
-            this.textBox2.Text = forme.Height.ToString();
-
-            this.btnOK.Text = "OK";
-            this.btnResize.Text = "Cancel";
+            ChangeLanguage(); 
         }
 
         private void btnResize_Click(object sender, EventArgs e)
         {
-            // Annuler
             Close();
         }
 

@@ -5,6 +5,12 @@ using OrthoDesigner.Other;
 using System.Xml.Linq;
 using OrthoDesigner;
 using System.Reflection;
+using CodeExceptionManager.Model.Objects;
+using CodeExceptionManager.Controller.DatabaseEngine.Implementation;
+using System.Data.SQLite;
+using CodeExceptionManager.Controller;
+using CodeExceptionManager.DAO;
+using System;
 
 namespace StageCode
 {
@@ -33,6 +39,29 @@ namespace StageCode
 
         //A corriger
         //les commentaire et position des controls + la bd
+        //public void LogException(string assemblyName, string assemblyVersion, string className, string methodName, string errorMessage, string errorStackTrace)
+        //{
+        //    try
+        //    {
+        //        string query = "INSERT INTO Exceptions (Date, AssemblyName, AssemblyVersion, ClassName, MethodName, ErrorMessage, ErrorStackTrace) " +
+        //                       "VALUES (@Date, @AssemblyName, @AssemblyVersion, @ClassName, @MethodName, @ErrorMessage, @ErrorStackTrace);";
+
+        //        _sqlCommandExecuter = new SQLiteCommand(query, _dbConnection);
+        //        _sqlCommandExecuter.Parameters.AddWithValue("@Date", DateTime.Now);
+        //        _sqlCommandExecuter.Parameters.AddWithValue("@AssemblyName", assemblyName);
+        //        _sqlCommandExecuter.Parameters.AddWithValue("@AssemblyVersion", assemblyVersion);
+        //        _sqlCommandExecuter.Parameters.AddWithValue("@ClassName", className);
+        //        _sqlCommandExecuter.Parameters.AddWithValue("@MethodName", methodName);
+        //        _sqlCommandExecuter.Parameters.AddWithValue("@ErrorMessage", errorMessage);
+        //        _sqlCommandExecuter.Parameters.AddWithValue("@ErrorStackTrace", errorStackTrace);
+
+        //        _sqlCommandExecuter.ExecuteNonQuery();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("Error while logging exception: " + ex.Message);
+        //    }
+        //}
 
         public Form1()
         {
@@ -57,16 +86,43 @@ namespace StageCode
 
             form.Show();  // Affiche le formulaire
         }
+        public void LogException(Exception ex)
+        {
+            SQLite sQ = new SQLite();
+            sQ.Connect();
+
+            if (sQ.ConnexionStatus)
+            {
+                string dbPath = @"C:\Users\Alial\Desktop\Developpement\Tools\OrthoDesigner\StageCode\bin\Debug\Datas\Databases\ErrorLogs.db";
+                string connectionString = $"Data Source={dbPath};Version=3;";
+
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string query = @"INSERT INTO Exceptions (Date, AssemblyName, AssemblyVersion, ClassName, MethodName, ErrorMessage, ErrorStackTrace)
+                                 VALUES (@Date, @AssemblyName, @AssemblyVersion, @ClassName, @MethodName, @ErrorMessage, @ErrorStackTrace)";
+
+                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Date", DateTime.Now);
+                        command.Parameters.AddWithValue("@AssemblyName", Assembly.GetExecutingAssembly().GetName().Name);
+                        command.Parameters.AddWithValue("@AssemblyVersion", Assembly.GetExecutingAssembly().GetName().Version.ToString());
+                        command.Parameters.AddWithValue("@ClassName", this.GetType().Name);
+                        command.Parameters.AddWithValue("@MethodName", MethodBase.GetCurrentMethod().Name);
+                        command.Parameters.AddWithValue("@ErrorMessage", ex.Message);
+                        command.Parameters.AddWithValue("@ErrorStackTrace", ex.StackTrace);
+
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+
+            sQ.Disconnect();
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
-            try
-            {
-
-            }
-            catch(Exception ex)
-            {
-              //  new LoggedException(Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Version.ToString(), this.GetType().Name, MethodBase.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
-            }
 
             string tmp = Application.ProductVersion[0].ToString();
             tmp += Application.ProductVersion[1].ToString();
@@ -240,21 +296,16 @@ namespace StageCode
         }
         private StringBuilder SaveAsXML()
         {
-            // Créer un StringBuilder pour accumuler le texte de tous les contrôles
             StringBuilder accumulatedText = new StringBuilder();
 
-            // Parcours tous les contrôles dans le panneau ou le conteneur (ici pnlViewHost)
             foreach (Control controle in forme.panel1.Controls)
             {
-                // Vérifier si le contrôle est une PictureBox
                 if (controle is PictureBox pictureBox)
                 {
-                    // Parcourir les contrôles enfants de la PictureBox
                     foreach (Control childControl in pictureBox.Controls)
                     {
                         childControl.Location = pictureBox.Location;
 
-                        // Vérifier le type de contrôle enfant et appeler la méthode WriteFile correspondante
                         if (childControl is AM60 am60Control)
                         {
                             accumulatedText.AppendLine(" " + " " + am60Control.WriteFileXML());
@@ -329,49 +380,35 @@ namespace StageCode
 
         public void ExportFormToTXT()
         {
-            // Créer un StringBuilder pour accumuler le texte de tous les contrôles
 
-
-            // Appeler la méthode SaveAs pour accumuler tous les contrôles dans xmlContent
             StringBuilder accumulatedText = SaveAsTXT(); // Récupère le texte accumulé des contrôles
 
-
-
-            // Ouvrir un SaveFileDialog pour choisir l'emplacement et le nom du fichier .syn
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
             {
                 saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn"; // Filtrer les fichiers pour .syn
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    // Ouvrir un stream pour écrire dans le fichier choisi
                     using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
                     {
-                        // Écrire le texte XML accumulé dans le fichier
                         writer.Write(accumulatedText.ToString());
                     }
 
-                    // Message de confirmation
                     MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
         private StringBuilder SaveAsTXT()
         {
-            // Créer un StringBuilder pour accumuler le texte de tous les contrôles
             StringBuilder accumulatedText = new StringBuilder();
 
-            // Parcours tous les contrôles dans le panneau ou le conteneur (ici pnlViewHost)
             foreach (Control controle in forme.panel1.Controls)
             {
-                // Vérifier si le contrôle est une PictureBox
                 if (controle is PictureBox pictureBox)
                 {
-                    // Parcourir les contrôles enfants de la PictureBox
                     foreach (Control childControl in pictureBox.Controls)
                     {
                         childControl.Location = pictureBox.Location;
 
-                        // Vérifier le type de contrôle enfant et appeler la méthode WriteFile correspondante
                         if (childControl is AM60 am60Control)
                         {
                             accumulatedText.AppendLine(am60Control.WriteFile());
@@ -478,7 +515,6 @@ namespace StageCode
 
             if (r == DialogResult.Yes)
             {
-                // Demande si l'utilisateur souhaite sauvegarder en XML ou non
                 string saveMessage = "";
                 string saveTitle = "";
 
@@ -535,13 +571,11 @@ namespace StageCode
 
         private void Couper(object sender, EventArgs e)
         {
-            // Trouver la PictureBox sélectionnée
             PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
                                               .FirstOrDefault(p => p.Name == PictureBoxSelectonner);
 
             if (pic != null)
             {
-                // Liste des informations des contrôles contenus dans la PictureBox
                 List<SerializableControl> controlsData = new List<SerializableControl>();
 
                 foreach (Control ctrl in pic.Controls)
@@ -558,7 +592,6 @@ namespace StageCode
                     });
                 }
 
-                // Sérialiser les données
                 DataObject data = new DataObject();
                 using (MemoryStream ms = new MemoryStream())
                 {
@@ -569,10 +602,8 @@ namespace StageCode
                     data.SetData("ControlsData", ms.ToArray());
                 }
 
-                // Mettre les données dans le presse-papiers
                 Clipboard.SetDataObject(data, true);
 
-                // Supprimer uniquement les contrôles internes
                 pic.Controls.Clear();
                 forme.panel1.Controls.Remove(pic);
             }
@@ -585,13 +616,11 @@ namespace StageCode
 
         private void Copier(object sender, EventArgs e)
         {
-            // Trouver la PictureBox sélectionnée
             PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
                                               .FirstOrDefault(p => p.Name == PictureBoxSelectonner);
 
             if (pic != null)
             {
-                // Liste des informations des contrôles contenus dans la PictureBox
                 List<SerializableControl> controlsData = new List<SerializableControl>();
 
                 foreach (Control ctrl in pic.Controls)
@@ -608,7 +637,6 @@ namespace StageCode
                     });
                 }
 
-                // Sérialiser les données
                 DataObject data = new DataObject();
                 using (MemoryStream ms = new MemoryStream())
                 {
@@ -619,7 +647,6 @@ namespace StageCode
                     data.SetData("ControlsData", ms.ToArray());
                 }
 
-                // Mettre les données dans le presse-papiers
                 Clipboard.SetDataObject(data, true);
 
                 MessageBox.Show("Copie effectuée !");
@@ -635,10 +662,8 @@ namespace StageCode
         {
             if (Clipboard.ContainsData("ControlsData"))
             {
-                // Récupérer la position de la souris relative à pnlViewHost
                 Point mousePosition = forme.panel1.PointToClient(Cursor.Position);
 
-                // Récupérer les données du presse-papiers
                 byte[] rawData = (byte[])Clipboard.GetData("ControlsData")!;
                 using (MemoryStream ms = new MemoryStream(rawData))
                 {
@@ -647,7 +672,6 @@ namespace StageCode
 #pragma warning restore SYSLIB0011
                     List<SerializableControl> controlsData = (List<SerializableControl>)bf.Deserialize(ms);
 
-                    // Créer une nouvelle PictureBox pour contenir les contrôles collés
                     PictureBox newpic = new PictureBox
                     {
                         BorderStyle = BorderStyle.None,
@@ -660,6 +684,8 @@ namespace StageCode
                     newpic.Paint += pic_Paint;
                     newpic.Click += Control_Click;
                     newpic.MouseLeave += pic_MouseLeave;
+                    newpic.MouseEnter += pic_MouseEnter;
+
 
                     // Restaurer les contrôles dans la nouvelle PictureBox
                     foreach (var controlData in controlsData)
@@ -691,6 +717,18 @@ namespace StageCode
             }
         }
 
+        private void pic_MouseEnter(object? sender, EventArgs e)
+        {
+            PictureBoxSelectonner = "";
+
+            PictureBox? pic = sender as PictureBox;
+
+            if(pic != null)
+            {
+                pic.Paint += pic_Paint;
+            }
+        }
+
         private void Supprimer(object sender, EventArgs e)
         {
             PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
@@ -699,7 +737,7 @@ namespace StageCode
             if (pic != null)
             {
                 forme.panel1.Controls.Remove(pic);
-                pic.Dispose(); // Libérer la mémoire utilisée par la PictureBox
+                pic.Dispose(); 
             }
             else
             {
@@ -823,7 +861,7 @@ namespace StageCode
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                LogException(ex);
             }
         }
 
@@ -836,8 +874,10 @@ namespace StageCode
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erreur lors de la lecture du fichier XML : {ex.Message}");
+                LogException(ex);
             }
+
+            return null;
         }
 
         private void RecupererContenuXML(string xmlContent)
@@ -846,20 +886,16 @@ namespace StageCode
             {
                 XElement xml = XElement.Parse(xmlContent);
 
-                // Parcourir tous les éléments <Component> du XML
                 foreach (XElement component in xml.Descendants("Component"))
                 {
                     string? type = component.Attribute("type")?.Value;
 
-                    // Convertir l'élément en texte pour passer à ReadFileXML
                     string componentText = component.ToString();
 
                     if (type == "AM60")
                     {
-                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet AM60
                         AM60 am60Control = AM60.ReadFileXML(componentText);
 
-                        // Extraire les informations de position et de taille depuis le XML
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
@@ -892,10 +928,8 @@ namespace StageCode
                     }
                     else if (type == "CONT1")
                     {
-                        // Appeler la fonction statique ReadFileXML pour récupérer l'objet Cont1
                         CONT1 cont1Control = CONT1.ReadFileXML(componentText);
 
-                        // Extraire les informations de position et de taille depuis le XML
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
@@ -1434,7 +1468,7 @@ namespace StageCode
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur : {ex.Message}");
+                LogException(ex);
             }
         }
 
@@ -1974,11 +2008,15 @@ namespace StageCode
 
         private void lstToolbox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (lstToolbox.SelectedItem != null)
+            if (this.Cursor == Cursors.Default)
             {
                 ControlSelectionner = lstToolbox.SelectedItem.ToString();
 
                 this.Cursor = Cursors.Cross;
+            }
+            else
+            {
+                this.Cursor = DefaultCursor;
             }
         }
 
@@ -2189,7 +2227,10 @@ namespace StageCode
 
         private void pic_MouseLeave(object? sender, EventArgs e)
         {
+            PictureBoxSelectonner = "";
+
             PictureBox? p = sender as PictureBox;
+            p.Paint -= pic_Paint;
             foreach (Control ctrl in p.Controls)
             {
                 p.Size = ctrl.Size;
@@ -2198,7 +2239,6 @@ namespace StageCode
                 p.Height += 10;
             }
 
-            p.Paint -= pic_Paint;
             p.Invalidate();
 
             this.Cursor = DefaultCursor;

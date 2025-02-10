@@ -13,12 +13,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="linq2db.SQLite" Version="5.4.1" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.119" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="CButtonLib">
       <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\CButtonLib.dll</HintPath>
+    </Reference>
+    <Reference Include="CodeExceptionManager">
+      <HintPath>Z:\_CurrentRelease\lib\CodeExceptionManager\CodeExceptionManager.dll</HintPath>
     </Reference>
     <Reference Include="ComponentEditors">
       <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\ComponentEditors.dll</HintPath>
@@ -28,6 +31,12 @@
     </Reference>
     <Reference Include="INTEGLib">
       <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\INTEGLib.dll</HintPath>
+    </Reference>
+    <Reference Include="linq2db">
+      <HintPath>Z:\_CurrentRelease\lib\CodeExceptionManager\linq2db.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces">
+      <HintPath>Z:\_CurrentRelease\lib\CodeExceptionManager\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
     <Reference Include="OrthoADLib">
       <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoADLib.dll</HintPath>
@@ -71,6 +80,9 @@
     <Reference Include="ReticuleLib">
       <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\ReticuleLib.dll</HintPath>
     </Reference>
+    <Reference Include="System.Data.SQLite">
+      <HintPath>Z:\_CurrentRelease\lib\CodeExceptionManager\System.Data.SQLite.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -86,10 +98,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="BD\" />
   </ItemGroup>
 
 </Project>
