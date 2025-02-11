@@ -22,9 +22,8 @@ namespace StageCode
         public static FormVide forme;
         private bool peutViderListe = false;
 
-        private string ControlSelectionner = "";
-
-        private string PictureBoxSelectonner = "";
+        private string ControlSelectionner = ""; //OK
+        private string PictureBoxSelectonner = ""; // OK
 
         private PictureBox? ChangerPicture = null;
         private Point SourisDecalage;
@@ -587,7 +586,7 @@ namespace StageCode
         private void Couper(object sender, EventArgs e)
         {
             PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
-                                              .FirstOrDefault(p => p.Name == PictureBoxSelectonner);
+                                              .FirstOrDefault(p => p.Tag == PictureBoxSelectonner);
 
             if (pic != null)
             {
@@ -632,7 +631,7 @@ namespace StageCode
         private void Copier(object sender, EventArgs e)
         {
             PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
-                                              .FirstOrDefault(p => p.Name == PictureBoxSelectonner);
+                                              .FirstOrDefault(p => p.Tag == PictureBoxSelectonner);
 
             if (pic != null)
             {
@@ -731,20 +730,20 @@ namespace StageCode
 
         private void pic_MouseEnter(object? sender, EventArgs e)
         {
-            PictureBoxSelectonner = "";
+            //PictureBoxSelectonner = "";
 
-            PictureBox? pic = sender as PictureBox;
+            //PictureBox? pic = sender as PictureBox;
 
-            if (pic != null)
-            {
-                pic.Paint += pic_Paint;
-            }
+            //if (pic != null)
+            //{
+            //    pic.Paint += pic_Paint;
+            //}
         }
 
         private void Supprimer(object sender, EventArgs e)
         {
             PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
-                                      .FirstOrDefault(p => p.Name == PictureBoxSelectonner);
+                                      .FirstOrDefault(p => p.Tag == PictureBoxSelectonner);
 
             if (pic != null)
             {
@@ -1473,10 +1472,6 @@ namespace StageCode
                             forme.panel1.Controls.Add(pic);
                         }
                     }
-
-
-
-
                 }
             }
             catch (Exception ex)
@@ -2151,6 +2146,16 @@ namespace StageCode
                     Location = new Point(e.X - 5, e.Y - 5)
                 };
 
+                foreach (PictureBox pic2 in forme.panel1.Controls)
+                {
+                    pic2.MouseDown -= pic_MouseDown2;
+                    pic2.MouseMove -= pic_MouseMove2;
+                    pic2.MouseUp -= pic_MouseUp2;
+
+                    pic2.Paint -= pic_Paint;
+                    pic2.Invalidate();
+                }
+
                 pic.BorderStyle = BorderStyle.FixedSingle;
 
                 pic.Paint += pic_Paint;
@@ -2255,19 +2260,19 @@ namespace StageCode
 
         private void pic_MouseLeave(object? sender, EventArgs e)
         {
-            //PictureBoxSelectonner = "";
+            ////PictureBoxSelectonner = "";
 
-            PictureBox? p = sender as PictureBox;
-            p.Paint -= pic_Paint;
-            foreach (Control ctrl in p.Controls)
-            {
-                p.Size = ctrl.Size;
+            //PictureBox? p = sender as PictureBox;
+            //p.Paint -= pic_Paint;
+            //foreach (Control ctrl in p.Controls)
+            //{
+            //    p.Size = ctrl.Size;
 
-                p.Width += 10;
-                p.Height += 10;
-            }
+            //    p.Width += 10;
+            //    p.Height += 10;
+            //}
 
-            p.Invalidate();
+            //p.Invalidate();
 
             this.Cursor = DefaultCursor;
 
@@ -2278,6 +2283,19 @@ namespace StageCode
 
         private void Control_Click(object? sender, EventArgs e)
         {
+            foreach(PictureBox pic2 in forme.panel1.Controls)
+            {
+                if (pic2 != null)
+                {
+                    pic2.MouseDown -= pic_MouseDown2;
+                    pic2.MouseMove -= pic_MouseMove2;
+                    pic2.MouseUp -= pic_MouseUp2;
+
+                    pic2.Paint -= pic_Paint;
+                    pic2.Invalidate();
+                }
+            }
+
             Control? controle = sender as Control;
 
             PictureBox? pic = controle?.Parent as PictureBox;
@@ -2291,78 +2309,9 @@ namespace StageCode
                 pic.Paint += pic_Paint;
                 pic.Invalidate();
 
-                //if (controle is AM60 am60Control)
-                //{
-
-                //    propertyGrid1.SelectedObject = am60Control;
-
-                //}
-                //else if (controle is CONT1 cont1Control)
-                //{
-                //    propertyGrid1.SelectedObject = cont1Control;
-                //}
-                //else if (controle is INTEG integControl)
-                //{
-                //    propertyGrid1.SelectedObject = integControl;
-                //}
-                //else if (controle is OrthoAD orthoADControl)
-                //{
-                //    propertyGrid1.SelectedObject = orthoADControl;
-                //}
-                //else if (controle is OrthoAla orthoAlaControl)
-                //{
-                //    propertyGrid1.SelectedObject = orthoAlaControl;
-                //}
-                //else if (controle is OrthoCMDLib orthoCMDLibControl)
-                //{
-                //    propertyGrid1.SelectedObject = orthoCMDLibControl;
-                //}
-                //else if (controle is OrthoCombo orthoComboControl)
-                //{
-                //    propertyGrid1.SelectedObject = orthoComboControl;
-                //}
-                //else if (controle is OrthoDI orthoDIControl)
-                //{
-                //    propertyGrid1.SelectedObject = orthoDIControl;
-                //}
-                //else if (controle is OrthoEdit orthoEditControl)
-                //{
-                //    propertyGrid1.SelectedObject = orthoEditControl;
-                //}
-                //else if (controle is OrthoImage orthoImageControl)
-                //{
-                //    propertyGrid1.SelectedObject = orthoImageControl;
-                //}
-                //else if (controle is OrthoLabel orthoLabelControl)
-                //{
-                //    propertyGrid1.SelectedObject = orthoLabelControl;
-                //}
-                //else if (controle is OrthoPbar orthoPbarControl)
-                //{
-                //    propertyGrid1.SelectedObject = orthoPbarControl;
-                //}
-                //else if (controle is OrthoRel orthoRelControl)
-                //{
-                //    propertyGrid1.SelectedObject = orthoRelControl;
-                //}
-                //else if (controle is OrthoResult orthoResultControl)
-                //{
-                //    propertyGrid1.SelectedObject = orthoResultControl;
-                //}
-                //else if (controle is OrthoVarname orthoVarnameControl)
-                //{
-                //    propertyGrid1.SelectedObject = orthoVarnameControl;
-                //}
-                //else if (controle is Reticule reticuleControl)
-                //{
-                //    propertyGrid1.SelectedObject = reticuleControl;
-                //}
-                //else
-                //{
-                //    propertyGrid1.SelectedObject = forme;
-                //}
-
                 propertyGrid1.SelectedObject = controle;
+
+
             }
         }
 
@@ -2494,17 +2443,16 @@ namespace StageCode
 
             int pictureBoxCount = forme.panel1.Controls.OfType<PictureBox>().Count();
 
-            pic.Name = "PictureBox" + (pictureBoxCount + 1);
+            pic.Tag = "PictureBox" + (pictureBoxCount + 1);
 
-            PictureBoxSelectonner = pic.Name;
+            PictureBoxSelectonner = pic.Tag.ToString();
 
             if (pic != null)
             {
                 using (Pen pen = new Pen(Color.Black))
                 {
-                    pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot; // Bordure en pointillés
+                    pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid; // Bordure en pointillés
                     e.Graphics.DrawRectangle(pen, 0, 0, pic.Width - 1, pic.Height - 1);
-
                 }
             }
         }
@@ -2522,7 +2470,7 @@ namespace StageCode
 
             foreach (PictureBox ctrl in forme.panel1.Controls)
             {
-                if (ctrl.Name == PictureBoxSelectonner)
+                if (ctrl.Tag == PictureBoxSelectonner)
                 {
                     foreach (Control childControl in ctrl.Controls)
                     {
