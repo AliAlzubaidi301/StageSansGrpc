@@ -86,6 +86,7 @@ namespace StageCode
 
             form.Show();  // Affiche le formulaire
         }
+
         public void LogException(Exception ex)
         {
             SQLite sQ = new SQLite();
@@ -125,10 +126,14 @@ namespace StageCode
         {
             for (int i = 0; i < menuStrip1.Items.Count; i++)
             {
-                menuStrip1.Items[i].Margin = new Padding(3, 0, 3, 0);
-                menuStrip1.Items[i].Padding = new Padding(5);
+                var item = menuStrip1.Items[i];
 
-                menuStrip1.Items[i].BackgroundImageLayout = ImageLayout.Zoom;
+                item.Margin = new Padding(3, 0, 3, 0);
+                item.Padding = new Padding(5);
+                item.BackgroundImageLayout = ImageLayout.Zoom;
+
+                item.Image = item.BackgroundImage;
+                item.BackgroundImage = null;
             }
 
             ToolStripSeparator separator = new ToolStripSeparator();
@@ -1983,7 +1988,18 @@ namespace StageCode
             propertyGrid1.Width = lstToolbox.Width;
             propertyGrid1.Height = pnlViewHost.Height - lstToolbox.Height;
             propertyGrid1.Location = new Point(lstToolbox.Left, lstToolbox.Bottom);
+
+            foreach (FormVide forme in pnlViewHost.Controls)
+            {
+                if (forme.WindowState == FormWindowState.Minimized)
+                {
+                    forme.WindowState = FormWindowState.Maximized;
+                    forme.Location = new Point(forme.Location.X, pnlViewHost.Height);
+                    forme.WindowState = FormWindowState.Minimized;
+                }
+            }
         }
+
 
         #endregion
 
@@ -2016,15 +2032,17 @@ namespace StageCode
 
         private void lstToolbox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (this.Cursor == Cursors.Default)
+            if (lstToolbox.SelectedIndex >= 0 && lstToolbox.SelectedIndex < lstToolbox.Items.Count)
             {
-                ControlSelectionner = lstToolbox.SelectedItem.ToString();
-
-                this.Cursor = Cursors.Cross;
-            }
-            else
-            {
-                this.Cursor = DefaultCursor;
+                if (this.Cursor == Cursors.Default)
+                {
+                    ControlSelectionner = lstToolbox.SelectedItem.ToString();
+                    this.Cursor = Cursors.Cross; 
+                }
+                else if (this.Cursor == Cursors.Cross)
+                {
+                    this.Cursor = Cursors.Default;  
+                }
             }
         }
 
@@ -2678,11 +2696,7 @@ namespace StageCode
 
         private void CloseALL_Click(object sender, EventArgs e)
         {
-            foreach (FormVide tmp in this.pnlViewHost.Controls)
-            {
-                forme = tmp;
-                tmp.Close();
-            }
+            pnlViewHost.Controls.Clear();
         }
 
         private void CouperLogo_Click(object sender, EventArgs e)

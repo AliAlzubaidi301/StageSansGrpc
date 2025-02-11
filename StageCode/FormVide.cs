@@ -16,7 +16,7 @@ namespace OrthoDesigner
         public FormVide()
         {
             InitializeComponent();
-            this.FormBorderStyle = FormBorderStyle.None; // Enlever la bordure
+            this.FormBorderStyle = FormBorderStyle.None; // Enlever la bordureZ
         }
 
         private void FormVide_Load(object sender, EventArgs e)
@@ -81,6 +81,7 @@ namespace OrthoDesigner
 
         private void FormVide_ResizeMouseMove(object sender, MouseEventArgs e)
         {
+            this.Enabled = true;
             if (_isResizing)
             {
                 int deltaWidth = e.X - _resizeStartPoint.X;
@@ -160,7 +161,6 @@ namespace OrthoDesigner
             panel2.Controls.Add(btnAgrandir);
             panel2.Controls.Add(btnReduire);
 
-            // Réajuster la position des boutons lors du redimensionnement du panneau
             panel2.Resize += (s, e) =>
             {
                 btnFermer.Left = panel2.Width - 45;

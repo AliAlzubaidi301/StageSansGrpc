@@ -193,6 +193,7 @@
             // menuStrip1
             // 
             menuStrip1.BackgroundImageLayout = ImageLayout.Zoom;
+            menuStrip1.GripStyle = ToolStripGripStyle.Visible;
             menuStrip1.Items.AddRange(new ToolStripItem[] { Nouveau, Open, Save, SaveALL, Close, CloseALL, CouperLogo, CopierLogo, CollerLogo });
             menuStrip1.Location = new Point(0, 24);
             menuStrip1.Name = "menuStrip1";
@@ -227,10 +228,10 @@
             // 
             // Close
             // 
+            Close.BackgroundImage = (Image)resources.GetObject("Close.BackgroundImage");
             Close.BackgroundImageLayout = ImageLayout.Zoom;
-            Close.Image = (Image)resources.GetObject("Close.Image");
             Close.Name = "Close";
-            Close.Size = new Size(28, 20);
+            Close.Size = new Size(12, 20);
             Close.Click += Close_Click;
             // 
             // CloseALL
