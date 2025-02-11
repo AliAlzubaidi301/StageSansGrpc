@@ -47,7 +47,18 @@
             pnlViewHost = new Panel();
             lstToolbox = new ListBox();
             propertyGrid1 = new PropertyGrid();
+            Nouveau = new ToolStripMenuItem();
+            menuStrip1 = new MenuStrip();
+            Open = new ToolStripMenuItem();
+            Save = new ToolStripMenuItem();
+            SaveALL = new ToolStripMenuItem();
+            Close = new ToolStripMenuItem();
+            CloseALL = new ToolStripMenuItem();
+            CouperLogo = new ToolStripMenuItem();
+            CopierLogo = new ToolStripMenuItem();
+            CollerLogo = new ToolStripMenuItem();
             MainMenu.SuspendLayout();
+            menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // MainMenu
@@ -62,79 +73,75 @@
             // btnFile
             // 
             btnFile.DropDownItems.AddRange(new ToolStripItem[] { newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, newFormeToolStripMenuItem });
-            btnFile.Image = (Image)resources.GetObject("btnFile.Image");
             btnFile.Name = "btnFile";
-            btnFile.Size = new Size(53, 20);
+            btnFile.Size = new Size(37, 20);
             btnFile.Text = "File";
             // 
             // newToolStripMenuItem
             // 
             newToolStripMenuItem.Name = "newToolStripMenuItem";
-            newToolStripMenuItem.Size = new Size(180, 22);
+            newToolStripMenuItem.Size = new Size(127, 22);
             newToolStripMenuItem.Text = "New";
             newToolStripMenuItem.Click += newToolStripMenuItem_Click;
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(180, 22);
+            openToolStripMenuItem.Size = new Size(127, 22);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(180, 22);
+            saveToolStripMenuItem.Size = new Size(127, 22);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
             // saveAsToolStripMenuItem
             // 
             saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new Size(180, 22);
+            saveAsToolStripMenuItem.Size = new Size(127, 22);
             saveAsToolStripMenuItem.Text = "Save As";
             saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
             // 
             // newFormeToolStripMenuItem
             // 
             newFormeToolStripMenuItem.Name = "newFormeToolStripMenuItem";
-            newFormeToolStripMenuItem.Size = new Size(180, 22);
-            newFormeToolStripMenuItem.Text = "New Forme";
+            newFormeToolStripMenuItem.Size = new Size(127, 22);
+            newFormeToolStripMenuItem.Text = "New Page";
             newFormeToolStripMenuItem.Click += newFormeToolStripMenuItem_Click;
             // 
             // btnEdition
             // 
-            btnEdition.Image = (Image)resources.GetObject("btnEdition.Image");
             btnEdition.Name = "btnEdition";
-            btnEdition.Size = new Size(72, 20);
+            btnEdition.Size = new Size(56, 20);
             btnEdition.Text = "Edition";
             // 
             // btnView
             // 
-            btnView.Image = (Image)resources.GetObject("btnView.Image");
             btnView.Name = "btnView";
-            btnView.Size = new Size(60, 20);
+            btnView.Size = new Size(44, 20);
             btnView.Text = "View";
             // 
             // btnInfos
             // 
             btnInfos.DropDownItems.AddRange(new ToolStripItem[] { controlCommentToolStripMenuItem, aboutToolStripMenuItem });
-            btnInfos.Image = (Image)resources.GetObject("btnInfos.Image");
             btnInfos.Name = "btnInfos";
-            btnInfos.Size = new Size(61, 20);
+            btnInfos.Size = new Size(45, 20);
             btnInfos.Text = "Infos";
             // 
             // controlCommentToolStripMenuItem
             // 
             controlCommentToolStripMenuItem.Name = "controlCommentToolStripMenuItem";
-            controlCommentToolStripMenuItem.Size = new Size(180, 22);
+            controlCommentToolStripMenuItem.Size = new Size(169, 22);
             controlCommentToolStripMenuItem.Text = "Control comment";
             controlCommentToolStripMenuItem.Click += controlCommentToolStripMenuItem_Click;
             // 
             // aboutToolStripMenuItem
             // 
             aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            aboutToolStripMenuItem.Size = new Size(180, 22);
+            aboutToolStripMenuItem.Size = new Size(169, 22);
             aboutToolStripMenuItem.Text = "About";
             aboutToolStripMenuItem.Click += aboutToolStripMenuItem_Click;
             // 
@@ -151,19 +158,19 @@
             // 
             // pnlViewHost
             // 
-            pnlViewHost.BackColor = Color.White;
-            pnlViewHost.Location = new Point(0, 31);
+            pnlViewHost.BackColor = SystemColors.ActiveBorder;
+            pnlViewHost.Location = new Point(0, 57);
             pnlViewHost.Name = "pnlViewHost";
-            pnlViewHost.Size = new Size(729, 485);
+            pnlViewHost.Size = new Size(729, 459);
             pnlViewHost.TabIndex = 1;
             // 
             // lstToolbox
             // 
             lstToolbox.FormattingEnabled = true;
             lstToolbox.ItemHeight = 15;
-            lstToolbox.Location = new Point(735, 27);
+            lstToolbox.Location = new Point(735, 57);
             lstToolbox.Name = "lstToolbox";
-            lstToolbox.Size = new Size(277, 259);
+            lstToolbox.Size = new Size(277, 229);
             lstToolbox.TabIndex = 2;
             lstToolbox.SelectedIndexChanged += lstToolbox_SelectedIndexChanged;
             // 
@@ -175,11 +182,96 @@
             propertyGrid1.TabIndex = 3;
             propertyGrid1.PropertyValueChanged += propertyGrid1_PropertyValueChanged;
             // 
+            // Nouveau
+            // 
+            Nouveau.BackgroundImage = (Image)resources.GetObject("Nouveau.BackgroundImage");
+            Nouveau.BackgroundImageLayout = ImageLayout.Zoom;
+            Nouveau.Name = "Nouveau";
+            Nouveau.Size = new Size(12, 20);
+            Nouveau.Click += Nouveau_Click;
+            // 
+            // menuStrip1
+            // 
+            menuStrip1.BackgroundImageLayout = ImageLayout.Zoom;
+            menuStrip1.Items.AddRange(new ToolStripItem[] { Nouveau, Open, Save, SaveALL, Close, CloseALL, CouperLogo, CopierLogo, CollerLogo });
+            menuStrip1.Location = new Point(0, 24);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new Size(1012, 24);
+            menuStrip1.TabIndex = 4;
+            menuStrip1.Text = "menuStrip1";
+            // 
+            // Open
+            // 
+            Open.BackgroundImage = (Image)resources.GetObject("Open.BackgroundImage");
+            Open.BackgroundImageLayout = ImageLayout.Zoom;
+            Open.Name = "Open";
+            Open.Size = new Size(12, 20);
+            Open.Click += Open_Click;
+            // 
+            // Save
+            // 
+            Save.BackgroundImage = (Image)resources.GetObject("Save.BackgroundImage");
+            Save.BackgroundImageLayout = ImageLayout.Zoom;
+            Save.Name = "Save";
+            Save.Size = new Size(12, 20);
+            Save.Click += toolStripMenuItem2_Click;
+            // 
+            // SaveALL
+            // 
+            SaveALL.BackgroundImage = (Image)resources.GetObject("SaveALL.BackgroundImage");
+            SaveALL.BackgroundImageLayout = ImageLayout.Zoom;
+            SaveALL.Name = "SaveALL";
+            SaveALL.ShowShortcutKeys = false;
+            SaveALL.Size = new Size(12, 20);
+            SaveALL.Click += SaveALL_Click;
+            // 
+            // Close
+            // 
+            Close.BackgroundImageLayout = ImageLayout.Zoom;
+            Close.Image = (Image)resources.GetObject("Close.Image");
+            Close.Name = "Close";
+            Close.Size = new Size(28, 20);
+            Close.Click += Close_Click;
+            // 
+            // CloseALL
+            // 
+            CloseALL.BackgroundImage = (Image)resources.GetObject("CloseALL.BackgroundImage");
+            CloseALL.BackgroundImageLayout = ImageLayout.Zoom;
+            CloseALL.Name = "CloseALL";
+            CloseALL.Size = new Size(12, 20);
+            CloseALL.Click += CloseALL_Click;
+            // 
+            // CouperLogo
+            // 
+            CouperLogo.BackgroundImage = (Image)resources.GetObject("CouperLogo.BackgroundImage");
+            CouperLogo.BackgroundImageLayout = ImageLayout.Zoom;
+            CouperLogo.Name = "CouperLogo";
+            CouperLogo.Size = new Size(12, 20);
+            CouperLogo.Click += CouperLogo_Click;
+            // 
+            // CopierLogo
+            // 
+            CopierLogo.BackgroundImage = (Image)resources.GetObject("CopierLogo.BackgroundImage");
+            CopierLogo.BackgroundImageLayout = ImageLayout.Zoom;
+            CopierLogo.Name = "CopierLogo";
+            CopierLogo.Size = new Size(12, 20);
+            CopierLogo.Click += CopierLogo_Click;
+            // 
+            // CollerLogo
+            // 
+            CollerLogo.BackgroundImage = (Image)resources.GetObject("CollerLogo.BackgroundImage");
+            CollerLogo.BackgroundImageLayout = ImageLayout.Zoom;
+            CollerLogo.Name = "CollerLogo";
+            CollerLogo.Size = new Size(12, 20);
+            CollerLogo.Click += CollerLogo_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackgroundImageLayout = ImageLayout.Zoom;
             ClientSize = new Size(1012, 528);
+            Controls.Add(menuStrip1);
             Controls.Add(propertyGrid1);
             Controls.Add(lstToolbox);
             Controls.Add(pnlViewHost);
@@ -191,6 +283,8 @@
             Load += Form1_Load;
             MainMenu.ResumeLayout(false);
             MainMenu.PerformLayout();
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -216,5 +310,15 @@
         private ListBox lstToolbox;
         private PropertyGrid propertyGrid1;
         private ToolStripMenuItem newFormeToolStripMenuItem;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem Nouveau;
+        private ToolStripMenuItem Open;
+        private ToolStripMenuItem Save;
+        private ToolStripMenuItem SaveALL;
+        private ToolStripMenuItem Close;
+        private ToolStripMenuItem CloseALL;
+        private ToolStripMenuItem CouperLogo;
+        private ToolStripMenuItem CopierLogo;
+        private ToolStripMenuItem CollerLogo;
     }
 }

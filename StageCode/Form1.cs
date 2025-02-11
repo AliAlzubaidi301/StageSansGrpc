@@ -123,6 +123,16 @@ namespace StageCode
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            for (int i = 0; i < menuStrip1.Items.Count; i++)
+            {
+                menuStrip1.Items[i].Margin = new Padding(3, 0, 3, 0);
+                menuStrip1.Items[i].Padding = new Padding(5);
+
+                menuStrip1.Items[i].BackgroundImageLayout = ImageLayout.Zoom;
+            }
+
+            ToolStripSeparator separator = new ToolStripSeparator();
+            menuStrip1.Items.Insert(6, separator);
 
             string tmp = Application.ProductVersion[0].ToString();
             tmp += Application.ProductVersion[1].ToString();
@@ -649,14 +659,13 @@ namespace StageCode
 
                 Clipboard.SetDataObject(data, true);
 
-                MessageBox.Show("Copie effectuée !");
+                //  MessageBox.Show("Copie effectuée !");
             }
             else
             {
                 MessageBox.Show("Aucune PictureBox sélectionnée.");
             }
         }
-
 
         private void Coller(object sender, EventArgs e)
         {
@@ -667,7 +676,7 @@ namespace StageCode
                 byte[] rawData = (byte[])Clipboard.GetData("ControlsData")!;
                 using (MemoryStream ms = new MemoryStream(rawData))
                 {
-#pragma warning disable SYSLIB0011 // Suppression de l'avertissement d'obsolescence
+#pragma warning disable SYSLIB0011 
                     BinaryFormatter bf = new BinaryFormatter();
 #pragma warning restore SYSLIB0011
                     List<SerializableControl> controlsData = (List<SerializableControl>)bf.Deserialize(ms);
@@ -686,8 +695,6 @@ namespace StageCode
                     newpic.MouseLeave += pic_MouseLeave;
                     newpic.MouseEnter += pic_MouseEnter;
 
-
-                    // Restaurer les contrôles dans la nouvelle PictureBox
                     foreach (var controlData in controlsData)
                     {
                         Type? controlType = Type.GetType(controlData.TypeName);
@@ -723,7 +730,7 @@ namespace StageCode
 
             PictureBox? pic = sender as PictureBox;
 
-            if(pic != null)
+            if (pic != null)
             {
                 pic.Paint += pic_Paint;
             }
@@ -737,7 +744,7 @@ namespace StageCode
             if (pic != null)
             {
                 forme.panel1.Controls.Remove(pic);
-                pic.Dispose(); 
+                pic.Dispose();
             }
             else
             {
@@ -814,7 +821,6 @@ namespace StageCode
             string message = "";
             string title = "";
 
-            // Définition du message et du titre en fonction de la langue
             switch (Langue)
             {
                 case 1: // English
@@ -854,8 +860,10 @@ namespace StageCode
                 file.Filter = "Fichier SYN (*.syn)|*.syn";
 
                 file.ShowDialog();
-                string a = LireXML(file.FileName);
+                string? a = LireXML(file.FileName);
 
+                if (a == null)
+                { return; }
                 MessageBox.Show(a);
                 RecupererContenuXML(a);
             }
@@ -865,7 +873,7 @@ namespace StageCode
             }
         }
 
-        private string LireXML(string filePath)
+        private string? LireXML(string filePath)
         {
             try
             {
@@ -1950,7 +1958,7 @@ namespace StageCode
 
         private void Form1_ClientSizeChanged(object sender, EventArgs e)
         {
-            if(this.WindowState == FormWindowState.Minimized)
+            if (this.WindowState == FormWindowState.Minimized)
             {
                 return;
             }
@@ -1958,13 +1966,13 @@ namespace StageCode
             this.MainMenu.Width = this.ClientSize.Width;
             this.MainMenu.Height = (int)(this.ClientSize.Height * 0.08);
 
-            float fontSize = (this.ClientSize.Width * 0.02f + this.ClientSize.Height * 0.02f) / 2;
+            float fontSize = (this.ClientSize.Width * 0.01f + this.ClientSize.Height * 0.01f) / 2;
             foreach (ToolStripMenuItem item in MainMenu.Items)
             {
                 item.Font = new Font(item.Font.FontFamily, fontSize);
             }
 
-            pnlViewHost.Location = new Point(0, MainMenu.Bottom);
+            pnlViewHost.Location = new Point(0, menuStrip1.Bottom);
             pnlViewHost.Width = (int)(this.ClientSize.Width * 0.8);
             pnlViewHost.Height = this.ClientSize.Height - pnlViewHost.Top;
 
@@ -2125,6 +2133,8 @@ namespace StageCode
                     Location = new Point(e.X - 5, e.Y - 5)
                 };
 
+                pic.BorderStyle = BorderStyle.FixedSingle;
+
                 pic.Paint += pic_Paint;
 
                 Ctrl.MouseEnter += Control_MouseEnter;
@@ -2227,7 +2237,7 @@ namespace StageCode
 
         private void pic_MouseLeave(object? sender, EventArgs e)
         {
-            PictureBoxSelectonner = "";
+            //PictureBoxSelectonner = "";
 
             PictureBox? p = sender as PictureBox;
             p.Paint -= pic_Paint;
@@ -2352,6 +2362,8 @@ namespace StageCode
             {
                 Bouger = true;
                 SourisDecalage = e.Location;
+
+                picturebox.BringToFront();
             }
         }
 
@@ -2365,6 +2377,8 @@ namespace StageCode
             {
                 pictureBox.Left += e.X - SourisDecalage.X;
                 pictureBox.Top += e.Y - SourisDecalage.Y;
+
+                pictureBox.BringToFront();
             }
         }
 
@@ -2386,7 +2400,9 @@ namespace StageCode
                     ChangerPicture = pictureBox;
                     SourisDecalage = e.Location;
                     Changement = true;
-                    pictureBox.Cursor = Cursors.SizeNWSE; 
+                    pictureBox.Cursor = Cursors.SizeNWSE;
+
+                    pictureBox.BringToFront();
                 }
             }
         }
@@ -2418,7 +2434,7 @@ namespace StageCode
             {
                 if (pic != null && IsNearBorder(e.Location, pic))
                 {
-                    pic.Cursor = Cursors.SizeNWSE; 
+                    pic.Cursor = Cursors.SizeNWSE;
                 }
                 else
                 {
@@ -2447,7 +2463,7 @@ namespace StageCode
 
         private bool IsNearBorder(Point mousePosition, PictureBox pic)
         {
-            int borderDistance = 10; 
+            int borderDistance = 10;
             return mousePosition.X >= pic.Width - borderDistance ||
                    mousePosition.X <= borderDistance ||
                    mousePosition.Y >= pic.Height - borderDistance ||
@@ -2460,7 +2476,7 @@ namespace StageCode
 
             int pictureBoxCount = forme.panel1.Controls.OfType<PictureBox>().Count();
 
-            pic.Name = "PictureBox" + (pictureBoxCount + 1);  
+            pic.Name = "PictureBox" + (pictureBoxCount + 1);
 
             PictureBoxSelectonner = pic.Name;
 
@@ -2538,7 +2554,86 @@ namespace StageCode
 
             tmp.panel1.MouseClick += pnlViewHost_Click;
 
+            tmp.FormClosing += Tmp_FormClosing;
+
             AfficherFormDansPanel(tmp, pnlViewHost);
+        }
+
+        private void Tmp_FormClosing(object? sender, FormClosingEventArgs e)
+        {
+            string message = "";
+            string title = "";
+
+            switch (Langue)
+            {
+                case 1: // English
+                    message = "Save the changes?";
+                    title = "Save";
+                    break;
+                case 2: // Chinese
+                    message = "保存更改？";
+                    title = "保存";
+                    break;
+                case 3: // German
+                    message = "Änderungen speichern?";
+                    title = "Speichern";
+                    break;
+                case 4: // French
+                    message = "Enregistrer les modifications ?";
+                    title = "Enregistrer";
+                    break;
+                case 5: // Lithuanian
+                    message = "Išsaugoti pakeitimus?";
+                    title = "Išsaugoti";
+                    break;
+            }
+
+            DialogResult r = MessageBox.Show(message, title, MessageBoxButtons.YesNoCancel);
+
+            if (r == DialogResult.Yes)
+            {
+                string saveMessage = "";
+                string saveTitle = "";
+
+                switch (Langue)
+                {
+                    case 1: // English
+                        saveMessage = "Do you want to save as XML?";
+                        saveTitle = "Save As XML";
+                        break;
+                    case 2: // Chinese
+                        saveMessage = "您是否要以XML格式保存？";
+                        saveTitle = "保存为XML";
+                        break;
+                    case 3: // German
+                        saveMessage = "Möchten Sie als XML speichern?";
+                        saveTitle = "Als XML speichern";
+                        break;
+                    case 4: // French
+                        saveMessage = "Voulez-vous enregistrer en XML ?";
+                        saveTitle = "Enregistrer en XML";
+                        break;
+                    case 5: // Lithuanian
+                        saveMessage = "Ar norite išsaugoti kaip XML?";
+                        saveTitle = "Išsaugoti kaip XML";
+                        break;
+                }
+
+                DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
+
+                if (saveResult == DialogResult.Yes)
+                {
+                    ExportFormToXml();
+                }
+                else
+                {
+                    ExportFormToTXT();
+                }
+            }
+            else if (r == DialogResult.Cancel)
+            {
+                e.Cancel = true;
+            }
         }
 
         private void propertyGrid1_PropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
@@ -2550,6 +2645,59 @@ namespace StageCode
             {
                 pic.Size = new Size(objet.Size.Width + 10, objet.Size.Height + 10);
             }
+        }
+
+        private void Nouveau_Click(object sender, EventArgs e)
+        {
+            newToolStripMenuItem_Click(sender, e);
+        }
+
+        private void Open_Click(object sender, EventArgs e)
+        {
+            openToolStripMenuItem_Click(sender, e);
+        }
+
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            saveToolStripMenuItem_Click(sender, e);
+        }
+
+        private void SaveALL_Click(object sender, EventArgs e)
+        {
+            foreach (FormVide vide in this.pnlViewHost.Controls)
+            {
+                forme = vide;
+                saveToolStripMenuItem_Click(sender, e);
+            }
+        }
+
+        private void Close_Click(object sender, EventArgs e)
+        {
+            forme.Close();
+        }
+
+        private void CloseALL_Click(object sender, EventArgs e)
+        {
+            foreach (FormVide tmp in this.pnlViewHost.Controls)
+            {
+                forme = tmp;
+                tmp.Close();
+            }
+        }
+
+        private void CouperLogo_Click(object sender, EventArgs e)
+        {
+            Couper(sender, e);
+        }
+
+        private void CopierLogo_Click(object sender, EventArgs e)
+        {
+            Copier(sender, e);
+        }
+
+        private void CollerLogo_Click(object sender, EventArgs e)
+        {
+            Coller(sender, e);
         }
     }
 }

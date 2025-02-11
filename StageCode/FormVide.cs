@@ -1,48 +1,192 @@
 ﻿using StageCode;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OrthoDesigner
 {
     public partial class FormVide : Form
     {
-        // se formulaire est affichier sur le pnlviewHost panel
+        private bool _isDragging = false;
+        private bool _isResizing = false;
+        private Point _dragStartPoint;
+        private Size _resizeStartSize;
+        private Point _resizeStartPoint;
+
         public FormVide()
         {
             InitializeComponent();
+            this.FormBorderStyle = FormBorderStyle.None; // Enlever la bordure
         }
 
         private void FormVide_Load(object sender, EventArgs e)
         {
             this.ClientSizeChanged += FormVide_ClientSizeChanged;
-
             this.MouseEnter += FormVide_MouseEnter;
-
             this.panel1.MouseEnter += FormVide_MouseEnter;
+
+            this.DoubleBuffered = true;
+
+            // Ajouter les boutons de contrôle
+            AjouterBoutonsControle();
+
+            // Ajouter l'événement pour déplacer la fenêtre
+            panel2.MouseDown += FormVide_MouseDown;
+            panel2.MouseMove += FormVide_MouseMove;
+            panel2.MouseUp += FormVide_MouseUp;
+
+            // Ajouter l'événement pour le redimensionnement de la fenêtre
+            panel1.MouseDown += FormVide_ResizeMouseDown;
+            panel1.MouseMove += FormVide_ResizeMouseMove;
+            panel1.MouseUp += FormVide_ResizeMouseUp;
+
+            panel1.BackColor = Color.White; // Couleur de fond du panel
+        }
+        private void FormVide_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                _isDragging = true;
+                _dragStartPoint = e.Location;
+            }
         }
 
-        private void FormVide_MouseEnter(object? sender, EventArgs e)
+        private void FormVide_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isDragging)
+            {
+                this.Location = new Point(
+                    this.Left + e.X - _dragStartPoint.X,
+                    this.Top + e.Y - _dragStartPoint.Y
+                );
+            }
+        }
+
+        private void FormVide_MouseUp(object sender, MouseEventArgs e)
+        {
+            _isDragging = false;
+        }
+
+        private void FormVide_ResizeMouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                _isResizing = true;
+                _resizeStartPoint = e.Location;
+                _resizeStartSize = this.Size;
+
+                // Ne pas appeler Invalidate ici, car le redimensionnement peut être lent
+            }
+        }
+
+        private void FormVide_ResizeMouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isResizing)
+            {
+                int deltaWidth = e.X - _resizeStartPoint.X;
+                int deltaHeight = e.Y - _resizeStartPoint.Y;
+                this.Size = new Size(_resizeStartSize.Width + deltaWidth, _resizeStartSize.Height + deltaHeight);
+
+                Invalidate();
+            }
+            else
+            {
+                // Détection des bords pour redimensionnement
+                if (e.X < 10)
+                    this.Cursor = Cursors.SizeWE; // Clic sur le côté gauche
+                else if (e.X > this.Width - 10)
+                    this.Cursor = Cursors.SizeWE; // Clic sur le côté droit
+                else if (e.Y < 10)
+                    this.Cursor = Cursors.SizeNS; // Clic sur le côté haut
+                else if (e.Y > this.Height - 10)
+                    this.Cursor = Cursors.SizeNS; // Clic sur le côté bas
+                else
+                    this.Cursor = Cursors.Default; // Curseur par défaut
+            }
+        }
+
+        private void FormVide_ResizeMouseUp(object sender, MouseEventArgs e)
+        {
+            _isResizing = false;
+        }
+
+        private void AjouterBoutonsControle()
+        {
+            panel2.BackColor = Color.FromArgb(30, 30, 30); // Fond du panneau
+            panel2.Dock = DockStyle.Top;
+            panel2.Height = 40;
+
+            Button btnFermer = new Button
+            {
+                Text = "✖",
+                ForeColor = Color.White,
+                BackColor = Color.Red,
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(40, 30),
+                Location = new Point(panel2.Width - 45, 5) // Aligné à droite
+            };
+            btnFermer.Click += (s, e) => { this.Close(); };
+
+            Button btnAgrandir = new Button
+            {
+                Text = "⬜",
+                ForeColor = Color.White,
+                BackColor = Color.Gray,
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(40, 30),
+                Location = new Point(panel2.Width - 90, 5)
+            };
+            btnAgrandir.Click += (s, e) =>
+            {
+                this.WindowState = this.WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
+                btnAgrandir.Text = this.WindowState == FormWindowState.Maximized ? "❐" : "⬜";
+            };
+
+            Button btnReduire = new Button
+            {
+                Text = "➖",
+                ForeColor = Color.White,
+                BackColor = Color.Gray,
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(40, 30),
+                Location = new Point(panel2.Width - 135, 5)
+            };
+            btnReduire.Click += (s, e) =>
+            {
+                this.WindowState = FormWindowState.Minimized;
+            };
+
+            panel2.Controls.Add(btnFermer);
+            panel2.Controls.Add(btnAgrandir);
+            panel2.Controls.Add(btnReduire);
+
+            // Réajuster la position des boutons lors du redimensionnement du panneau
+            panel2.Resize += (s, e) =>
+            {
+                btnFermer.Left = panel2.Width - 45;
+                btnAgrandir.Left = panel2.Width - 90;
+                btnReduire.Left = panel2.Width - 135;
+            };
+        }
+        private void It_Click(object? sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void FormVide_MouseEnter(object sender, EventArgs e)
         {
             Form1.forme = this;
-
             this.BringToFront();
         }
 
-        private void FormVide_ClientSizeChanged(object? sender, EventArgs e)
+        private void FormVide_ClientSizeChanged(object sender, EventArgs e)
         {
             this.panel1.Size = this.ClientSize;
         }
 
-        private void panel1_Paint(object sender, PaintEventArgs e)
+        private void FormVide_Click(object sender, EventArgs e)
         {
-
+            this.Show();
         }
     }
 }
