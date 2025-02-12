@@ -17,6 +17,7 @@ using System.ComponentModel.Design;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using Microsoft.VisualBasic.ApplicationServices;
+using OrthoDesigner.LIB;
 
 namespace StageCode
 {
@@ -176,7 +177,7 @@ namespace StageCode
                 contextMenu.Items[0].Enabled = false;
                 contextMenu.Enabled = true;
 
-               // Point menuPosition = new Point(Cursor.Position.X + 10, Cursor.Position.Y + 10);
+                // Point menuPosition = new Point(Cursor.Position.X + 10, Cursor.Position.Y + 10);
                 contextMenu.Show(Cursor.Position, ToolStripDropDownDirection.BelowLeft);
 
                 //timer.Stop();
@@ -325,16 +326,16 @@ namespace StageCode
 
             xmlContent.AppendLine("  <Controls>");
 
-            StringBuilder accumulatedText = SaveAsXML(); 
+            StringBuilder accumulatedText = SaveAsXML();
 
-            xmlContent.AppendLine(accumulatedText.ToString()); 
+            xmlContent.AppendLine(accumulatedText.ToString());
             xmlContent.AppendLine("  </Controls>");
 
             xmlContent.AppendLine("</Syno>");
 
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
             {
-                saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn"; 
+                saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn";
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
@@ -528,7 +529,7 @@ namespace StageCode
                             accumulatedText.AppendLine(reticuleControl.WriteFile());
                         }
 
-                        childControl.Location = new Point(5,5);
+                        childControl.Location = new Point(5, 5);
 
                     }
                 }
@@ -733,8 +734,8 @@ namespace StageCode
                         BorderStyle = BorderStyle.FixedSingle,
                         BackColor = Color.White,
                         Size = new Size(200, 200),
-                        Location = mousePosition, 
-                        AllowDrop = true 
+                        Location = mousePosition,
+                        AllowDrop = true
                     };
 
                     newpic.Paint += pic_Paint;
@@ -762,13 +763,13 @@ namespace StageCode
 
                             Control.MouseClick += Control_MouseClick;
 
-                            newpic.Width = Control.Size.Width+10;
+                            newpic.Width = Control.Size.Width + 10;
                             newpic.Height = Control.Size.Height + 10;
                         }
                     }
 
                     forme.panel1.Controls.Add(newpic);
-                    newpic.Invalidate(); 
+                    newpic.Invalidate();
                     PictureBoxSelectonner = "";
                 }
             }
@@ -975,7 +976,7 @@ namespace StageCode
                             {
                                 Size = new Size(am60Control.Size.Width + 10, am60Control.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
-                                 
+
                             };
 
                             pic.BorderStyle = BorderStyle.FixedSingle;
@@ -1424,7 +1425,7 @@ namespace StageCode
                             {
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
-                            }; 
+                            };
                             pic.BorderStyle = BorderStyle.FixedSingle;
 
 
@@ -1730,7 +1731,7 @@ namespace StageCode
 
                 xmlContent.AppendLine("</Syno>");
 
-                using (StreamWriter writer = new StreamWriter(forme.Text +".Syno"))
+                using (StreamWriter writer = new StreamWriter(forme.Text + ".Syno"))
                 {
                     writer.Write(xmlContent.ToString());
                 }
@@ -1861,7 +1862,7 @@ namespace StageCode
                     break;
             }
 
-            DialogResult r = MessageBox.Show($"{message}", title, MessageBoxButtons.YesNo); 
+            DialogResult r = MessageBox.Show($"{message}", title, MessageBoxButtons.YesNo);
 
             if (r == DialogResult.Yes)
             {
@@ -2086,7 +2087,8 @@ namespace StageCode
                 "OrthoRel",
                 "OrthoResult",
                 "OrthoVarname",
-                "Reticule"
+                "Reticule",
+                "TABNAME"
             });
 
         }
@@ -2098,11 +2100,11 @@ namespace StageCode
                 if (this.Cursor == Cursors.Default)
                 {
                     ControlSelectionner = lstToolbox.SelectedItem.ToString();
-                    this.Cursor = Cursors.Cross; 
+                    this.Cursor = Cursors.Cross;
                 }
                 else if (this.Cursor == Cursors.Cross)
                 {
-                    this.Cursor = Cursors.Default;  
+                    this.Cursor = Cursors.Default;
                 }
             }
         }
@@ -2202,6 +2204,9 @@ namespace StageCode
 
                 case "Reticule":
                     Ctrl = new Reticule();
+                    break;
+                case "TABNAME":
+                    Ctrl = new OrthoTabname();
                     break;
 
                 default:
@@ -2354,7 +2359,7 @@ namespace StageCode
 
         private void Control_Click(object? sender, EventArgs e)
         {
-            foreach(PictureBox pic2 in forme.panel1.Controls)
+            foreach (PictureBox pic2 in forme.panel1.Controls)
             {
                 if (pic2 != null)
                 {
@@ -2522,10 +2527,10 @@ namespace StageCode
 
             if (pic != null)
             {
-                using (Pen pen = new Pen(Color.SkyBlue, 4)) 
+                using (Pen pen = new Pen(Color.SkyBlue, 4))
                 {
-                  //  pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid; 
-                    e.Graphics.DrawRectangle(pen, pic.ClientRectangle); 
+                    //  pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid; 
+                    e.Graphics.DrawRectangle(pen, pic.ClientRectangle);
                 }
             }
         }
@@ -2738,28 +2743,45 @@ namespace StageCode
         {
             try
             {
+                int compteur = 0;
+
+                forme.Text = FilePath;
+
                 using (StreamReader sr = new StreamReader(FilePath, Encoding.UTF8, true))
                 {
                     string? ligne;
-                     while ((ligne = sr.ReadLine()) != null)
+
+                    // Lire chaque ligne jusqu'à ce qu'on atteigne la fin ou un nombre limite de lignes vides (ici, 5)
+                    while ((ligne = sr.ReadLine()) != null && compteur < 5)
                     {
-                        if (!ligne.StartsWith("'"))
+                        // Ignorer les commentaires (lignes qui commencent par "'") et les lignes vides
+                        if (!ligne.StartsWith("'") && !string.IsNullOrWhiteSpace(ligne))
                         {
                             string[] splitPvirgule = ligne.Split(";");
 
+                            // Créer l'objet à partir du texte
                             Control? nouvelObjet = CreerObjetDepuisTexte(splitPvirgule, FilePath);
 
                             if (nouvelObjet != null)
                             {
+                                compteur = 0;  // Réinitialiser le compteur pour les lignes valides
+
+                                // Créer un PictureBox pour afficher l'objet
                                 PictureBox pb = new PictureBox();
-                                pb.Size = new Size(nouvelObjet.Size.Width +10, nouvelObjet.Size.Height+10);
+                                pb.Size = new Size(nouvelObjet.Size.Width + 10, nouvelObjet.Size.Height + 10);
                                 pb.Location = nouvelObjet.Location;
 
+                                // Déplacer l'objet à l'intérieur du PictureBox
                                 nouvelObjet.Location = new Point(5, 5);
                                 pb.Controls.Add(nouvelObjet);
 
+                                // Ajouter le PictureBox au panel
                                 forme.panel1.Controls.Add(pb);
                             }
+                        }
+                        else if (string.IsNullOrWhiteSpace(ligne)) // Incrémenter le compteur pour les lignes vides
+                        {
+                            compteur++;
                         }
                     }
                 }
@@ -2790,10 +2812,11 @@ namespace StageCode
                 "RESULT" => new OrthoResult(),
                 "VARNAME" => new OrthoVarname(),
                 "RETICULE" => new Reticule(),
+                "TABNAME" => new OrthoTabname(),
                 _ => null
             };
 
-            if(splitPvirgule[0] == "ORTHO")
+            if (objet == null)
             {
                 objet = splitPvirgule[1] switch
                 {
@@ -2813,6 +2836,7 @@ namespace StageCode
                     "RESULT" => new OrthoResult(),
                     "VARNAME" => new OrthoVarname(),
                     "RETICULE" => new Reticule(),
+                    "TABNAME" => new OrthoTabname(),
                     _ => null
                 };
             }
@@ -2823,6 +2847,84 @@ namespace StageCode
             }
 
             return objet;
+        }
+
+
+        private void chargerTousLesFichiersSyn(string dossier)
+        {
+            try
+            {
+                // Vérifie si le dossier existe
+                if (Directory.Exists(dossier))
+                {
+                    // Récupère tous les fichiers .syn dans le dossier
+                    string[] fichiersSyn = Directory.GetFiles(dossier, "*.syn");
+
+                    // Si des fichiers .syn sont trouvés
+                    if (fichiersSyn.Length > 0)
+                    {
+                        // Ferme la fenêtre principale avant de charger
+                        forme.Close();
+
+                        // Crée un formulaire temporaire pour chaque fichier .syn
+                        foreach (string fichier in fichiersSyn)
+                        {
+                            // Crée un contrôle de bordure dans le panel d'affichage
+                            pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
+
+                            // Crée un formulaire vide pour chaque fichier
+                            FormVide tmp = new FormVide();
+
+                            // Positionne le formulaire temporaire
+                            tmp.Location = new Point(0, 0);
+
+                            // Ajoute un événement de clic pour le panel
+                            tmp.panel1.MouseClick += pnlViewHost_Click;
+
+                            // Ajoute un événement de fermeture pour le formulaire
+                            tmp.FormClosing += Tmp_FormClosing;
+
+                            // Affiche le formulaire dans le panel
+                            AfficherFormDansPanel(tmp, pnlViewHost);
+
+                            // Charge le contenu du fichier .syn dans l'interface
+                            charger_fichierTXT(fichier);
+
+                            // Réduit la fenêtre principale pour plus de fluidité
+                            forme.WindowState = FormWindowState.Minimized;
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Aucun fichier .syn trouvé dans ce dossier.");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Le dossier spécifié n'existe pas.");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogException(ex); // Enregistre l'exception si nécessaire
+                MessageBox.Show($"Erreur : {ex.Message}");
+            }
+        }
+
+
+        private void chargerToutDossierToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Crée une boîte de dialogue pour permettre à l'utilisateur de sélectionner un dossier
+            using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
+            {
+                // Affiche la boîte de dialogue et vérifie si l'utilisateur a sélectionné un dossier
+                if (folderDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Appelle la méthode pour charger tous les fichiers .syn du dossier sélectionné
+                    string cheminDossier = folderDialog.SelectedPath;
+                    chargerTousLesFichiersSyn(cheminDossier);
+                }
+            }
         }
 
     }

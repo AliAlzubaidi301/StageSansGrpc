@@ -49,7 +49,6 @@
 
         bool IEquatable<AvailableLanguage>.Equals(AvailableLanguage other)
         {
-            //ILSpy generated this explicit interface implementation from .override directive in Equals1
             return this.Equals1(other);
         }
 

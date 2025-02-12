@@ -120,7 +120,7 @@ namespace StageCode.LIB
 
             this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
             Format = splitPvirgule[4];
-            Font = new Font(splitPvirgule[7], int.Parse(splitPvirgule[8]), StyleText);
+           // Font = new Font(splitPvirgule[7], int.Parse(splitPvirgule[8]), StyleText);
             this.Text = splitPvirgule[2];
             TextAlign = (HorizontalAlignment)int.Parse(splitPvirgule[3]);
             try

@@ -204,6 +204,75 @@ namespace StageCode.LIB
             return ColorTranslator.FromHtml(oleColor);  // On suppose que les couleurs sont au format hexadécimal
         }
 
+        public object ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
+        {
+            var StyleText = new FontStyle();
+            this.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(splitPvirgule[3]));
+
+            if (bool.TryParse(splitPvirgule[9], out bool isStrikeout) && isStrikeout)
+            {
+                StyleText |= FontStyle.Strikeout;
+            }
+            if (bool.TryParse(splitPvirgule[10], out bool isUnderline) && isUnderline)
+            {
+                StyleText |= FontStyle.Underline;
+            }
+            if (bool.TryParse(splitPvirgule[11], out bool isBold) && isBold)
+            {
+                StyleText |= FontStyle.Bold;
+            }
+            if (bool.TryParse(splitPvirgule[12], out bool isItalic) && isItalic)
+            {
+                StyleText |= FontStyle.Italic;
+            }
+
+            this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
+            this.comment = comment;
+            this.Caption = splitPvirgule[2];
+            this.Format = splitPvirgule[4];
+            //this.Font = new Font(splitPvirgule[7], int.Parse(splitPvirgule[8]), StyleText);
+            this.Text = splitPvirgule[2];
+            this.BackColor = FromOle(splitPvirgule[5]);
+            this.ForeColor = FromOle(splitPvirgule[6]);
+            if (Enum.TryParse<TDesign>(splitPvirgule[13], out TDesign typeDesignResult))
+            {
+                TypeDesign = typeDesignResult;  // Conversion réussie
+            }
+            else
+            {
+                // Si la conversion échoue, vous pouvez définir une valeur par défaut
+                TypeDesign = TDesign.Bouton;  // Par exemple, assigner une valeur par défaut
+            }
+            this.BorderWidth = int.Parse(splitPvirgule[14]);
+            this.Size = new Size(int.Parse(splitPvirgule[16]), int.Parse(splitPvirgule[15]));
+            if (FromCopy)
+            {
+                this.Location = new Point(int.Parse(splitPvirgule[18]) + 10, int.Parse(splitPvirgule[17]) + 10);
+            }
+            else
+            {
+                this.Location = new Point(int.Parse(splitPvirgule[18]), int.Parse(splitPvirgule[17]));
+            }
+            this.VarText = splitPvirgule[19];
+            this.VarBackColor = splitPvirgule[20];
+            this.VarForeColor = splitPvirgule[21];
+            this.VarValMax = splitPvirgule[22];
+            this.VarTextMax = splitPvirgule[23];
+            this.VarValMin = splitPvirgule[24];
+            this.VarTextMin = splitPvirgule[25];
+            _VL[7] = (splitPvirgule[26]);
+            _VL[8] = (splitPvirgule[27]);
+            this.ColorOn = FromOle(splitPvirgule[28]);
+            this.ColorOff = FromOle(splitPvirgule[29]);
+            this.ColorErr = FromOle(splitPvirgule[30]);
+            this.LevelVisible = int.Parse(splitPvirgule[31]);
+            this.LevelEnabled = int.Parse(splitPvirgule[32]);
+            if (splitPvirgule.Length >= 34)
+            {
+                this.Visibility = splitPvirgule[33];
+            }
+            return this;
+        }
 
         public string WriteFileXML()
         {

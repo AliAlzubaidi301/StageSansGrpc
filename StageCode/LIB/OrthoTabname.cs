@@ -16,7 +16,7 @@ using static StageCode.Other.Langs;
 
 namespace OrthoDesigner.LIB
 {
-    public partial class OrthoTabnameDesigner : UserControl
+    public partial class OrthoTabname : UserControl
     {
         private int _LevelVisible = 0; // Niveau d'accès minimum pour rendre l'objet visible
         private int _LevelEnabled = 0; // Niveau d'accès minimum pour rendre l'objet accessible
@@ -36,7 +36,7 @@ namespace OrthoDesigner.LIB
 
         public event EventHandler VisibilityChanging;
         public event EventHandler VisibilityChanged;
-        public OrthoTabnameDesigner()
+        public OrthoTabname()
         {
             InitializeComponent();
         }
@@ -922,7 +922,7 @@ namespace OrthoDesigner.LIB
         }
         private void Tmp_Load(object sender, EventArgs e)
         {
-            Debug.WriteLine(typeof(OrthoTabnameDesigner).AssemblyQualifiedName);
+            Debug.WriteLine(typeof(OrthoTabname).AssemblyQualifiedName);
 
 
 

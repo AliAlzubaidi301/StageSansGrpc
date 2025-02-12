@@ -1,6 +1,6 @@
 ﻿namespace OrthoDesigner.LIB
 {
-    partial class OrthoTabnameDesigner
+    partial class OrthoTabname
     {
         /// <summary>
         /// Required designer variable.

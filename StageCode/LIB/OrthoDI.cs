@@ -142,7 +142,7 @@ namespace StageCode.LIB
 
             this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
             Precision = splitPvirgule[4];
-            Font = new Font(splitPvirgule[7], float.Parse(splitPvirgule[8]), StyleText);
+          //  Font = new Font(splitPvirgule[7], float.Parse(splitPvirgule[8]), StyleText);
             // LBO 2012 03 19 Correction
             // Me.Text = splitPvirgule(2)
             Caption = splitPvirgule[2];

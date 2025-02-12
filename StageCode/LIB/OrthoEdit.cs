@@ -109,7 +109,7 @@ namespace StageCode.LIB
 
             this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
             Format = splitPvirgule[4];
-            Font = new Font(splitPvirgule[7], float.Parse(splitPvirgule[8]), StyleText);
+            //Font = new Font(splitPvirgule[7], float.Parse(splitPvirgule[8]), StyleText);
             this.Text = splitPvirgule[2];
             BackColor = FromOle(splitPvirgule[5]);
             ForeColor = FromOle(splitPvirgule[6]);

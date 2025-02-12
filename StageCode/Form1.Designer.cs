@@ -57,6 +57,7 @@
             CouperLogo = new ToolStripMenuItem();
             CopierLogo = new ToolStripMenuItem();
             CollerLogo = new ToolStripMenuItem();
+            chargerToutDossierToolStripMenuItem = new ToolStripMenuItem();
             MainMenu.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -72,7 +73,7 @@
             // 
             // btnFile
             // 
-            btnFile.DropDownItems.AddRange(new ToolStripItem[] { newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, newFormeToolStripMenuItem });
+            btnFile.DropDownItems.AddRange(new ToolStripItem[] { newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, newFormeToolStripMenuItem, chargerToutDossierToolStripMenuItem });
             btnFile.Name = "btnFile";
             btnFile.Size = new Size(37, 20);
             btnFile.Text = "File";
@@ -80,35 +81,35 @@
             // newToolStripMenuItem
             // 
             newToolStripMenuItem.Name = "newToolStripMenuItem";
-            newToolStripMenuItem.Size = new Size(127, 22);
+            newToolStripMenuItem.Size = new Size(181, 22);
             newToolStripMenuItem.Text = "New";
             newToolStripMenuItem.Click += newToolStripMenuItem_Click;
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(127, 22);
+            openToolStripMenuItem.Size = new Size(181, 22);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(127, 22);
+            saveToolStripMenuItem.Size = new Size(181, 22);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
             // saveAsToolStripMenuItem
             // 
             saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new Size(127, 22);
+            saveAsToolStripMenuItem.Size = new Size(181, 22);
             saveAsToolStripMenuItem.Text = "Save As";
             saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
             // 
             // newFormeToolStripMenuItem
             // 
             newFormeToolStripMenuItem.Name = "newFormeToolStripMenuItem";
-            newFormeToolStripMenuItem.Size = new Size(127, 22);
+            newFormeToolStripMenuItem.Size = new Size(181, 22);
             newFormeToolStripMenuItem.Text = "New Page";
             newFormeToolStripMenuItem.Click += newFormeToolStripMenuItem_Click;
             // 
@@ -275,6 +276,13 @@
             CollerLogo.Tag = "Paste";
             CollerLogo.Click += CollerLogo_Click;
             // 
+            // chargerToutDossierToolStripMenuItem
+            // 
+            chargerToutDossierToolStripMenuItem.Name = "chargerToutDossierToolStripMenuItem";
+            chargerToutDossierToolStripMenuItem.Size = new Size(181, 22);
+            chargerToutDossierToolStripMenuItem.Text = "Charger tout dossier";
+            chargerToutDossierToolStripMenuItem.Click += chargerToutDossierToolStripMenuItem_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -330,5 +338,6 @@
         private ToolStripMenuItem CouperLogo;
         private ToolStripMenuItem CopierLogo;
         private ToolStripMenuItem CollerLogo;
+        private ToolStripMenuItem chargerToutDossierToolStripMenuItem;
     }
 }
