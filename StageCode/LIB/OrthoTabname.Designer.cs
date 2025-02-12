@@ -1,6 +1,6 @@
-﻿namespace StageCode.LIB
+﻿namespace OrthoDesigner.LIB
 {
-    partial class OrthoVarname
+    partial class OrthoTabnameDesigner
     {
         /// <summary>
         /// Required designer variable.
@@ -28,32 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
-            Label1 = new Label();
             SuspendLayout();
             // 
-            // Label1
-            // 
-            Label1.AutoSize = true;
-            Label1.Location = new Point(0, 0);
-            Label1.Name = "Label1";
-            Label1.Size = new Size(38, 15);
-            Label1.TabIndex = 0;
-            Label1.Text = "label1";
-            // 
-            // OrthoVarname
+            // OrthoTabnameDesigner
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(Label1);
-            Name = "OrthoVarname";
-            Size = new Size(164, 115);
-            Load += OrthoVarname_Load;
+            Name = "OrthoTabnameDesigner";
+            Load += Tmp_Load;
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
-
-        private Label Label1;
     }
 }

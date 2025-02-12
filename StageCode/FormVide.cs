@@ -12,6 +12,7 @@ namespace OrthoDesigner
         private Point _dragStartPoint;
         private Size _resizeStartSize;
         private Point _resizeStartPoint;
+        private Label label; 
 
         public FormVide()
         {
@@ -35,6 +36,16 @@ namespace OrthoDesigner
             panel2.MouseMove += FormVide_MouseMove;
             panel2.MouseUp += FormVide_MouseUp;
 
+            label = new Label();
+            label.Text = this.Text;
+            label.ForeColor = Color.White;
+
+            label.Location = new Point(5,(panel2.Height -  label.Height) / 2 +2);
+
+            this.TextChanged += FormVide_TextChanged;
+
+            panel2.Controls.Add(label);
+
             // Ajouter l'événement pour le redimensionnement de la fenêtre
             panel1.MouseDown += FormVide_ResizeMouseDown;
             panel1.MouseMove += FormVide_ResizeMouseMove;
@@ -42,6 +53,12 @@ namespace OrthoDesigner
 
             panel1.BackColor = Color.White; // Couleur de fond du panel
         }
+
+        private void FormVide_TextChanged(object? sender, EventArgs e)
+        {
+            label.Text = this.Text;
+        }
+
         private void FormVide_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)

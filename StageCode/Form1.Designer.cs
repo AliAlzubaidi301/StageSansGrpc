@@ -188,6 +188,7 @@
             Nouveau.BackgroundImageLayout = ImageLayout.Zoom;
             Nouveau.Name = "Nouveau";
             Nouveau.Size = new Size(12, 20);
+            Nouveau.Tag = "New";
             Nouveau.Click += Nouveau_Click;
             // 
             // menuStrip1
@@ -207,6 +208,7 @@
             Open.BackgroundImageLayout = ImageLayout.Zoom;
             Open.Name = "Open";
             Open.Size = new Size(12, 20);
+            Open.Tag = "Open";
             Open.Click += Open_Click;
             // 
             // Save
@@ -215,6 +217,7 @@
             Save.BackgroundImageLayout = ImageLayout.Zoom;
             Save.Name = "Save";
             Save.Size = new Size(12, 20);
+            Save.Tag = "Save";
             Save.Click += toolStripMenuItem2_Click;
             // 
             // SaveALL
@@ -224,6 +227,7 @@
             SaveALL.Name = "SaveALL";
             SaveALL.ShowShortcutKeys = false;
             SaveALL.Size = new Size(12, 20);
+            SaveALL.Tag = "Save all";
             SaveALL.Click += SaveALL_Click;
             // 
             // Close
@@ -232,6 +236,7 @@
             Close.BackgroundImageLayout = ImageLayout.Zoom;
             Close.Name = "Close";
             Close.Size = new Size(12, 20);
+            Close.Tag = "Close";
             Close.Click += Close_Click;
             // 
             // CloseALL
@@ -240,6 +245,7 @@
             CloseALL.BackgroundImageLayout = ImageLayout.Zoom;
             CloseALL.Name = "CloseALL";
             CloseALL.Size = new Size(12, 20);
+            CloseALL.Tag = "Close all";
             CloseALL.Click += CloseALL_Click;
             // 
             // CouperLogo
@@ -248,6 +254,7 @@
             CouperLogo.BackgroundImageLayout = ImageLayout.Zoom;
             CouperLogo.Name = "CouperLogo";
             CouperLogo.Size = new Size(12, 20);
+            CouperLogo.Tag = "Cut";
             CouperLogo.Click += CouperLogo_Click;
             // 
             // CopierLogo
@@ -256,6 +263,7 @@
             CopierLogo.BackgroundImageLayout = ImageLayout.Zoom;
             CopierLogo.Name = "CopierLogo";
             CopierLogo.Size = new Size(12, 20);
+            CopierLogo.Tag = "Copy";
             CopierLogo.Click += CopierLogo_Click;
             // 
             // CollerLogo
@@ -264,6 +272,7 @@
             CollerLogo.BackgroundImageLayout = ImageLayout.Zoom;
             CollerLogo.Name = "CollerLogo";
             CollerLogo.Size = new Size(12, 20);
+            CollerLogo.Tag = "Paste";
             CollerLogo.Click += CollerLogo_Click;
             // 
             // Form1

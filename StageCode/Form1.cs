@@ -11,6 +11,12 @@ using System.Data.SQLite;
 using CodeExceptionManager.Controller;
 using CodeExceptionManager.DAO;
 using System;
+using System.Windows.Forms;
+using StageCode.Other;
+using System.ComponentModel.Design;
+using System.Runtime.CompilerServices;
+using System.Threading.Channels;
+using Microsoft.VisualBasic.ApplicationServices;
 
 namespace StageCode
 {
@@ -31,10 +37,12 @@ namespace StageCode
         private bool Bouger = false;
 
         private bool EnMoouvement = false;
+        System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
 
         private bool Aligner = false;
 
-        List<PictureBox> listPic = new List<PictureBox>();
+        private List<PictureBox> listPic = new List<PictureBox>();
+        private ContextMenuStrip contextMenu = new ContextMenuStrip();
 
         //A corriger
         //les commentaire et position des controls + la bd
@@ -133,6 +141,9 @@ namespace StageCode
 
                 item.Image = item.BackgroundImage;
                 item.BackgroundImage = null;
+
+                item.MouseHover += Item_MouseHover;
+                item.MouseLeave += MenuItem_MouseLeave;
             }
 
             ToolStripSeparator separator = new ToolStripSeparator();
@@ -145,6 +156,8 @@ namespace StageCode
 
             this.btnVersion.Text = "V " + tmp;
 
+            this.Text = "OrthoDesigner V " + tmp;
+
             AjouterRaccourcisMenuFile();
             AjouterMenuEdition();
             AjouterbtnQuit();
@@ -153,6 +166,40 @@ namespace StageCode
 
             Initialize();
         }
+
+        private void Item_MouseHover(object? sender, EventArgs e)
+        {
+            if (sender is ToolStripMenuItem menuItem)
+            {
+                contextMenu.Items.Clear();
+                contextMenu.Items.Add($"{menuItem.Tag}");
+                contextMenu.Items[0].Enabled = false;
+                contextMenu.Enabled = true;
+
+               // Point menuPosition = new Point(Cursor.Position.X + 10, Cursor.Position.Y + 10);
+                contextMenu.Show(Cursor.Position, ToolStripDropDownDirection.BelowLeft);
+
+                //timer.Stop();
+
+                //timer.Interval = 3000;
+                //timer.Tick += (s, args) =>
+                //{
+                //    if (!contextMenu.Bounds.Contains(Cursor.Position))
+                //    {
+                //        contextMenu.Hide();
+                //        timer.Stop();
+                //    }
+                //};
+                //timer.Start();
+            }
+        }
+
+        private void MenuItem_MouseLeave(object? sender, EventArgs e)
+        {
+            contextMenu.Hide();
+        }
+
+
 
         #region Ajouter Menu File
 
@@ -271,39 +318,30 @@ namespace StageCode
         #region Actions des menus
         public void ExportFormToXml()
         {
-            // Créer un StringBuilder pour accumuler le texte de tous les contrôles
             StringBuilder xmlContent = new StringBuilder();
 
-            // Début du fichier XML
             xmlContent.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
             xmlContent.AppendLine("<Syno name=\"settings\">");
 
             xmlContent.AppendLine("  <Controls>");
 
-            // Appeler la méthode SaveAs pour accumuler tous les contrôles dans xmlContent
-            StringBuilder accumulatedText = SaveAsXML(); // Récupère le texte accumulé des contrôles
+            StringBuilder accumulatedText = SaveAsXML(); 
 
-            // Ajouter le texte accumulé (contenu des contrôles) dans le XML
-            xmlContent.AppendLine(accumulatedText.ToString());  // Ajouter le contenu des contrôles au XML
+            xmlContent.AppendLine(accumulatedText.ToString()); 
             xmlContent.AppendLine("  </Controls>");
 
-            // Clôturer l'élément principal <Syno>
             xmlContent.AppendLine("</Syno>");
 
-            // Ouvrir un SaveFileDialog pour choisir l'emplacement et le nom du fichier .syn
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
             {
-                saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn"; // Filtrer les fichiers pour .syn
+                saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn"; 
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    // Ouvrir un stream pour écrire dans le fichier choisi
                     using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
                     {
-                        // Écrire le texte XML accumulé dans le fichier
                         writer.Write(xmlContent.ToString());
                     }
 
-                    // Message de confirmation
                     MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
@@ -384,6 +422,8 @@ namespace StageCode
                         {
                             accumulatedText.AppendLine(reticuleControl.WriteFileXML());
                         }
+
+                        childControl.Location = new Point(5, 5);
                     }
                 }
             }
@@ -487,6 +527,9 @@ namespace StageCode
                         {
                             accumulatedText.AppendLine(reticuleControl.WriteFile());
                         }
+
+                        childControl.Location = new Point(5,5);
+
                     }
                 }
             }
@@ -654,9 +697,9 @@ namespace StageCode
                 DataObject data = new DataObject();
                 using (MemoryStream ms = new MemoryStream())
                 {
-#pragma warning disable SYSLIB0011 // Le type ou le membre est obsolète
+#pragma warning disable SYSLIB0011 
                     BinaryFormatter bf = new BinaryFormatter();
-#pragma warning restore SYSLIB0011 // Le type ou le membre est obsolète
+#pragma warning restore SYSLIB0011 
                     bf.Serialize(ms, controlsData);
                     data.SetData("ControlsData", ms.ToArray());
                 }
@@ -687,11 +730,11 @@ namespace StageCode
 
                     PictureBox newpic = new PictureBox
                     {
-                        BorderStyle = BorderStyle.None,
+                        BorderStyle = BorderStyle.FixedSingle,
                         BackColor = Color.White,
-                        Size = new Size(200, 200), // Taille par défaut, peut être ajustée
-                        Location = mousePosition, // Position à l'endroit du clic
-                        AllowDrop = true // Pour gérer éventuellement le drag & drop
+                        Size = new Size(200, 200),
+                        Location = mousePosition, 
+                        AllowDrop = true 
                     };
 
                     newpic.Paint += pic_Paint;
@@ -718,11 +761,14 @@ namespace StageCode
                             Control.Click += Control_Click;
 
                             Control.MouseClick += Control_MouseClick;
+
+                            newpic.Width = Control.Size.Width+10;
+                            newpic.Height = Control.Size.Height + 10;
                         }
                     }
 
                     forme.panel1.Controls.Add(newpic);
-                    newpic.Invalidate(); // Redessiner
+                    newpic.Invalidate(); 
                     PictureBoxSelectonner = "";
                 }
             }
@@ -864,6 +910,11 @@ namespace StageCode
                 file.Filter = "Fichier SYN (*.syn)|*.syn";
 
                 file.ShowDialog();
+
+                charger_fichierTXT(file.FileName);
+
+                return;
+
                 string? a = LireXML(file.FileName);
 
                 if (a == null)
@@ -924,7 +975,10 @@ namespace StageCode
                             {
                                 Size = new Size(am60Control.Size.Width + 10, am60Control.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
+                                 
                             };
+
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             am60Control.Location = new Point(5, 5);
 
@@ -960,6 +1014,7 @@ namespace StageCode
                                 Size = new Size(cont1Control.Size.Width + 10, cont1Control.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             cont1Control.Location = new Point(5, 5);
 
@@ -1001,6 +1056,7 @@ namespace StageCode
                                 Size = new Size(integControl.Size.Width + 10, integControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             integControl.Location = new Point(5, 5);
 
@@ -1041,6 +1097,7 @@ namespace StageCode
                                 Size = new Size(orthoADControl.Size.Width + 10, orthoADControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             orthoADControl.Location = new Point(5, 5);
 
@@ -1081,6 +1138,7 @@ namespace StageCode
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             orthoAlaControl.Location = new Point(5, 5);
 
@@ -1121,6 +1179,7 @@ namespace StageCode
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             orthoAlaControl.Location = new Point(5, 5);
 
@@ -1161,6 +1220,7 @@ namespace StageCode
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             orthoAlaControl.Location = new Point(5, 5);
 
@@ -1194,6 +1254,7 @@ namespace StageCode
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             orthoAlaControl.Location = new Point(5, 5);
 
@@ -1227,6 +1288,7 @@ namespace StageCode
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             orthoAlaControl.Location = new Point(5, 5);
 
@@ -1260,6 +1322,7 @@ namespace StageCode
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             orthoAlaControl.Location = new Point(5, 5);
 
@@ -1293,6 +1356,7 @@ namespace StageCode
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             orthoAlaControl.Location = new Point(5, 5);
 
@@ -1327,6 +1391,7 @@ namespace StageCode
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             orthoAlaControl.Location = new Point(5, 5);
 
@@ -1359,7 +1424,9 @@ namespace StageCode
                             {
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
-                            };
+                            }; 
+                            pic.BorderStyle = BorderStyle.FixedSingle;
+
 
                             orthoAlaControl.Location = new Point(5, 5);
 
@@ -1393,6 +1460,7 @@ namespace StageCode
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             orthoAlaControl.Location = new Point(5, 5);
 
@@ -1427,6 +1495,7 @@ namespace StageCode
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY)
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             orthoAlaControl.Location = new Point(5, 5);
 
@@ -1460,6 +1529,7 @@ namespace StageCode
                                 Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY)
                             };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
 
                             orthoAlaControl.Location = new Point(5, 5);
 
@@ -1660,7 +1730,7 @@ namespace StageCode
 
                 xmlContent.AppendLine("</Syno>");
 
-                using (StreamWriter writer = new StreamWriter("Save.syno"))
+                using (StreamWriter writer = new StreamWriter(forme.Text +".Syno"))
                 {
                     writer.Write(xmlContent.ToString());
                 }
@@ -1669,11 +1739,9 @@ namespace StageCode
             }
             else
             {
-
-
                 StringBuilder accumulatedText = SaveAsTXT();
 
-                using (StreamWriter writer = new StreamWriter("A.syno"))
+                using (StreamWriter writer = new StreamWriter(forme.Text + ".Syno"))
                 {
                     writer.Write(accumulatedText.ToString());
                 }
@@ -1759,12 +1827,10 @@ namespace StageCode
             }
         }
 
-
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string message = "";
             string title = "";
-
 
             switch (Langue)
             {
@@ -1795,7 +1861,7 @@ namespace StageCode
                     break;
             }
 
-            DialogResult r = MessageBox.Show($"{message}", title, MessageBoxButtons.YesNo);  //ShowCustomMessageBox(message, title, yesText, noText);
+            DialogResult r = MessageBox.Show($"{message}", title, MessageBoxButtons.YesNo); 
 
             if (r == DialogResult.Yes)
             {
@@ -2052,6 +2118,10 @@ namespace StageCode
             }
             if (this.Cursor == DefaultCursor)
             {
+                var wrapper = new FormPanelWrapper(forme);
+
+                propertyGrid1.SelectedObject = wrapper;
+
                 foreach (Control control in forme.panel1.Controls)
                 {
                     if (control is PictureBox pic)
@@ -2274,11 +2344,12 @@ namespace StageCode
 
             //p.Invalidate();
 
-            this.Cursor = DefaultCursor;
+            //this.Cursor = DefaultCursor;
 
-            this.Bouger = false;
-            this.EnMoouvement = false;
+            //this.Bouger = false;
+            //this.EnMoouvement = false;
 
+            return;
         }
 
         private void Control_Click(object? sender, EventArgs e)
@@ -2297,7 +2368,6 @@ namespace StageCode
             }
 
             Control? controle = sender as Control;
-
             PictureBox? pic = controle?.Parent as PictureBox;
 
             if (pic != null)
@@ -2309,9 +2379,12 @@ namespace StageCode
                 pic.Paint += pic_Paint;
                 pic.Invalidate();
 
-                propertyGrid1.SelectedObject = controle;
+                if (controle != null)
+                {
+                    var tmp = new ControlPictureBoxWrapper(pic, controle);
 
-
+                    propertyGrid1.SelectedObject = tmp;
+                }
             }
         }
 
@@ -2449,10 +2522,10 @@ namespace StageCode
 
             if (pic != null)
             {
-                using (Pen pen = new Pen(Color.Black))
+                using (Pen pen = new Pen(Color.SkyBlue, 4)) 
                 {
-                    pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid; // Bordure en pointillés
-                    e.Graphics.DrawRectangle(pen, 0, 0, pic.Width - 1, pic.Height - 1);
+                  //  pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid; 
+                    e.Graphics.DrawRectangle(pen, pic.ClientRectangle); 
                 }
             }
         }
@@ -2615,7 +2688,7 @@ namespace StageCode
 
         private void Nouveau_Click(object sender, EventArgs e)
         {
-            newToolStripMenuItem_Click(sender, e);
+            newFormeToolStripMenuItem_Click(sender, e);
         }
 
         private void Open_Click(object sender, EventArgs e)
@@ -2661,5 +2734,96 @@ namespace StageCode
         {
             Coller(sender, e);
         }
+        private void charger_fichierTXT(string FilePath)
+        {
+            try
+            {
+                using (StreamReader sr = new StreamReader(FilePath, Encoding.UTF8, true))
+                {
+                    string? ligne;
+                     while ((ligne = sr.ReadLine()) != null)
+                    {
+                        if (!ligne.StartsWith("'"))
+                        {
+                            string[] splitPvirgule = ligne.Split(";");
+
+                            Control? nouvelObjet = CreerObjetDepuisTexte(splitPvirgule, FilePath);
+
+                            if (nouvelObjet != null)
+                            {
+                                PictureBox pb = new PictureBox();
+                                pb.Size = new Size(nouvelObjet.Size.Width +10, nouvelObjet.Size.Height+10);
+                                pb.Location = nouvelObjet.Location;
+
+                                nouvelObjet.Location = new Point(5, 5);
+                                pb.Controls.Add(nouvelObjet);
+
+                                forme.panel1.Controls.Add(pb);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogException(ex);
+            }
+        }
+
+        private Control? CreerObjetDepuisTexte(string[] splitPvirgule, string FilePath)
+        {
+            Control? objet = splitPvirgule[0] switch
+            {
+                "AM60" => new AM60(),
+                "CONT1" => new CONT1(),
+                "INTEG" => new INTEG(),
+                "AD" => new OrthoAD(),
+                "ALA" => new OrthoAla(),
+                "CMD" => new OrthoCMDLib(),
+                "COMBO" => new OrthoCombo(),
+                "DI" => new OrthoDI(),
+                "EDIT" => new OrthoEdit(),
+                "IMAGE" => new OrthoImage(),
+                "LABEL" => new OrthoLabel(),
+                "PBAR" => new OrthoPbar(),
+                "REL" => new OrthoRel(),
+                "RESULT" => new OrthoResult(),
+                "VARNAME" => new OrthoVarname(),
+                "RETICULE" => new Reticule(),
+                _ => null
+            };
+
+            if(splitPvirgule[0] == "ORTHO")
+            {
+                objet = splitPvirgule[1] switch
+                {
+                    "AM60" => new AM60(),
+                    "CONT1" => new CONT1(),
+                    "INTEG" => new INTEG(),
+                    "AD" => new OrthoAD(),
+                    "ALA" => new OrthoAla(),
+                    "CMD" => new OrthoCMDLib(),
+                    "COMBO" => new OrthoCombo(),
+                    "DI" => new OrthoDI(),
+                    "EDIT" => new OrthoEdit(),
+                    "IMAGE" => new OrthoImage(),
+                    "LABEL" => new OrthoLabel(),
+                    "PBAR" => new OrthoPbar(),
+                    "REL" => new OrthoRel(),
+                    "RESULT" => new OrthoResult(),
+                    "VARNAME" => new OrthoVarname(),
+                    "RETICULE" => new Reticule(),
+                    _ => null
+                };
+            }
+            if (objet != null)
+            {
+                dynamic objDynamic = objet;
+                objDynamic.ReadFile(splitPvirgule, "", FilePath, false);
+            }
+
+            return objet;
+        }
+
     }
 }
