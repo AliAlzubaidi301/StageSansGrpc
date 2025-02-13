@@ -9,9 +9,11 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using static StageCode.Other.Langs;
 
 namespace OrthoDesigner.LIB
@@ -29,7 +31,7 @@ namespace OrthoDesigner.LIB
         private string _comment = ""; // Commentaire sur le contrôle
         private string[] _VL = new string[9];
 
-        private CButton btn = new CButton();
+        public CButton btn = new CButton();
         private string _OngletCible; // Page qui sera chargée lors du clic sur le bouton
         private string _captionValues = "OrthoTabName";
         private string _visibility = "1";
@@ -107,9 +109,7 @@ namespace OrthoDesigner.LIB
             this.comment = comment;
 
             var StyleText = new FontStyle();
-            // Initialiser StyleText à une valeur de base si nécessaire
 
-            // Parsing de l'alignement
             TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(splitPvirgule[3]));
 
             // Ajouter des styles de texte conditionnellement
@@ -175,12 +175,140 @@ namespace OrthoDesigner.LIB
             }
             return this;
         }
+
+        public static OrthoTabname ReadFileXML(string xmlText)
+        {
+            XElement xml = XElement.Parse(xmlText);
+
+            OrthoTabname am60Control = new OrthoTabname();
+
+            am60Control.Caption = xml.Attribute("name")?.Value ?? "";
+
+            // Parse the <Apparence> section
+            XElement? appearance = xml.Element("Apparence");
+            if (appearance != null)
+            {
+                am60Control.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(appearance.Element("TextAlign")?.Attribute("value")?.Value ?? "0"));
+                am60Control.Precision = (appearance.Element("Precision")?.Attribute("value")?.Value ?? "0");
+                am60Control.BackColor = ColorTranslator.FromOle(int.Parse(appearance.Element("Backcolor")?.Attribute("value")?.Value ?? "0"));
+                am60Control.ForeColor = ColorTranslator.FromOle(int.Parse(appearance.Element("Forecolor")?.Attribute("value")?.Value ?? "0"));
+
+                // Parse <Font> section
+                XElement? fontElement = appearance.Element("Font");
+                if (fontElement != null)
+                {
+                    am60Control.Font = new Font(
+                        fontElement.Element("Name")?.Attribute("value")?.Value ?? "Arial",
+                        float.Parse(fontElement.Element("Size")?.Attribute("value")?.Value ?? "12"),
+                        (fontElement.Element("Bold")?.Attribute("value")?.Value == "true" ? FontStyle.Bold : 0) |
+                        (fontElement.Element("Italic")?.Attribute("value")?.Value == "true" ? FontStyle.Italic : 0) |
+                        (fontElement.Element("Underline")?.Attribute("value")?.Value == "true" ? FontStyle.Underline : 0) |
+                        (fontElement.Element("Strikeout")?.Attribute("value")?.Value == "true" ? FontStyle.Strikeout : 0)
+                    );
+                }
+
+                am60Control.TypeDesign = (TDesign)int.Parse(appearance.Element("TypeDesign")?.Attribute("value")?.Value ?? "0");
+                am60Control.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Attribute("value")?.Value ?? "1");
+
+                // Extract Size and Location
+                am60Control.Size = new Size(
+                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+                );
+                am60Control.Location = new Point(
+                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+                );
+
+                am60Control.OngletCible = appearance.Element("OngletCible")?.Attribute("value")?.Value ?? "";
+
+                // Extract <Values> section
+                XElement? valuesElement = appearance.Element("Values");
+                if (valuesElement != null)
+                {
+                    for (int i = 1; i <= 8; i++)
+                    {
+                        am60Control._VL[i] = valuesElement.Element($"VL{i}")?.Attribute("value")?.Value ?? "";
+                    }
+                }
+
+                am60Control.ColorOn = ColorTranslator.FromOle(int.Parse(appearance.Element("ColorOn")?.Attribute("value")?.Value ?? "0"));
+                am60Control.ColorOff = ColorTranslator.FromOle(int.Parse(appearance.Element("ColorOff")?.Attribute("value")?.Value ?? "0"));
+                am60Control.ColorErr = ColorTranslator.FromOle(int.Parse(appearance.Element("ColorErr")?.Attribute("value")?.Value ?? "0"));
+                am60Control.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Attribute("value")?.Value ?? "0");
+                am60Control.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Attribute("value")?.Value ?? "0");
+                am60Control.Visibility = appearance.Element("Visibility")?.Attribute("value")?.Value ?? "Visible";
+            }
+
+            return am60Control;
+        }
+
         public string WriteFile()
         {
             string retour = "ORTHO;TABNAME;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + OngletCible + ";" + _VL[1] + ";" + _VL[2] + ";" + _VL[3] + ";" + _VL[4] + ";" + _VL[5] + ";" + _VL[6] + ";" + _VL[7] + ";" + _VL[8] + (";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility);
 
             return retour;
         }
+        public string WriteFileXML()
+        {
+            var xmlContent = new StringBuilder();
+
+            // Début du composant spécifique
+            xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{SecurityElement.Escape(this.Caption)}\">");
+
+            // Section Apparence
+            xmlContent.AppendLine("      <Apparence>");
+            xmlContent.AppendLine($"        <TextAlign value=\"{ContentAlignment_Parser.Get_ValueToWrite(TextAlign)}\"/>");
+            xmlContent.AppendLine($"        <Precision value=\"{Precision}\"/>");
+            xmlContent.AppendLine($"        <Backcolor value=\"{ToOle(BackColor)}\"/>");
+            xmlContent.AppendLine($"        <Forecolor value=\"{ToOle(ForeColor)}\"/>");
+
+            // Section Police
+            xmlContent.AppendLine("      <Font>");
+            xmlContent.AppendLine($"        <Name value=\"{Font.Name}\"/>");
+            xmlContent.AppendLine($"        <Size value=\"{Font.Size}\"/>");
+            xmlContent.AppendLine($"        <Strikeout value=\"{Font.Strikeout.ToString().ToLower()}\"/>");
+            xmlContent.AppendLine($"        <Underline value=\"{Font.Underline.ToString().ToLower()}\"/>");
+            xmlContent.AppendLine($"        <Bold value=\"{Font.Bold.ToString().ToLower()}\"/>");
+            xmlContent.AppendLine($"        <Italic value=\"{Font.Italic.ToString().ToLower()}\"/>");
+            xmlContent.AppendLine("      </Font>");
+
+            xmlContent.AppendLine($"        <TypeDesign value=\"{Convert.ToInt32(TypeDesign)}\"/>");
+            xmlContent.AppendLine($"        <BorderWidth value=\"{BorderWidth}\"/>");
+
+            // Ajout des informations de taille et de position
+            xmlContent.AppendLine($"        <SizeWidth>{this.Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"        <SizeHeight>{this.Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"        <LocationX>{this.Location.X}</LocationX>");
+            xmlContent.AppendLine($"        <LocationY>{this.Location.Y}</LocationY>");
+
+            // Autres paramètres
+            xmlContent.AppendLine($"        <OngletCible value=\"{OngletCible}\"/>");
+
+            // Gestion des valeurs _VL
+            xmlContent.AppendLine("      <Values>");
+            for (int i = 1; i <= 8; i++)
+            {
+                xmlContent.AppendLine($"        <VL{i} value=\"{_VL[i]}\"/>");
+            }
+            xmlContent.AppendLine("      </Values>");
+
+            // Couleurs et visibilité
+            xmlContent.AppendLine($"        <ColorOn value=\"{ToOle(ColorOn)}\"/>");
+            xmlContent.AppendLine($"        <ColorOff value=\"{ToOle(ColorOff)}\"/>");
+            xmlContent.AppendLine($"        <ColorErr value=\"{ToOle(ColorErr)}\"/>");
+            xmlContent.AppendLine($"        <LevelVisible value=\"{LevelVisible.ToString().ToLower()}\"/>");
+            xmlContent.AppendLine($"        <LevelEnabled value=\"{LevelEnabled.ToString().ToLower()}\"/>");
+            xmlContent.AppendLine($"        <Visibility value=\"{Visibility}\"/>");
+
+            xmlContent.AppendLine("      </Apparence>");
+
+            // Fermeture du composant
+            xmlContent.AppendLine("    </Component>");
+
+            return xmlContent.ToString();
+        }
+
         #endregion
 
         #region Control Properties
@@ -924,10 +1052,7 @@ namespace OrthoDesigner.LIB
         {
             Debug.WriteLine(typeof(OrthoTabname).AssemblyQualifiedName);
 
-
-
             this.Controls.Add(btn);
-            btn.Text = this.Name;
             BackColor = Color.Transparent;
             btn.FillType = CButton.eFillType.Solid;
             btn.BackColor = Color.Transparent;
@@ -935,7 +1060,6 @@ namespace OrthoDesigner.LIB
             Langs.LanguageChanged += LanguageChangedEventHandler;
             LanguageChangedEventHandler(Langs.CurrentLanguage);
 
-            // Ajoutez une initialisation quelconque après l'appel InitializeComponent().
             ControlUtils.RegisterControl(btn, () => Visibility, h => VisibilityChanging += h, h => VisibilityChanged += h);
             base.Resize += OrthoTabName_Resize;
         }

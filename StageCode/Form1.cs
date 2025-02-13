@@ -423,6 +423,10 @@ namespace StageCode
                         {
                             accumulatedText.AppendLine(reticuleControl.WriteFileXML());
                         }
+                        if (childControl is OrthoTabname TabNAME)
+                        {
+                            accumulatedText.AppendLine(TabNAME.WriteFileXML());
+                        }
 
                         childControl.Location = new Point(5, 5);
                     }
@@ -1543,6 +1547,44 @@ namespace StageCode
                             forme.panel1.Controls.Add(pic);
                         }
                     }
+                    else if (type == "TABNAME")
+                    {
+                        OrthoTabname am60Control = OrthoTabname.ReadFileXML(componentText);
+
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            // Assurez-vous de définir la taille et la position
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            am60Control.Size = new Size(sizeWidth, sizeHeight);
+
+                            //Mes
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(am60Control.Size.Width + 10, am60Control.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+
+                            };
+
+                            pic.BorderStyle = BorderStyle.FixedSingle;
+
+                            am60Control.Location = new Point(5, 5);
+
+                            pic.MouseLeave += pic_MouseLeave;
+
+                            pic.Controls.Add(am60Control);
+
+                            am60Control.Click += Control_Click;
+                            am60Control.MouseEnter += Control_MouseEnter;
+
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+
                 }
             }
             catch (Exception ex)
@@ -2773,7 +2815,27 @@ namespace StageCode
 
                                 // Déplacer l'objet à l'intérieur du PictureBox
                                 nouvelObjet.Location = new Point(5, 5);
+
+                                if (nouvelObjet is OrthoTabname orthoTabname)
+                                {
+                                    if (orthoTabname.btn != null)
+                                    {
+                                        orthoTabname.btn.Width = pb.Width - 10;
+                                        orthoTabname.btn.Height = pb.Height - 10; 
+                                    }
+                                }
+
                                 pb.Controls.Add(nouvelObjet);
+
+                                pb.BorderStyle = BorderStyle.Fixed3D;
+                                pb.Paint += pic_Paint;
+                                pb.MouseEnter += pic_MouseEnter;
+                                pb.MouseLeave += pic_MouseLeave;
+                                pb.Click += Control_Click;
+
+                                nouvelObjet.MouseEnter += Control_MouseEnter;
+                                nouvelObjet.Click += Control_Click;
+                                nouvelObjet.MouseClick += Control_MouseClick;
 
                                 // Ajouter le PictureBox au panel
                                 forme.panel1.Controls.Add(pb);
@@ -2848,84 +2910,5 @@ namespace StageCode
 
             return objet;
         }
-
-
-        private void chargerTousLesFichiersSyn(string dossier)
-        {
-            try
-            {
-                // Vérifie si le dossier existe
-                if (Directory.Exists(dossier))
-                {
-                    // Récupère tous les fichiers .syn dans le dossier
-                    string[] fichiersSyn = Directory.GetFiles(dossier, "*.syn");
-
-                    // Si des fichiers .syn sont trouvés
-                    if (fichiersSyn.Length > 0)
-                    {
-                        // Ferme la fenêtre principale avant de charger
-                        forme.Close();
-
-                        // Crée un formulaire temporaire pour chaque fichier .syn
-                        foreach (string fichier in fichiersSyn)
-                        {
-                            // Crée un contrôle de bordure dans le panel d'affichage
-                            pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
-
-                            // Crée un formulaire vide pour chaque fichier
-                            FormVide tmp = new FormVide();
-
-                            // Positionne le formulaire temporaire
-                            tmp.Location = new Point(0, 0);
-
-                            // Ajoute un événement de clic pour le panel
-                            tmp.panel1.MouseClick += pnlViewHost_Click;
-
-                            // Ajoute un événement de fermeture pour le formulaire
-                            tmp.FormClosing += Tmp_FormClosing;
-
-                            // Affiche le formulaire dans le panel
-                            AfficherFormDansPanel(tmp, pnlViewHost);
-
-                            // Charge le contenu du fichier .syn dans l'interface
-                            charger_fichierTXT(fichier);
-
-                            // Réduit la fenêtre principale pour plus de fluidité
-                            forme.WindowState = FormWindowState.Minimized;
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Aucun fichier .syn trouvé dans ce dossier.");
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Le dossier spécifié n'existe pas.");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogException(ex); // Enregistre l'exception si nécessaire
-                MessageBox.Show($"Erreur : {ex.Message}");
-            }
-        }
-
-
-        private void chargerToutDossierToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Crée une boîte de dialogue pour permettre à l'utilisateur de sélectionner un dossier
-            using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
-            {
-                // Affiche la boîte de dialogue et vérifie si l'utilisateur a sélectionné un dossier
-                if (folderDialog.ShowDialog() == DialogResult.OK)
-                {
-                    // Appelle la méthode pour charger tous les fichiers .syn du dossier sélectionné
-                    string cheminDossier = folderDialog.SelectedPath;
-                    chargerTousLesFichiersSyn(cheminDossier);
-                }
-            }
-        }
-
     }
 }
