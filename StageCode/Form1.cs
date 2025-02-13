@@ -45,31 +45,7 @@ namespace StageCode
         private List<PictureBox> listPic = new List<PictureBox>();
         private ContextMenuStrip contextMenu = new ContextMenuStrip();
 
-        //A corriger
-        //les commentaire et position des controls + la bd
-        //public void LogException(string assemblyName, string assemblyVersion, string className, string methodName, string errorMessage, string errorStackTrace)
-        //{
-        //    try
-        //    {
-        //        string query = "INSERT INTO Exceptions (Date, AssemblyName, AssemblyVersion, ClassName, MethodName, ErrorMessage, ErrorStackTrace) " +
-        //                       "VALUES (@Date, @AssemblyName, @AssemblyVersion, @ClassName, @MethodName, @ErrorMessage, @ErrorStackTrace);";
-
-        //        _sqlCommandExecuter = new SQLiteCommand(query, _dbConnection);
-        //        _sqlCommandExecuter.Parameters.AddWithValue("@Date", DateTime.Now);
-        //        _sqlCommandExecuter.Parameters.AddWithValue("@AssemblyName", assemblyName);
-        //        _sqlCommandExecuter.Parameters.AddWithValue("@AssemblyVersion", assemblyVersion);
-        //        _sqlCommandExecuter.Parameters.AddWithValue("@ClassName", className);
-        //        _sqlCommandExecuter.Parameters.AddWithValue("@MethodName", methodName);
-        //        _sqlCommandExecuter.Parameters.AddWithValue("@ErrorMessage", errorMessage);
-        //        _sqlCommandExecuter.Parameters.AddWithValue("@ErrorStackTrace", errorStackTrace);
-
-        //        _sqlCommandExecuter.ExecuteNonQuery();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine("Error while logging exception: " + ex.Message);
-        //    }
-        //}
+        //OrthoAla CMDLIB COMBO DI BUG EDIT 
 
         public Form1()
         {
@@ -86,13 +62,15 @@ namespace StageCode
             this.ClientSizeChanged += Form1_ClientSizeChanged;
             forme.panel1.MouseClick += pnlViewHost_Click;
         }
-        private void AfficherFormDansPanel(Form form, Panel panel)
+        private void AfficherFormDansPanel(FormVide frm, Panel panel)
         {
-            form.TopLevel = false;  // Le formulaire n'est pas un formulaire principal
+            frm.TopLevel = false;  // Le formulaire n'est pas un formulaire principal
                                     // panel.Controls.Clear();  // Supprime les contrôles existants dans le panel
-            panel.Controls.Add(form);  // Ajoute le formulaire dans le panel
+            panel.Controls.Add(frm);  // Ajoute le formulaire dans le panel
 
-            form.Show();  // Affiche le formulaire
+            frm.Show();  // Affiche le formulaire
+
+            forme = frm;
         }
 
         public void LogException(Exception ex)
@@ -131,7 +109,7 @@ namespace StageCode
         }
 
         private void Form1_Load(object sender, EventArgs e)
-        {
+        {            
             for (int i = 0; i < menuStrip1.Items.Count; i++)
             {
                 var item = menuStrip1.Items[i];
@@ -906,26 +884,103 @@ namespace StageCode
             {
                 if (r == DialogResult.Yes)
                 {
-                    ExportFormToXml();
+                    //ExportFormToXml();
+
+                    string xmlMessage = string.Empty;
+                    string xmlTitle = string.Empty;
+
+                    switch (Langue)
+                    {
+                        case 1: // English
+                            xmlMessage = "Do you want to save as XML?";
+                            xmlTitle = "Save as XML";
+                            break;
+                        case 2: // Chinese
+                            xmlMessage = "是否以XML格式保存？";
+                            xmlTitle = "保存为XML";
+                            break;
+                        case 3: // German
+                            xmlMessage = "Möchten Sie als XML speichern?";
+                            xmlTitle = "Als XML speichern";
+                            break;
+                        case 4: // French
+                            xmlMessage = "Souhaitez-vous enregistrer en XML ?";
+                            xmlTitle = "Enregistrer en XML";
+                            break;
+                        case 5: // Lithuanian
+                            xmlMessage = "Ar norite išsaugoti kaip XML?";
+                            xmlTitle = "Išsaugoti kaip XML";
+                            break;
+                    }
+
+                    DialogResult saveXmlResponse = MessageBox.Show(xmlMessage, xmlTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                    if (saveXmlResponse == DialogResult.Yes)
+                    {
+                        ExportFormToXml(); 
+                    }
+                    else
+                    {
+                        ExportFormToTXT();
+                    }
                 }
 
-                forme.panel1.Controls.Clear();
+                else
+                {
+                    forme.panel1.Controls.Clear();
 
-                OpenFileDialog file = new OpenFileDialog();
-                file.Filter = "Fichier SYN (*.syn)|*.syn";
+                    OpenFileDialog file = new OpenFileDialog();
+                    file.Filter = "Fichier SYN (*.syn)|*.syn|Fichier XML (*.xml)|*.xml"; // Vous pouvez ajuster si vous avez d'autres filtres de fichiers
 
-                file.ShowDialog();
+                    file.ShowDialog();
 
-                charger_fichierTXT(file.FileName);
+                    if (string.IsNullOrEmpty(file.FileName))
+                    {
+                        throw new InvalidOperationException("Aucun fichier sélèctionner");
+                    }
 
-                return;
+                    bool isXmlFile = false;
 
-                string? a = LireXML(file.FileName);
+                    try
+                    {
 
-                if (a == null)
-                { return; }
-                MessageBox.Show(a);
-                RecupererContenuXML(a);
+                        using (StreamReader reader = new StreamReader(file.FileName))
+                        {
+                            for (int i = 0; i < 5; i++)
+                            {
+                                string? firstLine = reader.ReadLine();
+                                if (firstLine != null && firstLine.TrimStart().StartsWith("<?xml"))
+                                {
+                                    isXmlFile = true;
+                                }
+                            }
+                        }
+                        
+                    }
+                    catch (Exception ex)
+                    {
+                        LogException(ex);
+                        return;
+                    }
+
+                    if (isXmlFile)
+                    {
+                        string? xmlContent = LireXML(file.FileName);
+
+                        if (xmlContent == null)
+                        {
+                            MessageBox.Show("Le fichier XML n'a pas pu être chargé.", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return; 
+                        }
+
+                        RecupererContenuXML(xmlContent);
+                    }
+                    else
+                    {
+                        charger_fichierTXT(file.FileName);
+                    }
+                }
+
             }
             catch (Exception ex)
             {
@@ -1128,25 +1183,22 @@ namespace StageCode
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
-                            // Assurez-vous de définir la taille et la position
                             int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
                             int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            // Définir la taille du contrôle OrthoAla
+                            // Définir la taille et la position du contrôle OrthoAla
                             orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+                            orthoAlaControl.Location = new Point(5, 5); // Position interne dans la PictureBox
 
                             // Créer une PictureBox pour contenir le contrôle
                             PictureBox pic = new PictureBox
                             {
-                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
-                                Location = new Point(locationX, locationY) // Appliquer la position
+                                Size = new Size(sizeWidth + 10, sizeHeight + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY), // Appliquer la position récupérée
+                                BorderStyle = BorderStyle.FixedSingle
                             };
-                            pic.BorderStyle = BorderStyle.FixedSingle;
-
-                            orthoAlaControl.Location = new Point(5, 5);
-
 
                             // Ajouter le contrôle OrthoAla à la PictureBox
                             pic.Controls.Add(orthoAlaControl);
@@ -1547,14 +1599,13 @@ namespace StageCode
                             forme.panel1.Controls.Add(pic);
                         }
                     }
-                    else if (type == "TABNAME")
+                    else if (type == "OrthoTabname")
                     {
                         OrthoTabname am60Control = OrthoTabname.ReadFileXML(componentText);
 
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
                         {
-                            // Assurez-vous de définir la taille et la position
                             int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
                             int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
@@ -1562,11 +1613,10 @@ namespace StageCode
 
                             am60Control.Size = new Size(sizeWidth, sizeHeight);
 
-                            //Mes
                             PictureBox pic = new PictureBox
                             {
-                                Size = new Size(am60Control.Size.Width + 10, am60Control.Size.Height + 10), // Augmenter la taille de 10 pixels
-                                Location = new Point(locationX, locationY) // Appliquer la position
+                                Size = new Size(am60Control.Size.Width + 10, am60Control.Size.Height + 10), 
+                                Location = new Point(locationX, locationY)
 
                             };
 
@@ -1584,7 +1634,6 @@ namespace StageCode
                             forme.panel1.Controls.Add(pic);
                         }
                     }
-
                 }
             }
             catch (Exception ex)
@@ -1632,99 +1681,6 @@ namespace StageCode
                 }
             }
         }
-
-
-        //private void RecupererContenuTXT(string xmlContent)
-        //{
-        //    try
-        //    {
-        //        XElement xml = XElement.Parse(xmlContent);
-
-        //        // Parcourir tous les éléments <Component> du XML
-        //        foreach (XElement component in xml.Elements("Component"))
-        //        {
-        //            string? type = component.Attribute("type")?.Value;
-
-        //            if (type == "AM60")
-        //            {
-        //                AM60 am60Control = new AM60();
-        //                am60Control = am60Control.ReadFile(component.ToString());
-        //                Controls.Add(am60Control);
-        //            }
-        //            else if (type == "CONT1")
-        //            {
-        //                CONT1 reticuleControl = new CONT1();
-        //                reticuleControl = reticuleControl.ReadFileXML(component.ToString());
-        //                Controls.Add(reticuleControl);
-        //            }
-        //            else if (type == "INTEG")
-        //            {
-        //                ProgressBar pbarControl = new ProgressBar();
-        //                pbarControl = pbarControl.ReadFileXML(component.ToString());
-        //                Controls.Add(pbarControl);
-        //            }
-        //            else if (type == "RESULT")
-        //            {
-        //                Result resultControl = new Result();
-        //                resultControl = resultControl.ReadFileXML(component.ToString());
-        //                Controls.Add(resultControl);
-        //            }
-        //            else if (type == "VARNAME")
-        //            {
-        //                VarName varNameControl = new VarName();
-        //                varNameControl = varNameControl.ReadFileXML(component.ToString());
-        //                Controls.Add(varNameControl);
-        //            }
-        //            else if (type == "REL")
-        //            {
-        //                Relais relaisControl = new Relais();
-        //                relaisControl = relaisControl.ReadFileXML(component.ToString());
-        //                Controls.Add(relaisControl);
-        //            }
-        //            else if (type == "RESULT")
-        //            {
-        //                Result resultControl = new Result();
-        //                resultControl = resultControl.ReadFileXML(component.ToString());
-        //                Controls.Add(resultControl);
-        //            }
-        //            else if (type == "LABEL")
-        //            {
-        //                LabelControl labelControl = new LabelControl();
-        //                labelControl = labelControl.ReadFileXML(component.ToString());
-        //                Controls.Add(labelControl);
-        //            }
-        //            else if (type == "DI")
-        //            {
-        //                DiControl diControl = new DiControl();
-        //                diControl = diControl.ReadFileXML(component.ToString());
-        //                Controls.Add(diControl);
-        //            }
-        //            else if (type == "COMBO")
-        //            {
-        //                ComboBoxControl comboBoxControl = new ComboBoxControl();
-        //                comboBoxControl = comboBoxControl.ReadFileXML(component.ToString());
-        //                Controls.Add(comboBoxControl);
-        //            }
-        //            else if (type == "EDIT")
-        //            {
-        //                EditControl editControl = new EditControl();
-        //                editControl = editControl.ReadFileXML(component.ToString());
-        //                Controls.Add(editControl);
-        //            }
-        //            else if (type == "IMAGE")
-        //            {
-        //                ImageControl imageControl = new ImageControl();
-        //                imageControl = imageControl.ReadFileXML(component.ToString());
-        //                Controls.Add(imageControl);
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show($"Une erreur est survenue lors du traitement du fichier XML : {ex.Message}", "Erreur");
-        //    }
-        //}
-
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2093,13 +2049,13 @@ namespace StageCode
             propertyGrid1.Height = pnlViewHost.Height - lstToolbox.Height;
             propertyGrid1.Location = new Point(lstToolbox.Left, lstToolbox.Bottom);
 
-            foreach (FormVide forme in pnlViewHost.Controls)
+            foreach (FormVide tmp in pnlViewHost.Controls)
             {
-                if (forme.WindowState == FormWindowState.Minimized)
+                if (tmp.WindowState == FormWindowState.Minimized)
                 {
-                    forme.WindowState = FormWindowState.Maximized;
-                    forme.Location = new Point(forme.Location.X, pnlViewHost.Height);
-                    forme.WindowState = FormWindowState.Minimized;
+                    tmp.WindowState = FormWindowState.Maximized;
+                    tmp.Location = new Point(tmp.Location.X, pnlViewHost.Height);
+                    tmp.WindowState = FormWindowState.Minimized;
                 }
             }
         }
@@ -2460,10 +2416,141 @@ namespace StageCode
 
             PictureBox? pictureBox = (sender as PictureBox) ?? (sender as Control)?.Parent as PictureBox;
 
+            int tolerance = 2;
+
+            List<(Point start, Point end)> drawnLines = new List<(Point, Point)>();
+
             if (pictureBox != null)
             {
                 pictureBox.Left += e.X - SourisDecalage.X;
                 pictureBox.Top += e.Y - SourisDecalage.Y;
+
+                using (Graphics g = forme.panel1.CreateGraphics())
+                {
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+                    g.Clear(forme.panel1.BackColor);
+
+                    foreach (Control ctrl in forme.panel1.Controls)
+                    {
+                        if (ctrl is PictureBox pic && pic != pictureBox)
+                        {
+                            Point top1 = new Point(pictureBox.Left + pictureBox.Width / 2, pictureBox.Top);
+                            Point bottom1 = new Point(pictureBox.Left + pictureBox.Width / 2, pictureBox.Bottom);
+                            Point left1 = new Point(pictureBox.Left, pictureBox.Top + pictureBox.Height / 2);
+                            Point right1 = new Point(pictureBox.Right, pictureBox.Top + pictureBox.Height / 2);
+
+                            Point top2 = new Point(pic.Left + pic.Width / 2, pic.Top);
+                            Point bottom2 = new Point(pic.Left + pic.Width / 2, pic.Bottom);
+                            Point left2 = new Point(pic.Left, pic.Top + pic.Height / 2);
+                            Point right2 = new Point(pic.Right, pic.Top + pic.Height / 2);
+
+                            using (Pen pen = new Pen(Color.Blue, 2))
+                            {
+                                bool lineDrawn = false;
+
+                                if (Math.Abs(pictureBox.Top - pic.Top) <= tolerance) // Alignées en haut
+                                {
+                                    var line = (start: top1, end: top2);
+                                    if (!drawnLines.Contains(line))
+                                    {
+                                        g.DrawLine(pen, top1, top2);
+                                        drawnLines.Add(line);
+                                        lineDrawn = true;
+                                    }
+                                }
+
+                                if (Math.Abs(pictureBox.Bottom - pic.Bottom) <= tolerance) // Alignées en bas
+                                {
+                                    var line = (start: bottom1, end: bottom2);
+                                    if (!drawnLines.Contains(line))
+                                    {
+                                        g.DrawLine(pen, bottom1, bottom2);
+                                        drawnLines.Add(line);
+                                        lineDrawn = true;
+                                    }
+                                }
+
+                                if (Math.Abs(pictureBox.Left - pic.Left) <= tolerance) // Alignées à gauche
+                                {
+                                    var line = (start: left1, end: left2);
+                                    if (!drawnLines.Contains(line))
+                                    {
+                                        g.DrawLine(pen, left1, left2);
+                                        drawnLines.Add(line);
+                                        lineDrawn = true;
+                                    }
+                                }
+
+                                if (Math.Abs(pictureBox.Right - pic.Right) <= tolerance) // Alignées à droite
+                                {
+                                    var line = (start: right1, end: right2);
+                                    if (!drawnLines.Contains(line))
+                                    {
+                                        g.DrawLine(pen, right1, right2);
+                                        drawnLines.Add(line);
+                                        lineDrawn = true;
+                                    }
+                                }
+
+                                using (Pen pen2 = new Pen(Color.Red, 3))
+                                {
+                                    bool lineDrawn2 = false;
+
+                                    if (Math.Abs(pictureBox.Top - pic.Bottom) <= tolerance)
+                                    {
+                                        var line = (start: top1, end: bottom2);
+                                        if (!drawnLines.Contains(line))
+                                        {
+                                            g.DrawLine(pen2, top1, bottom2);
+                                            drawnLines.Add(line);
+                                            lineDrawn = true;
+                                        }
+                                    }
+
+                                    if (Math.Abs(pictureBox.Bottom - pic.Top) <= tolerance)
+                                    {
+                                        var line = (start: bottom1, end: top2);
+                                        if (!drawnLines.Contains(line))
+                                        {
+                                            g.DrawLine(pen2, bottom1, top2);
+                                            drawnLines.Add(line);
+                                            lineDrawn = true;
+                                        }
+                                    }
+
+                                    if (Math.Abs(pictureBox.Left - pic.Right) <= tolerance)
+                                    {
+                                        var line = (start: left1, end: right2);
+                                        if (!drawnLines.Contains(line))
+                                        {
+                                            g.DrawLine(pen2, left1, right2);
+                                            drawnLines.Add(line);
+                                            lineDrawn = true;
+                                        }
+                                    }
+
+                                    if (Math.Abs(pictureBox.Right - pic.Left) <= tolerance)
+                                    {
+                                        var line = (start: right1, end: left2);
+                                        if (!drawnLines.Contains(line))
+                                        {
+                                            g.DrawLine(pen2, right1, left2);
+                                            drawnLines.Add(line);
+                                            lineDrawn = true;
+                                        }
+                                    }
+
+                                    if (lineDrawn)
+                                    {
+                                        pen2.Color = Color.Red; // Change color to blue for shared part
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
 
                 pictureBox.BringToFront();
             }
@@ -2750,10 +2837,47 @@ namespace StageCode
 
         private void SaveALL_Click(object sender, EventArgs e)
         {
-            foreach (FormVide vide in this.pnlViewHost.Controls)
+            string saveMessage = "";
+            string saveTitle = "";
+
+            switch (Langue)
             {
-                forme = vide;
-                saveToolStripMenuItem_Click(sender, e);
+                case 1: saveMessage = "Do you want to save as XML?"; saveTitle = "Save As XML"; break;
+                case 2: saveMessage = "您是否要以XML格式保存？"; saveTitle = "保存为XML"; break;
+                case 3: saveMessage = "Möchten Sie als XML speichern?"; saveTitle = "Als XML speichern"; break;
+                case 4: saveMessage = "Voulez-vous enregistrer en XML ?"; saveTitle = "Enregistrer en XML"; break;
+                case 5: saveMessage = "Ar norite išsaugoti kaip XML?"; saveTitle = "Išsaugoti kaip XML"; break;
+            }
+
+            DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
+            using (FolderBrowserDialog folderDialog = new FolderBrowserDialog())
+            {
+                if (folderDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string selectedPath = folderDialog.SelectedPath;
+
+                    foreach (FormVide vide in this.pnlViewHost.Controls)
+                    {
+                        forme = vide;
+                        string filePath = Path.Combine(selectedPath, forme.Text + ".Syno");
+
+                        if (saveResult == DialogResult.Yes)
+                        {
+                            StringBuilder xmlContent = new StringBuilder();
+                            xmlContent.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                            xmlContent.AppendLine("<Syno name=\"settings\">\n  <Controls>");
+                            xmlContent.AppendLine(SaveAsXML().ToString());
+                            xmlContent.AppendLine("  </Controls>\n</Syno>");
+
+                            File.WriteAllText(filePath, xmlContent.ToString());
+                        }
+                        else
+                        {
+                            File.WriteAllText(filePath, SaveAsTXT().ToString());
+                        }
+                    }
+                    MessageBox.Show("Fichiers sauvegardés avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
         }
 
@@ -2785,6 +2909,10 @@ namespace StageCode
         {
             try
             {
+                var forme2 = new FormVide();
+                pnlViewHost.Controls.Remove(forme) ;
+                AfficherFormDansPanel(forme2, pnlViewHost);
+
                 int compteur = 0;
 
                 forme.Text = FilePath;
