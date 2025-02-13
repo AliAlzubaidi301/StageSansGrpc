@@ -37,9 +37,10 @@
             PictureBox1.BackColor = Color.White;
             PictureBox1.Location = new Point(0, 0);
             PictureBox1.Name = "PictureBox1";
-            PictureBox1.Size = new Size(133, 97);
+            PictureBox1.Size = new Size(137, 103);
             PictureBox1.TabIndex = 0;
             PictureBox1.TabStop = false;
+            PictureBox1.Click += PictureBox1_Click_1;
             // 
             // OrthoImage
             // 
@@ -55,6 +56,6 @@
 
         #endregion
 
-        private PictureBox PictureBox1;
+        public PictureBox PictureBox1;
     }
 }

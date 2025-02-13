@@ -7,9 +7,9 @@ namespace StageCode
 {
     public partial class FormResize : Form
     {
-        private Form1 forme;
+        private Forme1 forme;
 
-        public FormResize(Form1 forme)
+        public FormResize(Forme1 forme)
         {
             InitializeComponent();
             this.forme = forme;
@@ -23,7 +23,7 @@ namespace StageCode
 
         private void ChangeLanguage()
         {
-            switch (Form1.Langue)
+            switch (Forme1.Langue)
             {
                 case 1: // English
                     this.groupBoxAvant.Text = "Old Size";

@@ -301,44 +301,6 @@ namespace StageCode.LIB
             // Retourner l'objet OrthoAla avec toutes les propriétés remplies
             return orthoAlaControl;
         }
-
-        public static System.Drawing.Color FromOle2(string oleColor)
-        {
-            // Vérifier si la chaîne est vide ou nulle
-            if (string.IsNullOrEmpty(oleColor))
-            {
-                return System.Drawing.Color.Transparent;  // Retourne une couleur transparente si la valeur est vide ou nulle
-            }
-
-            // Enlever les caractères non numériques (comme "H" ou "0x") dans le cas d'un format OLE classique
-            if (oleColor.StartsWith("0x"))
-            {
-                oleColor = oleColor.Substring(2);  // Enlever le "0x"
-            }
-            else if (oleColor.StartsWith("&H"))
-            {
-                oleColor = oleColor.Substring(2);  // Enlever le "&H"
-            }
-
-            // Convertir la valeur hexadécimale en entier
-            int colorValue;
-            if (int.TryParse(oleColor, System.Globalization.NumberStyles.HexNumber, null, out colorValue))
-            {
-                // Retourner la couleur correspondante (Alpha, Red, Green, Blue)
-                return System.Drawing.Color.FromArgb(
-                    (colorValue >> 24) & 0xFF,   // Extraire le canal Alpha (transparence)
-                    (colorValue >> 16) & 0xFF,   // Extraire le canal Rouge
-                    (colorValue >> 8) & 0xFF,    // Extraire le canal Vert
-                    colorValue & 0xFF            // Extraire le canal Bleu
-                );
-            }
-
-            // Si la conversion échoue, retourner une couleur transparente par défaut
-            return System.Drawing.Color.Transparent;
-        }
-
-
-
         public string WriteFileXML()
         {
             var xmlContent = new StringBuilder();
@@ -396,6 +358,43 @@ namespace StageCode.LIB
             // Retourner le contenu XML généré
             return xmlContent.ToString();
         }
+
+        public static System.Drawing.Color FromOle2(string oleColor)
+        {
+            // Vérifier si la chaîne est vide ou nulle
+            if (string.IsNullOrEmpty(oleColor))
+            {
+                return System.Drawing.Color.Transparent;  // Retourne une couleur transparente si la valeur est vide ou nulle
+            }
+
+            // Enlever les caractères non numériques (comme "H" ou "0x") dans le cas d'un format OLE classique
+            if (oleColor.StartsWith("0x"))
+            {
+                oleColor = oleColor.Substring(2);  // Enlever le "0x"
+            }
+            else if (oleColor.StartsWith("&H"))
+            {
+                oleColor = oleColor.Substring(2);  // Enlever le "&H"
+            }
+
+            // Convertir la valeur hexadécimale en entier
+            int colorValue;
+            if (int.TryParse(oleColor, System.Globalization.NumberStyles.HexNumber, null, out colorValue))
+            {
+                // Retourner la couleur correspondante (Alpha, Red, Green, Blue)
+                return System.Drawing.Color.FromArgb(
+                    (colorValue >> 24) & 0xFF,   // Extraire le canal Alpha (transparence)
+                    (colorValue >> 16) & 0xFF,   // Extraire le canal Rouge
+                    (colorValue >> 8) & 0xFF,    // Extraire le canal Vert
+                    colorValue & 0xFF            // Extraire le canal Bleu
+                );
+            }
+
+            // Si la conversion échoue, retourner une couleur transparente par défaut
+            return System.Drawing.Color.Transparent;
+        }
+
+
         public string WriteFile()
         {
             return "ORTHO;ALA;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Etat + ";" + VarLink2 + ";" + NomFichier + ";" + _VL[3] + ";" + _VL[4] + ";" + _VL[5] + ";" + _VL[6] + ";" + Commande + ";" + VarLink9 + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;

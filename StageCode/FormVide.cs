@@ -91,8 +91,6 @@ namespace OrthoDesigner
                 _isResizing = true;
                 _resizeStartPoint = e.Location;
                 _resizeStartSize = this.Size;
-
-                // Ne pas appeler Invalidate ici, car le redimensionnement peut être lent
             }
         }
 
@@ -109,18 +107,25 @@ namespace OrthoDesigner
             }
             else
             {
-                // Détection des bords pour redimensionnement
-                if (e.X < 10)
-                    this.Cursor = Cursors.SizeWE; // Clic sur le côté gauche
-                else if (e.X > this.Width - 10)
-                    this.Cursor = Cursors.SizeWE; // Clic sur le côté droit
-                else if (e.Y < 10)
-                    this.Cursor = Cursors.SizeNS; // Clic sur le côté haut
-                else if (e.Y > this.Height - 10)
-                    this.Cursor = Cursors.SizeNS; // Clic sur le côté bas
+                const int borderSize = 10; // Zone de détection des bords
+
+                bool left = e.X <= borderSize;
+                bool right = e.X >= this.Width - borderSize;
+                bool top = e.Y <= borderSize;
+                bool bottom = e.Y >= panel1.Height - borderSize;
+
+                if ((left && top) || (right && bottom))
+                    this.Cursor = Cursors.SizeNWSE; // Coin haut-gauche ou bas-droit
+                else if ((right && top) || (left && bottom))
+                    this.Cursor = Cursors.SizeNESW; // Coin haut-droit ou bas-gauche
+                else if (left || right)
+                    this.Cursor = Cursors.SizeWE; // Côté gauche ou droit
+                else if (top || bottom)
+                    this.Cursor = Cursors.SizeNS; // Côté haut ou bas
                 else
                     this.Cursor = Cursors.Default; // Curseur par défaut
             }
+
         }
 
         private void FormVide_ResizeMouseUp(object sender, MouseEventArgs e)
@@ -185,14 +190,10 @@ namespace OrthoDesigner
                 btnReduire.Left = panel2.Width - 135;
             };
         }
-        private void It_Click(object? sender, EventArgs e)
-        {
-            this.Close();
-        }
 
         private void FormVide_MouseEnter(object sender, EventArgs e)
         {
-            Form1.forme = this;
+            Forme1.forme = this;
             this.BringToFront();
         }
 

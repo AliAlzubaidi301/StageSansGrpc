@@ -1,6 +1,6 @@
 ﻿namespace StageCode
 {
-    partial class Form1
+    partial class Forme1
     {
         /// <summary>
         ///  Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Forme1));
             MainMenu = new MenuStrip();
             btnFile = new ToolStripMenuItem();
             newToolStripMenuItem = new ToolStripMenuItem();
@@ -72,7 +72,6 @@
             // 
             // btnFile
             // 
-            btnFile.DropDownItems.AddRange(new ToolStripItem[] { newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, newFormeToolStripMenuItem });
             btnFile.Name = "btnFile";
             btnFile.Size = new Size(37, 20);
             btnFile.Text = "File";
@@ -80,35 +79,35 @@
             // newToolStripMenuItem
             // 
             newToolStripMenuItem.Name = "newToolStripMenuItem";
-            newToolStripMenuItem.Size = new Size(180, 22);
+            newToolStripMenuItem.Size = new Size(127, 22);
             newToolStripMenuItem.Text = "New";
             newToolStripMenuItem.Click += newToolStripMenuItem_Click;
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(180, 22);
+            openToolStripMenuItem.Size = new Size(127, 22);
             openToolStripMenuItem.Text = "Open";
             openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
             // saveToolStripMenuItem
             // 
             saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(180, 22);
+            saveToolStripMenuItem.Size = new Size(127, 22);
             saveToolStripMenuItem.Text = "Save";
             saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
             // 
             // saveAsToolStripMenuItem
             // 
             saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new Size(180, 22);
+            saveAsToolStripMenuItem.Size = new Size(127, 22);
             saveAsToolStripMenuItem.Text = "Save As";
             saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
             // 
             // newFormeToolStripMenuItem
             // 
             newFormeToolStripMenuItem.Name = "newFormeToolStripMenuItem";
-            newFormeToolStripMenuItem.Size = new Size(180, 22);
+            newFormeToolStripMenuItem.Size = new Size(127, 22);
             newFormeToolStripMenuItem.Text = "New Page";
             newFormeToolStripMenuItem.Click += newFormeToolStripMenuItem_Click;
             // 

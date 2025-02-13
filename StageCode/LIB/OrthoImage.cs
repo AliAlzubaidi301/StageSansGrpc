@@ -33,6 +33,13 @@ namespace StageCode.LIB
             // Ajoutez une initialisation quelconque après l'appel InitializeComponent().
             ControlUtils.RegisterControl(PictureBox1, () => Visibility, h => VisibilityChanging += h, h => VisibilityChanged += h);
             base.Resize += OrthoImage_Resize;
+
+            PictureBox1.Enabled = false;
+
+            foreach(Control ctrl in this.Controls)
+            {
+                ctrl.SendToBack();
+            }
         }
 
         private void OrthoImage_Load(object sender, EventArgs e)
@@ -660,7 +667,7 @@ namespace StageCode.LIB
             return GetType();
         }
 
-        private void PictureBox1_Click(object sender, EventArgs e)
+        private void PictureBox1_Click_1(object sender, EventArgs e)
         {
 
         }
