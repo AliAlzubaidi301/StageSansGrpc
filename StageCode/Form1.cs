@@ -468,8 +468,11 @@ namespace StageCode
                 return;
             }
 
+            PictureBox tmp = pic;
             CopyAndPasteAndCut cut = new CopyAndPasteAndCut();
-            cut.Cut(pic);
+            cut.TransformeToTxt(pic);
+
+            forme.panel1.Controls.Remove(tmp);            
         }
 
         private async void Copier(object sender, EventArgs e)
@@ -481,42 +484,38 @@ namespace StageCode
             }
 
             CopyAndPasteAndCut Copy = new CopyAndPasteAndCut();
-            Copy.Copy(pic);
+            Copy.TransformeToTxt(pic);
         }
 
         private async void Coller(object sender, EventArgs e)
         {
-            CopyAndPasteAndCut Paste = new CopyAndPasteAndCut();
+            CopyAndPasteAndCut paste = new CopyAndPasteAndCut();
             Point souris = forme.panel1.PointToClient(Control.MousePosition);
-            Paste.Paste(souris);
 
-            if (CopyAndPasteAndCut.Picturebox != null && CopyAndPasteAndCut.Copier)
-            {
-                PictureBox? pic = CopyAndPasteAndCut.Picturebox;
-                Control? ctrl = await RechercheControlAsyncDansPic(pic);
+            paste.Paste(souris);
 
-                pic.BorderStyle = BorderStyle.FixedSingle;
+            PictureBox? pic = CopyAndPasteAndCut.pic;
+            Control? ctrl = CopyAndPasteAndCut.ctrl;
 
-                pic.Paint += pic_Paint;
+            if (pic == null || ctrl == null)
+                return;
 
-                ctrl.MouseEnter += Control_MouseEnter;
+            pic.BorderStyle = BorderStyle.FixedSingle;
+            pic.Paint += pic_Paint;
+            pic.MouseLeave += pic_MouseLeave;
 
-                ctrl.Location = new Point(5, 5);
-                pic.Location = souris;
-                pic.Controls.Add(ctrl);
+            ctrl.MouseEnter += Control_MouseEnter;
+            ctrl.Click += Control_Click;
+            ctrl.MouseClick += Control_MouseClick;
 
-                pic.MouseLeave += pic_MouseLeave;
+            ctrl.Location = new Point(5, 5);
+            pic.Location = souris;
 
-                forme.panel1.Controls.Add(pic);
+            pic.Controls.Add(ctrl);
 
-                this.Cursor = DefaultCursor;
+            forme.panel1.Controls.Add(pic);
 
-                ctrl.Click += Control_Click;
-
-                ctrl.MouseClick += Control_MouseClick;
-
-                CopyAndPasteAndCut.Copier = false;
-            }
+            this.Cursor = Cursors.Default;
         }
 
         #endregion
