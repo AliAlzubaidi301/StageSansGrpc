@@ -2,6 +2,7 @@
 using StageCode;
 using StageCode.LIB;
 using System.Text;
+using System.Xml.Linq;
 
 namespace OrthoDesigner.Other
 {
@@ -99,85 +100,114 @@ namespace OrthoDesigner.Other
 
         public void Paste(Point position)
         {
-            if (string.IsNullOrEmpty(texte)) return;
-            MessageBox.Show(texte);
+            string? xmlContent = LireXML(texte);
 
-            switch (type)
+            if (xmlContent == null)
             {
-                case "AM60":
-                    var AM60 = new AM60();
-                    ctrl = AM60.ReadFileXML(texte);
-                    break;
-                case "CONT1":
-                    var CONT1 = new CONT1();
-                    ctrl = CONT1.ReadFileXML(texte);
-                    break;
-                case "INTEG":
-                    var INTEG = new INTEG();
-                    ctrl = INTEG.ReadFileXML(texte);
-                    break;
-                case "OrthoAD":
-                    var OrthoAD = new OrthoAD();
-                    ctrl = OrthoAD.ReadFileXML(texte);
-                    break;
-                case "OrthoAla":
-                    var OrthoAla = new OrthoAla();
-                    ctrl = OrthoAla.ReadFileXML(texte);
-                    break;
-                case "OrthoCMDLib":
-                    var OrthoCMDLib = new OrthoCMDLib();
-                    ctrl = OrthoCMDLib.ReadFileXML(texte);
-                    break;
-                case "OrthoCombo":
-                    var OrthoCombo = new OrthoCombo();
-                    ctrl = OrthoCombo.ReadFileXML(texte);
-                    break;
-                case "OrthoDI":
-                    var OrthoDI = new OrthoDI();
-                    ctrl = OrthoDI.ReadFileXML(texte);
-                    break;
-                case "OrthoEdit":
-                    var OrthoEdit = new OrthoEdit();
-                    ctrl = OrthoEdit.ReadFileXML(texte);
-                    break;
-                case "OrthoImage":
-                    var OrthoImage = new OrthoImage();
-                    ctrl = OrthoImage.ReadFileXML(texte);
-                    break;
-                case "OrthoLabel":
-                    var OrthoLabel = new OrthoLabel();
-                    ctrl = OrthoLabel.ReadFileXML(texte);
-                    break;
-                case "OrthoPbar":
-                    var OrthoPbar = new OrthoPbar();
-                    ctrl = OrthoPbar.ReadFileXML(texte);
-                    break;
-                case "OrthoRel":
-                    var OrthoRel = new OrthoRel();
-                    ctrl = OrthoRel.ReadFileXML(texte);
-                    break;
-                case "OrthoResult":
-                    var OrthoResult = new OrthoResult();
-                    ctrl = OrthoResult.ReadFileXML(texte);
-                    break;
-                case "OrthoVarname":
-                    var OrthoVarname = new OrthoVarname();
-                    ctrl = OrthoVarname.ReadFileXML(texte);
-                    break;
-                case "Reticule":
-                    var Reticule = new Reticule();
-                    ctrl = Reticule.ReadFileXML(texte);
-                    break;
-                case "OrthoTabname":
-                    ctrl = OrthoTabname.ReadFileXML(texte);
-                    break;
-                default:
-                    return;
+                MessageBox.Show("Le fichier XML n'a pas pu être chargé.", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
-            pic.Size = ctrl.Size;
-            pic.Width += 10;
-            pic.Height += 10;
-            ctrl.Location = new Point(5, 5);
+
+            MessageBox.Show(xmlContent);
+
+            //RecupererContenuXML(xmlContent);
+
+            //if (string.IsNullOrEmpty(texte)) return;
+            //MessageBox.Show(texte);
+
+            //switch (type)
+            //{
+            //    case "AM60":
+            //        var AM60 = new AM60();
+            //        ctrl = AM60.ReadFileXML(texte);
+            //        break;
+            //    case "CONT1":
+            //        var CONT1 = new CONT1();
+            //        ctrl = CONT1.ReadFileXML(texte);
+            //        break;
+            //    case "INTEG":
+            //        var INTEG = new INTEG();
+            //        ctrl = INTEG.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoAD":
+            //        var OrthoAD = new OrthoAD();
+            //        ctrl = OrthoAD.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoAla":
+            //        var OrthoAla = new OrthoAla();
+            //        ctrl = OrthoAla.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoCMDLib":
+            //        var OrthoCMDLib = new OrthoCMDLib();
+            //        ctrl = OrthoCMDLib.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoCombo":
+            //        var OrthoCombo = new OrthoCombo();
+            //        ctrl = OrthoCombo.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoDI":
+            //        var OrthoDI = new OrthoDI();
+            //        ctrl = OrthoDI.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoEdit":
+            //        var OrthoEdit = new OrthoEdit();
+            //        ctrl = OrthoEdit.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoImage":
+            //        var OrthoImage = new OrthoImage();
+            //        ctrl = OrthoImage.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoLabel":
+            //        var OrthoLabel = new OrthoLabel();
+            //        ctrl = OrthoLabel.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoPbar":
+            //        var OrthoPbar = new OrthoPbar();
+            //        ctrl = OrthoPbar.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoRel":
+            //        var OrthoRel = new OrthoRel();
+            //        ctrl = OrthoRel.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoResult":
+            //        var OrthoResult = new OrthoResult();
+            //        ctrl = OrthoResult.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoVarname":
+            //        var OrthoVarname = new OrthoVarname();
+            //        ctrl = OrthoVarname.ReadFileXML(texte);
+            //        break;
+            //    case "Reticule":
+            //        var Reticule = new Reticule();
+            //        ctrl = Reticule.ReadFileXML(texte);
+            //        break;
+            //    case "OrthoTabname":
+            //        ctrl = OrthoTabname.ReadFileXML(texte);
+            //        break;
+            //    default:
+            //        return;
+            //}
+            //pic.Size = ctrl.Size;
+            //pic.Width += 10;
+            //pic.Height += 10;
+            //ctrl.Location = new Point(5, 5);
         }
+
+
+        private string? LireXML(string filePath)
+        {
+            try
+            {
+                string xmlContent = File.ReadAllText(filePath);
+                return xmlContent;
+            }
+            catch (Exception ex)
+            {
+                
+            }
+
+            return null;
+        }
+
     }
 }

@@ -472,7 +472,14 @@ namespace StageCode
             CopyAndPasteAndCut cut = new CopyAndPasteAndCut();
             cut.TransformeToTxt(pic);
 
-            forme.panel1.Controls.Remove(tmp);            
+            foreach (FormVide forme2 in pnlViewHost.Controls)
+            {
+                foreach (Control ctrl in forme2.panel1.Controls)
+                {
+                    if (ctrl == pic)
+                        forme2.panel1.Controls.Remove(tmp);
+                }
+            }
         }
 
         private async void Copier(object sender, EventArgs e)
@@ -1071,7 +1078,7 @@ namespace StageCode
             return null;
         }
 
-        private void RecupererContenuXML(string xmlContent)
+        public void RecupererContenuXML(string xmlContent)
         {
             try
             {
