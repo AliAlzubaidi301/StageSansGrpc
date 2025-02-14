@@ -1,20 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using StageCode;
+using System;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace OrthoDesigner.Other
 {
-    [Serializable]
-    public class SerializableControl
+    public class CopyAndPasteAndCut
     {
-        public string TypeName { get; set; } = "";
-        public string Name { get; set; } = "";
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Width { get; set; }
-        public int Height { get; set; }
-        public string? Text { get; set; }
+        public static PictureBox? Picturebox { get; private set; }
+        public static bool Copier = false;
+        public static Control ctrl;
+        public void Copy(PictureBox pic)
+        {
+            Picturebox = new PictureBox();
+
+            ctrl = pic.Controls[0];
+            
+            Copier = true;
+        }
+
+        public void Cut(PictureBox pic)
+        {
+            Picturebox = pic;
+            Forme1.forme.panel1.Controls.Remove(pic);
+            Copier = false;
+        }
+
+        public void Paste(Point eLocation)
+        {
+            if (Picturebox != null)
+            {
+                PictureBox newPic = Picturebox;
+                newPic.Location = eLocation;
+                if(!Copier)
+                Forme1.forme.panel1.Controls.Add(newPic);
+            }
+        }
     }
 }

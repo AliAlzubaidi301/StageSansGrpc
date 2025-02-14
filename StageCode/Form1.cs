@@ -1,19 +1,20 @@
-﻿using StageCode.LIB;
+﻿using CodeExceptionManager.Controller.DatabaseEngine.Implementation;
+using OrthoDesigner;
+using OrthoDesigner.LIB;
+using OrthoDesigner.Other;
+using StageCode.LIB;
+using System.Data.SQLite;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using OrthoDesigner.Other;
 using System.Xml.Linq;
-using OrthoDesigner;
-using System.Reflection;
-using CodeExceptionManager.Model.Objects;
-using CodeExceptionManager.Controller.DatabaseEngine.Implementation;
-using System.Data.SQLite;
-using OrthoDesigner.LIB;
 
 namespace StageCode
 {
     public partial class Forme1 : Form
     {
+        #region Attribut
+
         public static int Langue = 1; // 1 = English, 2 = Chinese, 3 = German, 4 = French, 5 = Lithuanian
         private Forme1 frm;
 
@@ -38,6 +39,9 @@ namespace StageCode
 
         //OrthoAla CMDLIB COMBO DI BUG EDIT 
 
+        #endregion
+
+        #region Constructeur/Load
         public Forme1()
         {
             InitializeComponent();
@@ -53,54 +57,8 @@ namespace StageCode
             this.ClientSizeChanged += Form1_ClientSizeChanged;
             forme.panel1.MouseClick += pnlViewHost_Click;
         }
-        private void AfficherFormDansPanel(FormVide frm, Panel panel)
-        {
-            frm.TopLevel = false;  // Le formulaire n'est pas un formulaire principal
-                                    // panel.Controls.Clear();  // Supprime les contrôles existants dans le panel
-            panel.Controls.Add(frm);  // Ajoute le formulaire dans le panel
-
-            frm.Show();  // Affiche le formulaire
-
-            forme = frm;
-        }
-
-        public void LogException(Exception ex)
-        {
-            SQLite sQ = new SQLite();
-            sQ.Connect();
-
-            if (sQ.ConnexionStatus)
-            {
-                string dbPath = @"C:\Users\Alial\Desktop\Developpement\Tools\OrthoDesigner\StageCode\bin\Debug\Datas\Databases\ErrorLogs.db";
-                string connectionString = $"Data Source={dbPath};Version=3;";
-
-                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
-                {
-                    connection.Open();
-
-                    string query = @"INSERT INTO Exceptions (Date, AssemblyName, AssemblyVersion, ClassName, MethodName, ErrorMessage, ErrorStackTrace)
-                                 VALUES (@Date, @AssemblyName, @AssemblyVersion, @ClassName, @MethodName, @ErrorMessage, @ErrorStackTrace)";
-
-                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@Date", DateTime.Now);
-                        command.Parameters.AddWithValue("@AssemblyName", Assembly.GetExecutingAssembly().GetName().Name);
-                        command.Parameters.AddWithValue("@AssemblyVersion", Assembly.GetExecutingAssembly().GetName().Version.ToString());
-                        command.Parameters.AddWithValue("@ClassName", this.GetType().Name);
-                        command.Parameters.AddWithValue("@MethodName", MethodBase.GetCurrentMethod().Name);
-                        command.Parameters.AddWithValue("@ErrorMessage", ex.Message);
-                        command.Parameters.AddWithValue("@ErrorStackTrace", ex.StackTrace);
-
-                        command.ExecuteNonQuery();
-                    }
-                }
-            }
-
-            sQ.Disconnect();
-        }
-
         private void Form1_Load(object sender, EventArgs e)
-        {            
+        {
             for (int i = 0; i < menuStrip1.Items.Count; i++)
             {
                 var item = menuStrip1.Items[i];
@@ -137,39 +95,55 @@ namespace StageCode
             Initialize();
         }
 
-        private void Item_MouseHover(object? sender, EventArgs e)
+        private void AfficherFormDansPanel(FormVide frm, Panel panel)
         {
-            if (sender is ToolStripMenuItem menuItem)
+            frm.TopLevel = false;  // Le formulaire n'est pas un formulaire principal
+                                   // panel.Controls.Clear();  // Supprime les contrôles existants dans le panel
+            panel.Controls.Add(frm);  // Ajoute le formulaire dans le panel
+
+            frm.Show();  // Affiche le formulaire
+
+            forme = frm;
+        }
+
+        #endregion
+
+        #region Exception
+        public void LogException(Exception ex)
+        {
+            SQLite sQ = new SQLite();
+            sQ.Connect();
+
+            if (sQ.ConnexionStatus)
             {
-                contextMenu.Items.Clear();
-                contextMenu.Items.Add($"{menuItem.Tag}");
-                contextMenu.Items[0].Enabled = false;
-                contextMenu.Enabled = true;
+                string dbPath = @"C:\Users\Alial\Desktop\Developpement\Tools\OrthoDesigner\StageCode\bin\Debug\Datas\Databases\ErrorLogs.db";
+                string connectionString = $"Data Source={dbPath};Version=3;";
 
-                // Point menuPosition = new Point(Cursor.Position.X + 10, Cursor.Position.Y + 10);
-                contextMenu.Show(Cursor.Position, ToolStripDropDownDirection.BelowLeft);
+                using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+                {
+                    connection.Open();
 
-                //timer.Stop();
+                    string query = @"INSERT INTO Exceptions (Date, AssemblyName, AssemblyVersion, ClassName, MethodName, ErrorMessage, ErrorStackTrace)
+                                 VALUES (@Date, @AssemblyName, @AssemblyVersion, @ClassName, @MethodName, @ErrorMessage, @ErrorStackTrace)";
 
-                //timer.Interval = 3000;
-                //timer.Tick += (s, args) =>
-                //{
-                //    if (!contextMenu.Bounds.Contains(Cursor.Position))
-                //    {
-                //        contextMenu.Hide();
-                //        timer.Stop();
-                //    }
-                //};
-                //timer.Start();
+                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Date", DateTime.Now);
+                        command.Parameters.AddWithValue("@AssemblyName", Assembly.GetExecutingAssembly().GetName().Name);
+                        command.Parameters.AddWithValue("@AssemblyVersion", Assembly.GetExecutingAssembly().GetName().Version.ToString());
+                        command.Parameters.AddWithValue("@ClassName", this.GetType().Name);
+                        command.Parameters.AddWithValue("@MethodName", MethodBase.GetCurrentMethod().Name);
+                        command.Parameters.AddWithValue("@ErrorMessage", ex.Message);
+                        command.Parameters.AddWithValue("@ErrorStackTrace", ex.StackTrace);
+
+                        command.ExecuteNonQuery();
+                    }
+                }
             }
+
+            sQ.Disconnect();
         }
-
-        private void MenuItem_MouseLeave(object? sender, EventArgs e)
-        {
-            contextMenu.Hide();
-        }
-
-
+        #endregion
 
         #region Ajouter Menu File
 
@@ -271,6 +245,111 @@ namespace StageCode
 
         #region Méthodes Utilitaires
 
+        private Task<Control?> RechercheControlAsyncDansPic(PictureBox pic)
+        {
+            return Task.Run(() =>
+            {
+                foreach (Control control in pic.Controls)
+                {
+                    return control;
+                }
+
+                return null; 
+            });
+        }
+
+        private Task<PictureBox?> RechercherPictureBoxAsync()
+        {
+            return Task.Run(() =>
+            {
+                foreach (Control control in forme.panel1.Controls)
+                {
+                    if (control is PictureBox pictureBox && pictureBox.Tag?.ToString() == PictureBoxSelectonner)
+                    {
+                        return pictureBox;
+                    }
+                }
+                return null;
+            });
+        }
+
+        private void FormVideClosing(object? sender, FormClosingEventArgs e)
+        {
+            string message = "";
+            string title = "";
+
+            switch (Langue)
+            {
+                case 1: // English
+                    message = "Save the changes?";
+                    title = "Save";
+                    break;
+                case 2: // Chinese
+                    message = "保存更改？";
+                    title = "保存";
+                    break;
+                case 3: // German
+                    message = "Änderungen speichern?";
+                    title = "Speichern";
+                    break;
+                case 4: // French
+                    message = "Enregistrer les modifications ?";
+                    title = "Enregistrer";
+                    break;
+                case 5: // Lithuanian
+                    message = "Išsaugoti pakeitimus?";
+                    title = "Išsaugoti";
+                    break;
+            }
+
+            DialogResult r = MessageBox.Show(message, title, MessageBoxButtons.YesNoCancel);
+
+            if (r == DialogResult.Yes)
+            {
+                string saveMessage = "";
+                string saveTitle = "";
+
+                switch (Langue)
+                {
+                    case 1: // English
+                        saveMessage = "Do you want to save as XML?";
+                        saveTitle = "Save As XML";
+                        break;
+                    case 2: // Chinese
+                        saveMessage = "您是否要以XML格式保存？";
+                        saveTitle = "保存为XML";
+                        break;
+                    case 3: // German
+                        saveMessage = "Möchten Sie als XML speichern?";
+                        saveTitle = "Als XML speichern";
+                        break;
+                    case 4: // French
+                        saveMessage = "Voulez-vous enregistrer en XML ?";
+                        saveTitle = "Enregistrer en XML";
+                        break;
+                    case 5: // Lithuanian
+                        saveMessage = "Ar norite išsaugoti kaip XML?";
+                        saveTitle = "Išsaugoti kaip XML";
+                        break;
+                }
+
+                DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
+
+                if (saveResult == DialogResult.Yes)
+                {
+                    ExportFormToXml();
+                }
+                else
+                {
+                    ExportFormToTXT();
+                }
+            }
+            else if (r == DialogResult.Cancel)
+            {
+                e.Cancel = true;
+            }
+        }
+
         private ToolStripMenuItem CreerMenuItem(string text, Keys? shortcutKeys, EventHandler? clickEvent)
         {
             ToolStripMenuItem menuItem = new ToolStripMenuItem(text);
@@ -283,236 +362,375 @@ namespace StageCode
             return menuItem;
         }
 
+        private void FormePrincipaleClose(object sender, FormClosingEventArgs e)
+        {
+            string message = "";
+            string title = "";
+
+            switch (Langue)
+            {
+                case 1: // English
+                    message = "Save the changes?";
+                    title = "Save";
+                    break;
+                case 2: // Chinese
+                    message = "保存更改？";
+                    title = "保存";
+                    break;
+                case 3: // German
+                    message = "Änderungen speichern?";
+                    title = "Speichern";
+                    break;
+                case 4: // French
+                    message = "Enregistrer les modifications ?";
+                    title = "Enregistrer";
+                    break;
+                case 5: // Lithuanian
+                    message = "Išsaugoti pakeitimus?";
+                    title = "Išsaugoti";
+                    break;
+            }
+
+            DialogResult r = MessageBox.Show(message, title, MessageBoxButtons.YesNoCancel);
+
+            if (r == DialogResult.Yes)
+            {
+                string saveMessage = "";
+                string saveTitle = "";
+
+                switch (Langue)
+                {
+                    case 1: // English
+                        saveMessage = "Do you want to save as XML?";
+                        saveTitle = "Save As XML";
+                        break;
+                    case 2: // Chinese
+                        saveMessage = "您是否要以XML格式保存？";
+                        saveTitle = "保存为XML";
+                        break;
+                    case 3: // German
+                        saveMessage = "Möchten Sie als XML speichern?";
+                        saveTitle = "Als XML speichern";
+                        break;
+                    case 4: // French
+                        saveMessage = "Voulez-vous enregistrer en XML ?";
+                        saveTitle = "Enregistrer en XML";
+                        break;
+                    case 5: // Lithuanian
+                        saveMessage = "Ar norite išsaugoti kaip XML?";
+                        saveTitle = "Išsaugoti kaip XML";
+                        break;
+                }
+
+                DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
+
+                if (saveResult == DialogResult.Yes)
+                {
+                    ExportFormToXml();
+                }
+                else
+                {
+                    ExportFormToTXT();
+                }
+            }
+            else if (r == DialogResult.Cancel)
+            {
+                e.Cancel = true;
+            }
+        }
+
         #endregion
 
         #region Actions des menus
-        public void ExportFormToXml()
+
+        #region Copy/Paste/Cut
+
+        private async void Supprimer(object sender, EventArgs e)
         {
-            StringBuilder xmlContent = new StringBuilder();
+            PictureBox? pic = await RechercherPictureBoxAsync();
 
-            xmlContent.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-            xmlContent.AppendLine("<Syno name=\"settings\">");
-
-            xmlContent.AppendLine("  <Controls>");
-
-            StringBuilder accumulatedText = SaveAsXML();
-
-            xmlContent.AppendLine(accumulatedText.ToString());
-            xmlContent.AppendLine("  </Controls>");
-
-            xmlContent.AppendLine("</Syno>");
-
-            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            if (pic != null)
             {
-                saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn";
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
-                    {
-                        writer.Write(xmlContent.ToString());
-                    }
-
-                    MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
+                forme.panel1.Controls.Remove(pic);
+                pic.Dispose();
+            }
+            else
+            {
+                MessageBox.Show("Aucune PictureBox sélectionnée.");
             }
         }
-        private StringBuilder SaveAsXML()
+
+        private async void Couper(object sender, EventArgs e)
         {
-            StringBuilder accumulatedText = new StringBuilder();
-
-            foreach (Control controle in forme.panel1.Controls)
+            PictureBox? pic = await RechercherPictureBoxAsync();
+            if(pic == null)
             {
-                if (controle is PictureBox pictureBox)
+                return;
+            }
+
+            CopyAndPasteAndCut cut = new CopyAndPasteAndCut();
+            cut.Cut(pic);
+        }
+
+        private async void Copier(object sender, EventArgs e)
+        {
+            PictureBox? pic = await RechercherPictureBoxAsync();
+            if (pic == null)
+            {
+                return;
+            }
+
+            CopyAndPasteAndCut Copy = new CopyAndPasteAndCut();
+            Copy.Copy(pic);
+        }
+
+        private async void Coller(object sender, EventArgs e)
+        {
+            CopyAndPasteAndCut Paste = new CopyAndPasteAndCut();
+            Point souris = forme.panel1.PointToClient(Control.MousePosition);
+            Paste.Paste(souris);
+
+            if (CopyAndPasteAndCut.Picturebox != null && CopyAndPasteAndCut.Copier)
+            {
+                PictureBox? pic = CopyAndPasteAndCut.Picturebox;
+                Control? ctrl = await RechercheControlAsyncDansPic(pic);
+
+                pic.BorderStyle = BorderStyle.FixedSingle;
+
+                pic.Paint += pic_Paint;
+
+                ctrl.MouseEnter += Control_MouseEnter;
+
+                ctrl.Location = new Point(5, 5);
+                pic.Location = souris;
+                pic.Controls.Add(ctrl);
+
+                pic.MouseLeave += pic_MouseLeave;
+
+                forme.panel1.Controls.Add(pic);
+
+                this.Cursor = DefaultCursor;
+
+                ctrl.Click += Control_Click;
+
+                ctrl.MouseClick += Control_MouseClick;
+
+                CopyAndPasteAndCut.Copier = false;
+            }
+        }
+
+        #endregion
+
+        #region Appliquer la langue
+
+        private void AppliquerLangue()
+        {
+            switch (Langue)
+            {
+                case 1: // English
+                    btnFile.Text = "File";
+                    btnEdition.Text = "Edit";
+                    btnView.Text = "View";
+                    newToolStripMenuItem.Text = "New";
+                    openToolStripMenuItem.Text = "Open";
+                    saveToolStripMenuItem.Text = "Save";
+                    btnInfos.Text = "Info";
+
+                    // Menu Infos
+                    controlCommentToolStripMenuItem.Text = "Control Comment";
+                    aboutToolStripMenuItem.Text = "About";
+
+                    // Menu Edit
+                    btnEdition.DropDownItems[0].Text = "Cut";
+                    btnEdition.DropDownItems[1].Text = "Copy";
+                    btnEdition.DropDownItems[2].Text = "Paste";
+                    btnEdition.DropDownItems[4].Text = "Delete";
+                    btnEdition.DropDownItems[6].Text = "Resize synoptique";
+                    btnEdition.DropDownItems[7].Text = "Protect";
+
+                    // Menu View
+                    btnView.DropDownItems[0].Text = "Resolution";
+                    btnView.DropDownItems[1].Text = "Language";
+                    btnView.DropDownItems[2].Text = "Visibility Checker";
+                    break;
+
+                case 2: // Chinese
+                    btnFile.Text = "文件";
+                    btnEdition.Text = "编辑";
+                    btnView.Text = "视图";
+                    newToolStripMenuItem.Text = "新建";
+                    openToolStripMenuItem.Text = "打开";
+                    saveToolStripMenuItem.Text = "保存";
+                    btnInfos.Text = "信息";
+
+                    // Menu Infos
+                    controlCommentToolStripMenuItem.Text = "控制评论";
+                    aboutToolStripMenuItem.Text = "关于";
+
+                    // Menu Edit
+                    btnEdition.DropDownItems[0].Text = "剪切";
+                    btnEdition.DropDownItems[1].Text = "复制";
+                    btnEdition.DropDownItems[2].Text = "粘贴";
+                    btnEdition.DropDownItems[4].Text = "删除";
+                    btnEdition.DropDownItems[6].Text = "调整大小";
+                    btnEdition.DropDownItems[7].Text = "保护";
+
+                    // Menu View
+                    btnView.DropDownItems[0].Text = "分辨率";
+                    btnView.DropDownItems[1].Text = "语言";
+                    btnView.DropDownItems[2].Text = "可见性检查";
+                    break;
+
+                case 3: // German
+                    btnFile.Text = "Datei";
+                    btnEdition.Text = "Bearbeiten";
+                    btnView.Text = "Ansicht";
+                    newToolStripMenuItem.Text = "Neu";
+                    openToolStripMenuItem.Text = "Öffnen";
+                    saveToolStripMenuItem.Text = "Speichern";
+                    btnInfos.Text = "Info";
+
+                    // Menu Infos
+                    controlCommentToolStripMenuItem.Text = "Kontrollkommentar";
+                    aboutToolStripMenuItem.Text = "Über";
+
+                    // Menu Edit
+                    btnEdition.DropDownItems[0].Text = "Ausschneiden";
+                    btnEdition.DropDownItems[1].Text = "Kopieren";
+                    btnEdition.DropDownItems[2].Text = "Einfügen";
+                    btnEdition.DropDownItems[4].Text = "Löschen";
+                    btnEdition.DropDownItems[6].Text = "Größe ändern";
+                    btnEdition.DropDownItems[7].Text = "Schützen";
+
+                    // Menu View
+                    btnView.DropDownItems[0].Text = "Auflösung";
+                    btnView.DropDownItems[1].Text = "Sprache";
+                    btnView.DropDownItems[2].Text = "Sichtbarkeitsprüfung";
+                    break;
+
+                case 4: // French
+                    btnFile.Text = "Fichier";
+                    btnEdition.Text = "Édition";
+                    btnView.Text = "Voir";
+                    newToolStripMenuItem.Text = "Nouveau";
+                    openToolStripMenuItem.Text = "Ouvrir";
+                    saveToolStripMenuItem.Text = "Enregistrer";
+                    btnInfos.Text = "Infos";
+
+                    // Menu Infos
+                    controlCommentToolStripMenuItem.Text = "Contrôle Commentaire";
+                    aboutToolStripMenuItem.Text = "À propos";
+
+                    // Menu Edit
+                    btnEdition.DropDownItems[0].Text = "Couper";
+                    btnEdition.DropDownItems[1].Text = "Copier";
+                    btnEdition.DropDownItems[2].Text = "Coller";
+                    btnEdition.DropDownItems[4].Text = "Supprimer";
+                    btnEdition.DropDownItems[6].Text = "Redimensionner synoptique";
+                    btnEdition.DropDownItems[7].Text = "Protéger";
+
+                    // Menu View
+                    btnView.DropDownItems[0].Text = "Résolution";
+                    btnView.DropDownItems[1].Text = "Langue";
+                    btnView.DropDownItems[2].Text = "Vérifier visibilité";
+                    break;
+
+                case 5: // Lithuanian
+                    btnFile.Text = "Byla";
+                    btnEdition.Text = "Redaguoti";
+                    btnView.Text = "Peržiūra";
+                    newToolStripMenuItem.Text = "Naujas";
+                    openToolStripMenuItem.Text = "Atidaryti";
+                    saveToolStripMenuItem.Text = "Išsaugoti";
+                    btnInfos.Text = "Informacija";
+
+                    // Menu Infos
+                    controlCommentToolStripMenuItem.Text = "Kontrolės komentaras";
+                    aboutToolStripMenuItem.Text = "Apie";
+
+                    // Menu Edit
+                    btnEdition.DropDownItems[0].Text = "Pjauti";
+                    btnEdition.DropDownItems[1].Text = "Kopijuoti";
+                    btnEdition.DropDownItems[2].Text = "Įklijuoti";
+                    btnEdition.DropDownItems[4].Text = "Ištrinti";
+                    btnEdition.DropDownItems[6].Text = "Pakeisti dydį";
+                    btnEdition.DropDownItems[7].Text = "Apsaugoti";
+
+                    // Menu View
+                    btnView.DropDownItems[0].Text = "Rezoliucija";
+                    btnView.DropDownItems[1].Text = "Kalba";
+                    btnView.DropDownItems[2].Text = "Matomumo patikrinimas";
+                    break;
+            }
+        }
+        #endregion
+
+        #region Other
+        private void controlCommentToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(PictureBoxSelectonner))
+            {
+                MessageBox.Show("Aucun element sélectionné.");
+                return;
+            }
+
+            Control? control = null;
+
+            foreach (PictureBox ctrl in forme.panel1.Controls)
+            {
+                if (ctrl.Tag == PictureBoxSelectonner)
                 {
-                    foreach (Control childControl in pictureBox.Controls)
+                    foreach (Control childControl in ctrl.Controls)
                     {
-                        childControl.Location = pictureBox.Location;
+                        Type controlType = childControl.GetType();
 
-                        if (childControl is AM60 am60Control)
+                        if (childControl.Name == ControlSélectionner)
                         {
-                            accumulatedText.AppendLine(" " + " " + am60Control.WriteFileXML());
+                            control = childControl;
+                            break;
                         }
-                        else if (childControl is CONT1 cont1Control)
+                    }
+
+                    if (control != null)
+                    {
+                        var commentWindow = new ControlComment();
+                        commentWindow.ShowDialog();
+
+                        string commentaire = ControlComment.commentaire;
+
+                        object? Control = Activator.CreateInstance(control.GetType());
+
+                        if (Control is Control newCtrl)
                         {
-                            accumulatedText.AppendLine(cont1Control.WriteFileXML());
-                        }
-                        else if (childControl is INTEG integControl)
-                        {
-                            accumulatedText.AppendLine(integControl.WriteFileXML());
-                        }
-                        else if (childControl is OrthoAD orthoADControl)
-                        {
-                            accumulatedText.AppendLine(orthoADControl.WriteFileXML());
-                        }
-                        else if (childControl is OrthoAla orthoAlaControl)
-                        {
-                            accumulatedText.AppendLine(orthoAlaControl.WriteFileXML());
-                        }
-                        else if (childControl is OrthoCMDLib orthoCMDLibControl)
-                        {
-                            accumulatedText.AppendLine(orthoCMDLibControl.WriteFileXML());
-                        }
-                        else if (childControl is OrthoCombo orthoComboControl)
-                        {
-                            accumulatedText.AppendLine(orthoComboControl.WriteFileXML());
-                        }
-                        else if (childControl is OrthoDI orthoDIControl)
-                        {
-                            accumulatedText.AppendLine(orthoDIControl.WriteFileXML());
-                        }
-                        else if (childControl is OrthoEdit orthoEditControl)
-                        {
-                            accumulatedText.AppendLine(orthoEditControl.WriteFileXML());
-                        }
-                        else if (childControl is OrthoImage orthoImageControl)
-                        {
-                            accumulatedText.AppendLine(orthoImageControl.WriteFileXML());
-                        }
-                        else if (childControl is OrthoLabel orthoLabelControl)
-                        {
-                            accumulatedText.AppendLine(orthoLabelControl.WriteFileXML());
-                        }
-                        else if (childControl is OrthoPbar orthoPbarControl)
-                        {
-                            accumulatedText.AppendLine(orthoPbarControl.WriteFileXML());
-                        }
-                        else if (childControl is OrthoRel orthoRelControl)
-                        {
-                            accumulatedText.AppendLine(orthoRelControl.WriteFileXML());
-                        }
-                        else if (childControl is OrthoResult orthoResultControl)
-                        {
-                            accumulatedText.AppendLine(orthoResultControl.WriteFileXML());
-                        }
-                        else if (childControl is OrthoVarname orthoVarnameControl)
-                        {
-                            accumulatedText.AppendLine(orthoVarnameControl.WriteFileXML());
-                        }
-                        else if (childControl is Reticule reticuleControl)
-                        {
-                            accumulatedText.AppendLine(reticuleControl.WriteFileXML());
-                        }
-                        if (childControl is OrthoTabname TabNAME)
-                        {
-                            accumulatedText.AppendLine(TabNAME.WriteFileXML());
+                            newCtrl.GetType().GetProperty("Comment")?.SetValue(newCtrl, commentaire);
                         }
 
-                        childControl.Location = new Point(5, 5);
+                        return;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Aucun contrôle trouvé dans le PictureBox sélectionné.");
+                        return;
                     }
                 }
             }
 
-            return accumulatedText;
+            MessageBox.Show("Aucune PictureBox correspondante n'a été trouvée.");
         }
-
-
-        public void ExportFormToTXT()
+        private void newFormeToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
 
-            StringBuilder accumulatedText = SaveAsTXT(); // Récupère le texte accumulé des contrôles
+            FormVide tmp = new FormVide();
 
-            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
-            {
-                saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn"; // Filtrer les fichiers pour .syn
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
-                    {
-                        writer.Write(accumulatedText.ToString());
-                    }
+            tmp.Location = new Point(0, 0);
 
-                    MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
+            tmp.panel1.MouseClick += pnlViewHost_Click;
+
+            tmp.FormClosing += FormVideClosing;
+
+            AfficherFormDansPanel(tmp, pnlViewHost);
         }
-        private StringBuilder SaveAsTXT()
-        {
-            StringBuilder accumulatedText = new StringBuilder();
-
-            foreach (Control controle in forme.panel1.Controls)
-            {
-                if (controle is PictureBox pictureBox)
-                {
-                    foreach (Control childControl in pictureBox.Controls)
-                    {
-                        childControl.Location = pictureBox.Location;
-
-                        if (childControl is AM60 am60Control)
-                        {
-                            accumulatedText.AppendLine(am60Control.WriteFile());
-                        }
-                        else if (childControl is CONT1 cont1Control)
-                        {
-                            accumulatedText.AppendLine(cont1Control.WriteFile());
-                        }
-                        else if (childControl is INTEG integControl)
-                        {
-                            accumulatedText.AppendLine(integControl.WriteFile());
-                        }
-                        else if (childControl is OrthoAD orthoADControl)
-                        {
-                            accumulatedText.AppendLine(orthoADControl.WriteFile());
-                        }
-                        else if (childControl is OrthoAla orthoAlaControl)
-                        {
-                            accumulatedText.AppendLine(orthoAlaControl.WriteFile());
-                        }
-                        else if (childControl is OrthoCMDLib orthoCMDLibControl)
-                        {
-                            accumulatedText.AppendLine(orthoCMDLibControl.WriteFile());
-                        }
-                        else if (childControl is OrthoCombo orthoComboControl)
-                        {
-                            accumulatedText.AppendLine(orthoComboControl.WriteFile());
-                        }
-                        else if (childControl is OrthoDI orthoDIControl)
-                        {
-                            accumulatedText.AppendLine(orthoDIControl.WriteFile());
-                        }
-                        else if (childControl is OrthoEdit orthoEditControl)
-                        {
-                            accumulatedText.AppendLine(orthoEditControl.WriteFile());
-                        }
-                        else if (childControl is OrthoImage orthoImageControl)
-                        {
-                            accumulatedText.AppendLine(orthoImageControl.WriteFile());
-                        }
-                        else if (childControl is OrthoLabel orthoLabelControl)
-                        {
-                            accumulatedText.AppendLine(orthoLabelControl.WriteFile());
-                        }
-                        else if (childControl is OrthoPbar orthoPbarControl)
-                        {
-                            accumulatedText.AppendLine(orthoPbarControl.WriteFile());
-                        }
-                        else if (childControl is OrthoRel orthoRelControl)
-                        {
-                            accumulatedText.AppendLine(orthoRelControl.WriteFile());
-                        }
-                        else if (childControl is OrthoResult orthoResultControl)
-                        {
-                            accumulatedText.AppendLine(orthoResultControl.WriteFile());
-                        }
-                        else if (childControl is OrthoVarname orthoVarnameControl)
-                        {
-                            accumulatedText.AppendLine(orthoVarnameControl.WriteFile());
-                        }
-                        else if (childControl is Reticule reticuleControl)
-                        {
-                            accumulatedText.AppendLine(reticuleControl.WriteFile());
-                        }
-
-                        childControl.Location = new Point(5, 5);
-
-                    }
-                }
-            }
-
-            return accumulatedText;
-        }
-
-
-
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string message = "";
@@ -598,157 +816,15 @@ namespace StageCode
 
             AfficherFormDansPanel(forme, pnlViewHost);
         }
-
-
-        private void Couper(object sender, EventArgs e)
-        {
-            List<PictureBox> selectedPics = listPic.Where(p => p.Tag?.ToString() == PictureBoxSelectonner).ToList();
-
-            if (selectedPics.Any())
-            {
-                List<SerializableControl> controlsData = new List<SerializableControl>();
-
-                foreach (var pic in selectedPics)
-                {
-                    foreach (Control ctrl in pic.Controls)
-                    {
-                        controlsData.Add(new SerializableControl
-                        {
-                            TypeName = ctrl.GetType().AssemblyQualifiedName ?? "",
-                            Name = ctrl.Name,
-                            X = ctrl.Location.X,
-                            Y = ctrl.Location.Y,
-                            Width = ctrl.Width,
-                            Height = ctrl.Height,
-                            Text = (ctrl is TextBox textBox) ? textBox.Text : ctrl.Text
-                        });
-                    }
-
-                    DataObject data = new DataObject();
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-#pragma warning disable SYSLIB0011
-                        BinaryFormatter bf = new BinaryFormatter();
-#pragma warning restore SYSLIB0011
-                        bf.Serialize(ms, controlsData);
-                        data.SetData("ControlsData", ms.ToArray());
-                    }
-
-                    Clipboard.SetDataObject(data, true);
-
-                    pic.Controls.Clear();
-                    forme.panel1.Controls.Remove(pic);
-                }
-            }
-        }
-
-        private void Copier(object sender, EventArgs e)
-        {
-            MessageBox.Show(PictureBoxSelectonner);
-
-            
-        }
-
-        private void Coller(object sender, EventArgs e)
-        {
-            if (Clipboard.ContainsData("ControlsData"))
-            {
-                Point mousePosition = forme.panel1.PointToClient(Cursor.Position);
-
-                byte[] rawData = (byte[])Clipboard.GetData("ControlsData")!;
-                using (MemoryStream ms = new MemoryStream(rawData))
-                {
-#pragma warning disable SYSLIB0011
-                    BinaryFormatter bf = new BinaryFormatter();
-#pragma warning restore SYSLIB0011
-                    List<SerializableControl> controlsData = (List<SerializableControl>)bf.Deserialize(ms);
-
-                    foreach (var controlData in controlsData)
-                    {
-                        PictureBox newpic = new PictureBox
-                        {
-                            BorderStyle = BorderStyle.FixedSingle,
-                            BackColor = Color.White,
-                            Size = new Size(200, 200),
-                            Location = mousePosition,
-                            AllowDrop = true,
-                            Tag = PictureBoxSelectonner
-                        };
-
-                        newpic.Paint += pic_Paint;
-                        newpic.Click += Control_Click;
-                        newpic.MouseLeave += pic_MouseLeave;
-                        newpic.MouseEnter += pic_MouseEnter;
-
-                        Type? controlType = Type.GetType(controlData.TypeName);
-                        if (controlType != null)
-                        {
-                            Control Control = (Control)Activator.CreateInstance(controlType)!;
-                            Control.Name = controlData.Name;
-                            Control.Location = new Point(controlData.X, controlData.Y);
-                            Control.Size = new Size(controlData.Width, controlData.Height);
-                            if (Control is TextBox textBox) textBox.Text = controlData.Text;
-                            else Control.Text = controlData.Text;
-
-                            newpic.Controls.Add(Control);
-                            Control.MouseEnter += Control_MouseEnter;
-                            Control.Click += Control_Click;
-                            Control.MouseClick += Control_MouseClick;
-
-                            newpic.Width = Control.Size.Width + 10;
-                            newpic.Height = Control.Size.Height + 10;
-                        }
-
-                        forme.panel1.Controls.Add(newpic);
-                        newpic.Invalidate();
-                        PictureBoxSelectonner = "";
-                    }
-                }
-            }
-        }
-
-
-
-
-        private void pic_MouseEnter(object? sender, EventArgs e)
-        {
-            //PictureBoxSelectonner = "";
-
-            //PictureBox? pic = sender as PictureBox;
-
-            //if (pic != null)
-            //{
-            //    pic.Paint += pic_Paint;
-            //}
-        }
-
-        private void Supprimer(object sender, EventArgs e)
-        {
-            PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
-                                      .FirstOrDefault(p => p.Tag == PictureBoxSelectonner);
-
-            if (pic != null)
-            {
-                forme.panel1.Controls.Remove(pic);
-                pic.Dispose();
-            }
-            else
-            {
-                MessageBox.Show("Aucune PictureBox sélectionnée.");
-            }
-        }
-
         private void RedimensionnerSynoptique(object sender, EventArgs e)
         {
             FormResize forme = new FormResize(this);
             forme.ShowDialog();
         }
-
         private void Proteger(object sender, EventArgs e)
         {
             MessageBox.Show("Protégé");
         }
-
         private void ChangerResolution(int largeur, int hauteur)
         {
             if (largeur > 0 && hauteur > 0)
@@ -760,18 +836,15 @@ namespace StageCode
                 //  Form1_ClientSizeChanged(new object(), new EventArgs());
             }
         }
-
         private void ChangerLangue(int nouvelleLangue)
         {
             Langue = nouvelleLangue;
             AppliquerLangue();
         }
-
         private void VerifierVisibilite(object sender, EventArgs e)
         {
             MessageBox.Show("Vérifier la visibilité");
         }
-
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             switch (Langue)
@@ -801,7 +874,49 @@ namespace StageCode
                     break;
             }
         }
+        private void Control_MouseEnter(object? sender, EventArgs e)
+        {
+            EnMoouvement = !EnMoouvement;
 
+            Control? ctrl = sender as Control;
+
+            PictureBox? pic = ctrl?.Parent as PictureBox;
+
+            pic.Cursor = EnMoouvement ? Cursors.SizeAll : Cursors.Default;
+
+            if (IsMdiChild)
+            {
+                foreach (Control child in pic.Controls)
+                {
+                    child.MouseDown -= pic_MouseDown;
+                    child.MouseMove -= pic_MouseMove;
+                    child.MouseUp -= pic_MouseUp;
+
+                    child.MouseDown += pic_MouseDown;
+                    child.MouseMove += pic_MouseMove;
+                    child.MouseUp += pic_MouseUp;
+                }
+            }
+            else
+            {
+                foreach (Control child in pic.Controls)
+                {
+
+                    child.MouseDown -= pic_MouseDown;
+                    child.MouseMove -= pic_MouseMove;
+                    child.MouseUp -= pic_MouseUp;
+
+                    child.MouseDown += pic_MouseDown;
+                    child.MouseMove += pic_MouseMove;
+                    child.MouseUp += pic_MouseUp;
+
+                }
+            }
+        }
+
+        #endregion
+
+        #region OpenFile
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string message = "";
@@ -870,7 +985,7 @@ namespace StageCode
 
                     if (saveXmlResponse == DialogResult.Yes)
                     {
-                        ExportFormToXml(); 
+                        ExportFormToXml();
                     }
                     else
                     {
@@ -908,7 +1023,7 @@ namespace StageCode
                                 }
                             }
                         }
-                        
+
                     }
                     catch (Exception ex)
                     {
@@ -923,7 +1038,7 @@ namespace StageCode
                         if (xmlContent == null)
                         {
                             MessageBox.Show("Le fichier XML n'a pas pu être chargé.", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return; 
+                            return;
                         }
 
                         RecupererContenuXML(xmlContent);
@@ -941,6 +1056,7 @@ namespace StageCode
             }
         }
 
+        #region ReadXML
         private string? LireXML(string filePath)
         {
             try
@@ -1568,7 +1684,7 @@ namespace StageCode
 
                             PictureBox pic = new PictureBox
                             {
-                                Size = new Size(am60Control.Size.Width + 10, am60Control.Size.Height + 10), 
+                                Size = new Size(am60Control.Size.Width + 10, am60Control.Size.Height + 10),
                                 Location = new Point(locationX, locationY)
 
                             };
@@ -1595,46 +1711,379 @@ namespace StageCode
             }
         }
 
-        private void Control_MouseEnter(object? sender, EventArgs e)
+        #endregion
+
+        #region Charger Fichier TXT
+        private void charger_fichierTXT(string FilePath)
         {
-            EnMoouvement = !EnMoouvement;
-
-            Control? ctrl = sender as Control;
-
-            PictureBox? pic = ctrl?.Parent as PictureBox;
-
-            pic.Cursor = EnMoouvement ? Cursors.SizeAll : Cursors.Default;
-
-            if (IsMdiChild)
+            try
             {
-                foreach (Control child in pic.Controls)
-                {
-                    child.MouseDown -= pic_MouseDown;
-                    child.MouseMove -= pic_MouseMove;
-                    child.MouseUp -= pic_MouseUp;
+                var forme2 = new FormVide();
+                pnlViewHost.Controls.Remove(forme);
+                AfficherFormDansPanel(forme2, pnlViewHost);
 
-                    child.MouseDown += pic_MouseDown;
-                    child.MouseMove += pic_MouseMove;
-                    child.MouseUp += pic_MouseUp;
+                int compteur = 0;
+
+                forme.Text = FilePath;
+
+                using (StreamReader sr = new StreamReader(FilePath, Encoding.UTF8, true))
+                {
+                    string? ligne;
+
+                    // Lire chaque ligne jusqu'à ce qu'on atteigne la fin ou un nombre limite de lignes vides (ici, 5)
+                    while ((ligne = sr.ReadLine()) != null && compteur < 5)
+                    {
+                        // Ignorer les commentaires (lignes qui commencent par "'") et les lignes vides
+                        if (!ligne.StartsWith("'") && !string.IsNullOrWhiteSpace(ligne))
+                        {
+                            string[] splitPvirgule = ligne.Split(";");
+
+                            // Créer l'objet à partir du texte
+                            Control? nouvelObjet = CreerObjetDepuisTexte(splitPvirgule, FilePath);
+
+                            if (nouvelObjet != null)
+                            {
+                                compteur = 0;  // Réinitialiser le compteur pour les lignes valides
+
+                                // Créer un PictureBox pour afficher l'objet
+                                PictureBox pb = new PictureBox();
+                                pb.Size = new Size(nouvelObjet.Size.Width + 10, nouvelObjet.Size.Height + 10);
+                                pb.Location = nouvelObjet.Location;
+
+                                // Déplacer l'objet à l'intérieur du PictureBox
+                                nouvelObjet.Location = new Point(5, 5);
+
+                                if (nouvelObjet is OrthoTabname orthoTabname)
+                                {
+                                    if (orthoTabname.btn != null)
+                                    {
+                                        orthoTabname.btn.Width = pb.Width - 10;
+                                        orthoTabname.btn.Height = pb.Height - 10;
+                                    }
+                                }
+
+                                pb.Controls.Add(nouvelObjet);
+
+                                pb.BorderStyle = BorderStyle.Fixed3D;
+                                pb.Paint += pic_Paint;
+                                pb.MouseEnter += pic_MouseEnter;
+                                pb.MouseLeave += pic_MouseLeave;
+                                pb.Click += Control_Click;
+
+                                nouvelObjet.MouseEnter += Control_MouseEnter;
+                                nouvelObjet.Click += Control_Click;
+                                nouvelObjet.MouseClick += Control_MouseClick;
+
+                                // Ajouter le PictureBox au panel
+                                forme.panel1.Controls.Add(pb);
+                            }
+                        }
+                        else if (string.IsNullOrWhiteSpace(ligne)) // Incrémenter le compteur pour les lignes vides
+                        {
+                            compteur++;
+                        }
+                    }
                 }
             }
-            else
+            catch (Exception ex)
             {
-                foreach (Control child in pic.Controls)
-                {
-
-                    child.MouseDown -= pic_MouseDown;
-                    child.MouseMove -= pic_MouseMove;
-                    child.MouseUp -= pic_MouseUp;
-
-                    child.MouseDown += pic_MouseDown;
-                    child.MouseMove += pic_MouseMove;
-                    child.MouseUp += pic_MouseUp;
-
-                }
+                LogException(ex);
             }
         }
 
+        private Control? CreerObjetDepuisTexte(string[] splitPvirgule, string FilePath)
+        {
+            Control? objet = splitPvirgule[0] switch
+            {
+                "AM60" => new AM60(),
+                "CONT1" => new CONT1(),
+                "INTEG" => new INTEG(),
+                "AD" => new OrthoAD(),
+                "ALA" => new OrthoAla(),
+                "CMD" => new OrthoCMDLib(),
+                "COMBO" => new OrthoCombo(),
+                "DI" => new OrthoDI(),
+                "EDIT" => new OrthoEdit(),
+                "IMAGE" => new OrthoImage(),
+                "LABEL" => new OrthoLabel(),
+                "PBAR" => new OrthoPbar(),
+                "REL" => new OrthoRel(),
+                "RESULT" => new OrthoResult(),
+                "VARNAME" => new OrthoVarname(),
+                "RETICULE" => new Reticule(),
+                "TABNAME" => new OrthoTabname(),
+                _ => null
+            };
+
+            if (objet == null)
+            {
+                objet = splitPvirgule[1] switch
+                {
+                    "AM60" => new AM60(),
+                    "CONT1" => new CONT1(),
+                    "INTEG" => new INTEG(),
+                    "AD" => new OrthoAD(),
+                    "ALA" => new OrthoAla(),
+                    "CMD" => new OrthoCMDLib(),
+                    "COMBO" => new OrthoCombo(),
+                    "DI" => new OrthoDI(),
+                    "EDIT" => new OrthoEdit(),
+                    "IMAGE" => new OrthoImage(),
+                    "LABEL" => new OrthoLabel(),
+                    "PBAR" => new OrthoPbar(),
+                    "REL" => new OrthoRel(),
+                    "RESULT" => new OrthoResult(),
+                    "VARNAME" => new OrthoVarname(),
+                    "RETICULE" => new Reticule(),
+                    "TABNAME" => new OrthoTabname(),
+                    _ => null
+                };
+            }
+            if (objet != null)
+            {
+                dynamic objDynamic = objet;
+                objDynamic.ReadFile(splitPvirgule, "", FilePath, false);
+            }
+
+            return objet;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Save
+
+        #region Save TXT
+
+        public void ExportFormToTXT()
+        {
+
+            StringBuilder accumulatedText = SaveAsTXT(); // Récupère le texte accumulé des contrôles
+
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn"; // Filtrer les fichiers pour .syn
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
+                    {
+                        writer.Write(accumulatedText.ToString());
+                    }
+
+                    MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+        }
+        private StringBuilder SaveAsTXT()
+        {
+            StringBuilder accumulatedText = new StringBuilder();
+
+            foreach (Control controle in forme.panel1.Controls)
+            {
+                if (controle is PictureBox pictureBox)
+                {
+                    foreach (Control childControl in pictureBox.Controls)
+                    {
+                        childControl.Location = pictureBox.Location;
+
+                        if (childControl is AM60 am60Control)
+                        {
+                            accumulatedText.AppendLine(am60Control.WriteFile());
+                        }
+                        else if (childControl is CONT1 cont1Control)
+                        {
+                            accumulatedText.AppendLine(cont1Control.WriteFile());
+                        }
+                        else if (childControl is INTEG integControl)
+                        {
+                            accumulatedText.AppendLine(integControl.WriteFile());
+                        }
+                        else if (childControl is OrthoAD orthoADControl)
+                        {
+                            accumulatedText.AppendLine(orthoADControl.WriteFile());
+                        }
+                        else if (childControl is OrthoAla orthoAlaControl)
+                        {
+                            accumulatedText.AppendLine(orthoAlaControl.WriteFile());
+                        }
+                        else if (childControl is OrthoCMDLib orthoCMDLibControl)
+                        {
+                            accumulatedText.AppendLine(orthoCMDLibControl.WriteFile());
+                        }
+                        else if (childControl is OrthoCombo orthoComboControl)
+                        {
+                            accumulatedText.AppendLine(orthoComboControl.WriteFile());
+                        }
+                        else if (childControl is OrthoDI orthoDIControl)
+                        {
+                            accumulatedText.AppendLine(orthoDIControl.WriteFile());
+                        }
+                        else if (childControl is OrthoEdit orthoEditControl)
+                        {
+                            accumulatedText.AppendLine(orthoEditControl.WriteFile());
+                        }
+                        else if (childControl is OrthoImage orthoImageControl)
+                        {
+                            accumulatedText.AppendLine(orthoImageControl.WriteFile());
+                        }
+                        else if (childControl is OrthoLabel orthoLabelControl)
+                        {
+                            accumulatedText.AppendLine(orthoLabelControl.WriteFile());
+                        }
+                        else if (childControl is OrthoPbar orthoPbarControl)
+                        {
+                            accumulatedText.AppendLine(orthoPbarControl.WriteFile());
+                        }
+                        else if (childControl is OrthoRel orthoRelControl)
+                        {
+                            accumulatedText.AppendLine(orthoRelControl.WriteFile());
+                        }
+                        else if (childControl is OrthoResult orthoResultControl)
+                        {
+                            accumulatedText.AppendLine(orthoResultControl.WriteFile());
+                        }
+                        else if (childControl is OrthoVarname orthoVarnameControl)
+                        {
+                            accumulatedText.AppendLine(orthoVarnameControl.WriteFile());
+                        }
+                        else if (childControl is Reticule reticuleControl)
+                        {
+                            accumulatedText.AppendLine(reticuleControl.WriteFile());
+                        }
+
+                        childControl.Location = new Point(5, 5);
+
+                    }
+                }
+            }
+
+            return accumulatedText;
+        }
+
+        #endregion
+
+        #region Save XML
+        public void ExportFormToXml()
+        {
+            StringBuilder xmlContent = new StringBuilder();
+
+            xmlContent.AppendLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+            xmlContent.AppendLine("<Syno name=\"settings\">");
+
+            xmlContent.AppendLine("  <Controls>");
+
+            StringBuilder accumulatedText = SaveAsXML();
+
+            xmlContent.AppendLine(accumulatedText.ToString());
+            xmlContent.AppendLine("  </Controls>");
+
+            xmlContent.AppendLine("</Syno>");
+
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "Fichier SYN (*.syn)|*.syn";
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
+                    {
+                        writer.Write(xmlContent.ToString());
+                    }
+
+                    MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+        }
+        private StringBuilder SaveAsXML()
+        {
+            StringBuilder accumulatedText = new StringBuilder();
+
+            foreach (Control controle in forme.panel1.Controls)
+            {
+                if (controle is PictureBox pictureBox)
+                {
+                    foreach (Control childControl in pictureBox.Controls)
+                    {
+                        childControl.Location = pictureBox.Location;
+
+                        if (childControl is AM60 am60Control)
+                        {
+                            accumulatedText.AppendLine(" " + " " + am60Control.WriteFileXML());
+                        }
+                        else if (childControl is CONT1 cont1Control)
+                        {
+                            accumulatedText.AppendLine(cont1Control.WriteFileXML());
+                        }
+                        else if (childControl is INTEG integControl)
+                        {
+                            accumulatedText.AppendLine(integControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoAD orthoADControl)
+                        {
+                            accumulatedText.AppendLine(orthoADControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoAla orthoAlaControl)
+                        {
+                            accumulatedText.AppendLine(orthoAlaControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoCMDLib orthoCMDLibControl)
+                        {
+                            accumulatedText.AppendLine(orthoCMDLibControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoCombo orthoComboControl)
+                        {
+                            accumulatedText.AppendLine(orthoComboControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoDI orthoDIControl)
+                        {
+                            accumulatedText.AppendLine(orthoDIControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoEdit orthoEditControl)
+                        {
+                            accumulatedText.AppendLine(orthoEditControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoImage orthoImageControl)
+                        {
+                            accumulatedText.AppendLine(orthoImageControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoLabel orthoLabelControl)
+                        {
+                            accumulatedText.AppendLine(orthoLabelControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoPbar orthoPbarControl)
+                        {
+                            accumulatedText.AppendLine(orthoPbarControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoRel orthoRelControl)
+                        {
+                            accumulatedText.AppendLine(orthoRelControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoResult orthoResultControl)
+                        {
+                            accumulatedText.AppendLine(orthoResultControl.WriteFileXML());
+                        }
+                        else if (childControl is OrthoVarname orthoVarnameControl)
+                        {
+                            accumulatedText.AppendLine(orthoVarnameControl.WriteFileXML());
+                        }
+                        else if (childControl is Reticule reticuleControl)
+                        {
+                            accumulatedText.AppendLine(reticuleControl.WriteFileXML());
+                        }
+                        if (childControl is OrthoTabname TabNAME)
+                        {
+                            accumulatedText.AppendLine(TabNAME.WriteFileXML());
+                        }
+
+                        childControl.Location = new Point(5, 5);
+                    }
+                }
+            }
+
+            return accumulatedText;
+        }
+
+        #endregion
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string saveMessage = "";
@@ -1701,84 +2150,6 @@ namespace StageCode
                 MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            string message = "";
-            string title = "";
-
-            switch (Langue)
-            {
-                case 1: // English
-                    message = "Save the changes?";
-                    title = "Save";
-                    break;
-                case 2: // Chinese
-                    message = "保存更改？";
-                    title = "保存";
-                    break;
-                case 3: // German
-                    message = "Änderungen speichern?";
-                    title = "Speichern";
-                    break;
-                case 4: // French
-                    message = "Enregistrer les modifications ?";
-                    title = "Enregistrer";
-                    break;
-                case 5: // Lithuanian
-                    message = "Išsaugoti pakeitimus?";
-                    title = "Išsaugoti";
-                    break;
-            }
-
-            DialogResult r = MessageBox.Show(message, title, MessageBoxButtons.YesNoCancel);
-
-            if (r == DialogResult.Yes)
-            {
-                string saveMessage = "";
-                string saveTitle = "";
-
-                switch (Langue)
-                {
-                    case 1: // English
-                        saveMessage = "Do you want to save as XML?";
-                        saveTitle = "Save As XML";
-                        break;
-                    case 2: // Chinese
-                        saveMessage = "您是否要以XML格式保存？";
-                        saveTitle = "保存为XML";
-                        break;
-                    case 3: // German
-                        saveMessage = "Möchten Sie als XML speichern?";
-                        saveTitle = "Als XML speichern";
-                        break;
-                    case 4: // French
-                        saveMessage = "Voulez-vous enregistrer en XML ?";
-                        saveTitle = "Enregistrer en XML";
-                        break;
-                    case 5: // Lithuanian
-                        saveMessage = "Ar norite išsaugoti kaip XML?";
-                        saveTitle = "Išsaugoti kaip XML";
-                        break;
-                }
-
-                DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
-
-                if (saveResult == DialogResult.Yes)
-                {
-                    ExportFormToXml();
-                }
-                else
-                {
-                    ExportFormToTXT();
-                }
-            }
-            else if (r == DialogResult.Cancel)
-            {
-                e.Cancel = true;
-            }
-        }
-
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string message = "";
@@ -1828,148 +2199,6 @@ namespace StageCode
 
         #endregion
 
-        #region Appliquer la langue
-
-        private void AppliquerLangue()
-        {
-            switch (Langue)
-            {
-                case 1: // English
-                    btnFile.Text = "File";
-                    btnEdition.Text = "Edit";
-                    btnView.Text = "View";
-                    newToolStripMenuItem.Text = "New";
-                    openToolStripMenuItem.Text = "Open";
-                    saveToolStripMenuItem.Text = "Save";
-                    btnInfos.Text = "Info";
-
-                    // Menu Infos
-                    controlCommentToolStripMenuItem.Text = "Control Comment";
-                    aboutToolStripMenuItem.Text = "About";
-
-                    // Menu Edit
-                    btnEdition.DropDownItems[0].Text = "Cut";
-                    btnEdition.DropDownItems[1].Text = "Copy";
-                    btnEdition.DropDownItems[2].Text = "Paste";
-                    btnEdition.DropDownItems[4].Text = "Delete";
-                    btnEdition.DropDownItems[6].Text = "Resize synoptique";
-                    btnEdition.DropDownItems[7].Text = "Protect";
-
-                    // Menu View
-                    btnView.DropDownItems[0].Text = "Resolution";
-                    btnView.DropDownItems[1].Text = "Language";
-                    btnView.DropDownItems[2].Text = "Visibility Checker";
-                    break;
-
-                case 2: // Chinese
-                    btnFile.Text = "文件";
-                    btnEdition.Text = "编辑";
-                    btnView.Text = "视图";
-                    newToolStripMenuItem.Text = "新建";
-                    openToolStripMenuItem.Text = "打开";
-                    saveToolStripMenuItem.Text = "保存";
-                    btnInfos.Text = "信息";
-
-                    // Menu Infos
-                    controlCommentToolStripMenuItem.Text = "控制评论";
-                    aboutToolStripMenuItem.Text = "关于";
-
-                    // Menu Edit
-                    btnEdition.DropDownItems[0].Text = "剪切";
-                    btnEdition.DropDownItems[1].Text = "复制";
-                    btnEdition.DropDownItems[2].Text = "粘贴";
-                    btnEdition.DropDownItems[4].Text = "删除";
-                    btnEdition.DropDownItems[6].Text = "调整大小";
-                    btnEdition.DropDownItems[7].Text = "保护";
-
-                    // Menu View
-                    btnView.DropDownItems[0].Text = "分辨率";
-                    btnView.DropDownItems[1].Text = "语言";
-                    btnView.DropDownItems[2].Text = "可见性检查";
-                    break;
-
-                case 3: // German
-                    btnFile.Text = "Datei";
-                    btnEdition.Text = "Bearbeiten";
-                    btnView.Text = "Ansicht";
-                    newToolStripMenuItem.Text = "Neu";
-                    openToolStripMenuItem.Text = "Öffnen";
-                    saveToolStripMenuItem.Text = "Speichern";
-                    btnInfos.Text = "Info";
-
-                    // Menu Infos
-                    controlCommentToolStripMenuItem.Text = "Kontrollkommentar";
-                    aboutToolStripMenuItem.Text = "Über";
-
-                    // Menu Edit
-                    btnEdition.DropDownItems[0].Text = "Ausschneiden";
-                    btnEdition.DropDownItems[1].Text = "Kopieren";
-                    btnEdition.DropDownItems[2].Text = "Einfügen";
-                    btnEdition.DropDownItems[4].Text = "Löschen";
-                    btnEdition.DropDownItems[6].Text = "Größe ändern";
-                    btnEdition.DropDownItems[7].Text = "Schützen";
-
-                    // Menu View
-                    btnView.DropDownItems[0].Text = "Auflösung";
-                    btnView.DropDownItems[1].Text = "Sprache";
-                    btnView.DropDownItems[2].Text = "Sichtbarkeitsprüfung";
-                    break;
-
-                case 4: // French
-                    btnFile.Text = "Fichier";
-                    btnEdition.Text = "Édition";
-                    btnView.Text = "Voir";
-                    newToolStripMenuItem.Text = "Nouveau";
-                    openToolStripMenuItem.Text = "Ouvrir";
-                    saveToolStripMenuItem.Text = "Enregistrer";
-                    btnInfos.Text = "Infos";
-
-                    // Menu Infos
-                    controlCommentToolStripMenuItem.Text = "Contrôle Commentaire";
-                    aboutToolStripMenuItem.Text = "À propos";
-
-                    // Menu Edit
-                    btnEdition.DropDownItems[0].Text = "Couper";
-                    btnEdition.DropDownItems[1].Text = "Copier";
-                    btnEdition.DropDownItems[2].Text = "Coller";
-                    btnEdition.DropDownItems[4].Text = "Supprimer";
-                    btnEdition.DropDownItems[6].Text = "Redimensionner synoptique";
-                    btnEdition.DropDownItems[7].Text = "Protéger";
-
-                    // Menu View
-                    btnView.DropDownItems[0].Text = "Résolution";
-                    btnView.DropDownItems[1].Text = "Langue";
-                    btnView.DropDownItems[2].Text = "Vérifier visibilité";
-                    break;
-
-                case 5: // Lithuanian
-                    btnFile.Text = "Byla";
-                    btnEdition.Text = "Redaguoti";
-                    btnView.Text = "Peržiūra";
-                    newToolStripMenuItem.Text = "Naujas";
-                    openToolStripMenuItem.Text = "Atidaryti";
-                    saveToolStripMenuItem.Text = "Išsaugoti";
-                    btnInfos.Text = "Informacija";
-
-                    // Menu Infos
-                    controlCommentToolStripMenuItem.Text = "Kontrolės komentaras";
-                    aboutToolStripMenuItem.Text = "Apie";
-
-                    // Menu Edit
-                    btnEdition.DropDownItems[0].Text = "Pjauti";
-                    btnEdition.DropDownItems[1].Text = "Kopijuoti";
-                    btnEdition.DropDownItems[2].Text = "Įklijuoti";
-                    btnEdition.DropDownItems[4].Text = "Ištrinti";
-                    btnEdition.DropDownItems[6].Text = "Pakeisti dydį";
-                    btnEdition.DropDownItems[7].Text = "Apsaugoti";
-
-                    // Menu View
-                    btnView.DropDownItems[0].Text = "Rezoliucija";
-                    btnView.DropDownItems[1].Text = "Kalba";
-                    btnView.DropDownItems[2].Text = "Matomumo patikrinimas";
-                    break;
-            }
-        }
         #endregion
 
         #region Responsive
@@ -2044,18 +2273,6 @@ namespace StageCode
 
         }
 
-        private void lstToolbox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (lstToolbox.SelectedIndex >= 0 && lstToolbox.SelectedIndex < lstToolbox.Items.Count)
-            {
-                if (this.Cursor == Cursors.Default)
-                {
-                    ControlSélectionner = lstToolbox.SelectedItem.ToString();
-                    this.Cursor = Cursors.Cross;
-                }
-            }
-        }
-
         #endregion
 
         #region PnlView
@@ -2063,7 +2280,7 @@ namespace StageCode
         {
             if (Aligner)
             {
-                foreach(PictureBox p in listPic)
+                foreach (PictureBox p in listPic)
                 {
                     p.Paint -= pic_Paint;
                 }
@@ -2177,6 +2394,12 @@ namespace StageCode
                     Location = new Point(e.X - 5, e.Y - 5)
                 };
 
+
+                foreach (Control a in Ctrl.Controls)
+                {
+                    a.Enabled = false;
+                    a.SendToBack();
+                }
                 foreach (PictureBox pic2 in forme.panel1.Controls)
                 {
                     pic2.MouseDown -= pic_MouseDown2;
@@ -2207,6 +2430,49 @@ namespace StageCode
                 Ctrl.MouseClick += Control_MouseClick;
             }
         }
+
+        private void Control_Click(object? sender, EventArgs e)
+        {
+            foreach (PictureBox pic2 in forme.panel1.Controls)
+            {
+                if (pic2 != null)
+                {
+                    pic2.MouseDown -= pic_MouseDown2;
+                    pic2.MouseMove -= pic_MouseMove2;
+                    pic2.MouseUp -= pic_MouseUp2;
+
+                    pic2.Paint -= pic_Paint;
+                    pic2.Invalidate();
+                }
+            }
+
+            Control? controle = sender as Control;
+            PictureBox? pic = controle?.Parent as PictureBox;
+
+            if (pic != null)
+            {
+                pic.MouseDown += pic_MouseDown2;
+                pic.MouseMove += pic_MouseMove2;
+                pic.MouseUp += pic_MouseUp2;
+
+                pic.Paint += pic_Paint;
+
+                PictureBoxSelectonner = pic.Tag.ToString();
+
+                pic.Invalidate();
+
+                if (controle != null)
+                {
+                    var tmp = new ControlPictureBoxWrapper(pic, controle);
+
+                    propertyGrid1.SelectedObject = tmp;
+                }
+            }
+        }
+
+        #endregion
+
+        #region AlignerItem
         private void Control_MouseClick(object? sender, MouseEventArgs e)
         {
             Control? Con = sender as Control;
@@ -2248,7 +2514,7 @@ namespace StageCode
             }
             else
             {
-                foreach(PictureBox p in listPic)
+                foreach (PictureBox p in listPic)
                 {
                     p.Paint -= pic_Paint;
                 }
@@ -2295,72 +2561,9 @@ namespace StageCode
             listPic.Clear();
         }
 
-        private void pic_MouseLeave(object? sender, EventArgs e)
-        {
-            ////PictureBoxSelectonner = "";
-
-            //PictureBox? p = sender as PictureBox;
-            //p.Paint -= pic_Paint;
-            //foreach (Control ctrl in p.Controls)
-            //{
-            //    p.Size = ctrl.Size;
-
-            //    p.Width += 10;
-            //    p.Height += 10;
-            //}
-
-            //p.Invalidate();
-
-            //this.Cursor = DefaultCursor;
-
-            //this.Bouger = false;
-            //this.EnMoouvement = false;
-
-            return;
-        }
-
-        private void Control_Click(object? sender, EventArgs e)
-        {
-            foreach (PictureBox pic2 in forme.panel1.Controls)
-            {
-                if (pic2 != null)
-                {
-                    pic2.MouseDown -= pic_MouseDown2;
-                    pic2.MouseMove -= pic_MouseMove2;
-                    pic2.MouseUp -= pic_MouseUp2;
-
-                    pic2.Paint -= pic_Paint;
-                    pic2.Invalidate();
-                }
-            }
-
-            Control? controle = sender as Control;
-            PictureBox? pic = controle?.Parent as PictureBox;
-
-            if (pic != null)
-            {
-                pic.MouseDown += pic_MouseDown2;
-                pic.MouseMove += pic_MouseMove2;
-                pic.MouseUp += pic_MouseUp2;
-
-                pic.Paint += pic_Paint;
-
-                PictureBoxSelectonner = pic.Tag.ToString();
-
-                pic.Invalidate();
-
-                if (controle != null)
-                {
-                    var tmp = new ControlPictureBoxWrapper(pic, controle);
-
-                    propertyGrid1.SelectedObject = tmp;
-                }
-            }
-        }
-
         #endregion
 
-        #region Mouse
+        #region Mouse (Resize et Move Control & PictureBox
 
         private void pic_MouseDown(object sender, MouseEventArgs e)
         {
@@ -2383,7 +2586,7 @@ namespace StageCode
 
             PictureBox? pictureBox = (Sender as PictureBox) ?? (Sender as Control)?.Parent as PictureBox;
 
-            int tolerance = 0;
+            int tolerance = 1;
 
             List<(Point start, Point end)> drawnLines = new List<(Point, Point)>();
 
@@ -2392,137 +2595,140 @@ namespace StageCode
                 pictureBox.Left += e.X - SourisDecalage.X;
                 pictureBox.Top += e.Y - SourisDecalage.Y;
 
-                using (Graphics g = forme.panel1.CreateGraphics())
+                Task.Run(() =>
                 {
-                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
-                    g.Clear(forme.panel1.BackColor);
-
-                    foreach (Control ctrl in forme.panel1.Controls)
+                    using (Graphics g = forme.panel1.CreateGraphics())
                     {
-                        if (ctrl is PictureBox pic && pic != pictureBox)
+                        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+                        g.Clear(forme.panel1.BackColor);
+
+                        foreach (Control ctrl in forme.panel1.Controls)
                         {
-                            Point top1 = new Point(pictureBox.Left + pictureBox.Width / 2, pictureBox.Top);
-                            Point bottom1 = new Point(pictureBox.Left + pictureBox.Width / 2, pictureBox.Bottom);
-                            Point left1 = new Point(pictureBox.Left, pictureBox.Top + pictureBox.Height / 2);
-                            Point right1 = new Point(pictureBox.Right, pictureBox.Top + pictureBox.Height / 2);
-
-                            Point top2 = new Point(pic.Left + pic.Width / 2, pic.Top);
-                            Point bottom2 = new Point(pic.Left + pic.Width / 2, pic.Bottom);
-                            Point left2 = new Point(pic.Left, pic.Top + pic.Height / 2);
-                            Point right2 = new Point(pic.Right, pic.Top + pic.Height / 2);
-
-                            using (Pen pen = new Pen(Color.Blue, 2))
+                            if (ctrl is PictureBox pic && pic != pictureBox)
                             {
-                                bool lineDrawn = false;
+                                Point top1 = new Point(pictureBox.Left + pictureBox.Width / 2, pictureBox.Top);
+                                Point bottom1 = new Point(pictureBox.Left + pictureBox.Width / 2, pictureBox.Bottom);
+                                Point left1 = new Point(pictureBox.Left, pictureBox.Top + pictureBox.Height / 2);
+                                Point right1 = new Point(pictureBox.Right, pictureBox.Top + pictureBox.Height / 2);
 
-                                if (Math.Abs(pictureBox.Top - pic.Top) <= tolerance)
+                                Point top2 = new Point(pic.Left + pic.Width / 2, pic.Top);
+                                Point bottom2 = new Point(pic.Left + pic.Width / 2, pic.Bottom);
+                                Point left2 = new Point(pic.Left, pic.Top + pic.Height / 2);
+                                Point right2 = new Point(pic.Right, pic.Top + pic.Height / 2);
+
+                                using (Pen pen = new Pen(Color.Blue, 2))
                                 {
-                                    var line = (start: top1, end: top2);
-                                    if (!drawnLines.Contains(line))
-                                    {
-                                        g.DrawLine(pen, top1, top2);
-                                        drawnLines.Add(line);
-                                        lineDrawn = true;
-                                    }
-                                }
+                                    bool lineDrawn = false;
 
-                                if (Math.Abs(pictureBox.Bottom - pic.Bottom) <= tolerance) // Alignées en bas
-                                {
-                                    var line = (start: bottom1, end: bottom2);
-                                    if (!drawnLines.Contains(line))
+                                    if (Math.Abs(pictureBox.Top - pic.Top) <= tolerance)
                                     {
-                                        g.DrawLine(pen, bottom1, bottom2);
-                                        drawnLines.Add(line);
-                                        lineDrawn = true;
-                                    }
-                                }
-
-                                if (Math.Abs(pictureBox.Left - pic.Left) <= tolerance) // Alignées à gauche
-                                {
-                                    var line = (start: left1, end: left2);
-                                    if (!drawnLines.Contains(line))
-                                    {
-                                        g.DrawLine(pen, left1, left2);
-                                        drawnLines.Add(line);
-                                        lineDrawn = true;
-                                    }
-                                }
-
-                                if (Math.Abs(pictureBox.Right - pic.Right) <= tolerance) // Alignées à droite
-                                {
-                                    var line = (start: right1, end: right2);
-                                    if (!drawnLines.Contains(line))
-                                    {
-                                        g.DrawLine(pen, right1, right2);
-                                        drawnLines.Add(line);
-                                        lineDrawn = true;
-                                    }
-                                }
-
-                                using (Pen pen2 = new Pen(Color.Blue, 2))
-                                {
-                                    bool lineDrawn2 = false;
-
-                                    if (Math.Abs(pictureBox.Top - pic.Bottom) <= tolerance)
-                                    {
-                                        var line = (start: top1, end: bottom2);
+                                        var line = (start: top1, end: top2);
                                         if (!drawnLines.Contains(line))
                                         {
-                                            g.DrawLine(pen2, top1, bottom2);
+                                            g.DrawLine(pen, top1, top2);
                                             drawnLines.Add(line);
                                             lineDrawn = true;
                                         }
                                     }
 
-                                    if (Math.Abs(pictureBox.Bottom - pic.Top) <= tolerance)
+                                    if (Math.Abs(pictureBox.Bottom - pic.Bottom) <= tolerance) // Alignées en bas
                                     {
-                                        var line = (start: bottom1, end: top2);
+                                        var line = (start: bottom1, end: bottom2);
                                         if (!drawnLines.Contains(line))
                                         {
-                                            g.DrawLine(pen2, bottom1, top2);
+                                            g.DrawLine(pen, bottom1, bottom2);
                                             drawnLines.Add(line);
                                             lineDrawn = true;
                                         }
                                     }
 
-                                    if (Math.Abs(pictureBox.Left - pic.Right) <= tolerance)
+                                    if (Math.Abs(pictureBox.Left - pic.Left) <= tolerance) // Alignées à gauche
                                     {
-                                        var line = (start: left1, end: right2);
+                                        var line = (start: left1, end: left2);
                                         if (!drawnLines.Contains(line))
                                         {
-                                            g.DrawLine(pen2, left1, right2);
+                                            g.DrawLine(pen, left1, left2);
                                             drawnLines.Add(line);
                                             lineDrawn = true;
                                         }
                                     }
 
-                                    if (Math.Abs(pictureBox.Right - pic.Left) <= tolerance)
+                                    if (Math.Abs(pictureBox.Right - pic.Right) <= tolerance) // Alignées à droite
                                     {
-                                        var line = (start: right1, end: left2);
+                                        var line = (start: right1, end: right2);
                                         if (!drawnLines.Contains(line))
                                         {
-                                            g.DrawLine(pen2, right1, left2);
+                                            g.DrawLine(pen, right1, right2);
                                             drawnLines.Add(line);
                                             lineDrawn = true;
                                         }
                                     }
 
-                                    if (lineDrawn)
+                                    using (Pen pen2 = new Pen(Color.Red, 2))
                                     {
-                                        pen2.Color = Color.Blue; // Change color to blue for shared part
+                                        bool lineDrawn2 = false;
+
+                                        if (Math.Abs(pictureBox.Top - pic.Bottom) <= tolerance)
+                                        {
+                                            var line = (start: top1, end: bottom2);
+                                            if (!drawnLines.Contains(line))
+                                            {
+                                                g.DrawLine(pen2, top1, bottom2);
+                                                drawnLines.Add(line);
+                                                lineDrawn = true;
+                                            }
+                                        }
+
+                                        if (Math.Abs(pictureBox.Bottom - pic.Top) <= tolerance)
+                                        {
+                                            var line = (start: bottom1, end: top2);
+                                            if (!drawnLines.Contains(line))
+                                            {
+                                                g.DrawLine(pen2, bottom1, top2);
+                                                drawnLines.Add(line);
+                                                lineDrawn = true;
+                                            }
+                                        }
+
+                                        if (Math.Abs(pictureBox.Left - pic.Right) <= tolerance)
+                                        {
+                                            var line = (start: left1, end: right2);
+                                            if (!drawnLines.Contains(line))
+                                            {
+                                                g.DrawLine(pen2, left1, right2);
+                                                drawnLines.Add(line);
+                                                lineDrawn = true;
+                                            }
+                                        }
+
+                                        if (Math.Abs(pictureBox.Right - pic.Left) <= tolerance)
+                                        {
+                                            var line = (start: right1, end: left2);
+                                            if (!drawnLines.Contains(line))
+                                            {
+                                                g.DrawLine(pen2, right1, left2);
+                                                drawnLines.Add(line);
+                                                lineDrawn = true;
+                                            }
+                                        }
+
+                                        if (lineDrawn)
+                                        {
+                                            pen2.Color = Color.Blue; // Change color to blue for shared part
+                                        }
                                     }
+
                                 }
-
                             }
                         }
                     }
-                }
 
-                pictureBox.BringToFront();
+                    pictureBox.BringToFront();
+                });
+
             }
         }
-
         private void pic_MouseUp(object Sender, MouseEventArgs e)
         {
             Bouger = false;
@@ -2629,176 +2835,22 @@ namespace StageCode
         }
 
         #endregion
-        private void controlCommentToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(PictureBoxSelectonner))
-            {
-                MessageBox.Show("Aucun element sélectionné.");
-                return;
-            }
 
-            Control? control = null;
-
-            foreach (PictureBox ctrl in forme.panel1.Controls)
-            {
-                if (ctrl.Tag == PictureBoxSelectonner)
-                {
-                    foreach (Control childControl in ctrl.Controls)
-                    {
-                        Type controlType = childControl.GetType();
-
-                        if (childControl.Name == ControlSélectionner)
-                        {
-                            control = childControl;
-                            break;
-                        }
-                    }
-
-                    if (control != null)
-                    {
-                        var commentWindow = new ControlComment();
-                        commentWindow.ShowDialog();
-
-                        string commentaire = ControlComment.commentaire;
-
-                        object? Control = Activator.CreateInstance(control.GetType());
-
-                        if (Control is Control newCtrl)
-                        {
-                            newCtrl.GetType().GetProperty("Comment")?.SetValue(newCtrl, commentaire);
-                        }
-
-                        return;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Aucun contrôle trouvé dans le PictureBox sélectionné.");
-                        return;
-                    }
-                }
-            }
-
-            MessageBox.Show("Aucune PictureBox correspondante n'a été trouvée.");
-        }
-
-        private void newFormeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
-
-            FormVide tmp = new FormVide();
-
-            tmp.Location = new Point(0, 0);
-
-            tmp.panel1.MouseClick += pnlViewHost_Click;
-
-            tmp.FormClosing += Tmp_FormClosing;
-
-            AfficherFormDansPanel(tmp, pnlViewHost);
-        }
-
-        private void Tmp_FormClosing(object? sender, FormClosingEventArgs e)
-        {
-            string message = "";
-            string title = "";
-
-            switch (Langue)
-            {
-                case 1: // English
-                    message = "Save the changes?";
-                    title = "Save";
-                    break;
-                case 2: // Chinese
-                    message = "保存更改？";
-                    title = "保存";
-                    break;
-                case 3: // German
-                    message = "Änderungen speichern?";
-                    title = "Speichern";
-                    break;
-                case 4: // French
-                    message = "Enregistrer les modifications ?";
-                    title = "Enregistrer";
-                    break;
-                case 5: // Lithuanian
-                    message = "Išsaugoti pakeitimus?";
-                    title = "Išsaugoti";
-                    break;
-            }
-
-            DialogResult r = MessageBox.Show(message, title, MessageBoxButtons.YesNoCancel);
-
-            if (r == DialogResult.Yes)
-            {
-                string saveMessage = "";
-                string saveTitle = "";
-
-                switch (Langue)
-                {
-                    case 1: // English
-                        saveMessage = "Do you want to save as XML?";
-                        saveTitle = "Save As XML";
-                        break;
-                    case 2: // Chinese
-                        saveMessage = "您是否要以XML格式保存？";
-                        saveTitle = "保存为XML";
-                        break;
-                    case 3: // German
-                        saveMessage = "Möchten Sie als XML speichern?";
-                        saveTitle = "Als XML speichern";
-                        break;
-                    case 4: // French
-                        saveMessage = "Voulez-vous enregistrer en XML ?";
-                        saveTitle = "Enregistrer en XML";
-                        break;
-                    case 5: // Lithuanian
-                        saveMessage = "Ar norite išsaugoti kaip XML?";
-                        saveTitle = "Išsaugoti kaip XML";
-                        break;
-                }
-
-                DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
-
-                if (saveResult == DialogResult.Yes)
-                {
-                    ExportFormToXml();
-                }
-                else
-                {
-                    ExportFormToTXT();
-                }
-            }
-            else if (r == DialogResult.Cancel)
-            {
-                e.Cancel = true;
-            }
-        }
-
-        private void propertyGrid1_PropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
-        {
-            Control? objet = (Control)sender;
-            PictureBox? pic = objet.Parent as PictureBox;
-
-            if (objet != null && pic != null)
-            {
-                pic.Size = new Size(objet.Size.Width + 10, objet.Size.Height + 10);
-            }
-        }
-
-        private void Nouveau_Click(object sender, EventArgs e)
-        {
-            newFormeToolStripMenuItem_Click(sender, e);
-        }
-
-        private void Open_Click(object sender, EventArgs e)
-        {
-            openToolStripMenuItem_Click(sender, e);
-        }
-
-        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        #region Logo Click
+        private void SavecLogoClick(object sender, EventArgs e)
         {
             saveToolStripMenuItem_Click(sender, e);
         }
 
+        private void NouveauLogo_Click(object sender, EventArgs e)
+        {
+            newFormeToolStripMenuItem_Click(sender, e);
+        }
+
+        private void OpenLogo_Click(object sender, EventArgs e)
+        {
+            openToolStripMenuItem_Click(sender, e);
+        }
         private void SaveALL_Click(object sender, EventArgs e)
         {
             string saveMessage = "";
@@ -2869,138 +2921,116 @@ namespace StageCode
         {
             Coller(sender, e);
         }
-        private void charger_fichierTXT(string FilePath)
+
+        #endregion
+
+        #region Logo Mouse Enter/Leave
+        private void Item_MouseHover(object? sender, EventArgs e)
         {
-            try
+            if (sender is ToolStripMenuItem menuItem)
             {
-                var forme2 = new FormVide();
-                pnlViewHost.Controls.Remove(forme) ;
-                AfficherFormDansPanel(forme2, pnlViewHost);
+                contextMenu.Items.Clear();
+                contextMenu.Items.Add($"{menuItem.Tag}");
+                contextMenu.Items[0].Enabled = false;
+                contextMenu.Enabled = true;
 
-                int compteur = 0;
+                // Point menuPosition = new Point(Cursor.Position.X + 10, Cursor.Position.Y + 10);
+                contextMenu.Show(Cursor.Position, ToolStripDropDownDirection.BelowLeft);
 
-                forme.Text = FilePath;
+                //timer.Stop();
 
-                using (StreamReader sr = new StreamReader(FilePath, Encoding.UTF8, true))
+                //timer.Interval = 3000;
+                //timer.Tick += (s, args) =>
+                //{
+                //    if (!contextMenu.Bounds.Contains(Cursor.Position))
+                //    {
+                //        contextMenu.Hide();
+                //        timer.Stop();
+                //    }
+                //};
+                //timer.Start();
+            }
+        }
+
+        private void MenuItem_MouseLeave(object? sender, EventArgs e)
+        {
+            contextMenu.Hide();
+        }
+
+        #endregion
+
+        #region PropertyGrid1
+        private void propertyGrid1_PropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
+        {
+            Control? objet = (Control)sender;
+            PictureBox? pic = objet.Parent as PictureBox;
+
+            if (objet != null && pic != null)
+            {
+                pic.Size = new Size(objet.Size.Width + 10, objet.Size.Height + 10);
+            }
+        }
+        private void lstToolbox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lstToolbox.SelectedIndex >= 0 && lstToolbox.SelectedIndex < lstToolbox.Items.Count)
+            {
+                if (this.Cursor == Cursors.Default)
                 {
-                    string? ligne;
-
-                    // Lire chaque ligne jusqu'à ce qu'on atteigne la fin ou un nombre limite de lignes vides (ici, 5)
-                    while ((ligne = sr.ReadLine()) != null && compteur < 5)
-                    {
-                        // Ignorer les commentaires (lignes qui commencent par "'") et les lignes vides
-                        if (!ligne.StartsWith("'") && !string.IsNullOrWhiteSpace(ligne))
-                        {
-                            string[] splitPvirgule = ligne.Split(";");
-
-                            // Créer l'objet à partir du texte
-                            Control? nouvelObjet = CreerObjetDepuisTexte(splitPvirgule, FilePath);
-
-                            if (nouvelObjet != null)
-                            {
-                                compteur = 0;  // Réinitialiser le compteur pour les lignes valides
-
-                                // Créer un PictureBox pour afficher l'objet
-                                PictureBox pb = new PictureBox();
-                                pb.Size = new Size(nouvelObjet.Size.Width + 10, nouvelObjet.Size.Height + 10);
-                                pb.Location = nouvelObjet.Location;
-
-                                // Déplacer l'objet à l'intérieur du PictureBox
-                                nouvelObjet.Location = new Point(5, 5);
-
-                                if (nouvelObjet is OrthoTabname orthoTabname)
-                                {
-                                    if (orthoTabname.btn != null)
-                                    {
-                                        orthoTabname.btn.Width = pb.Width - 10;
-                                        orthoTabname.btn.Height = pb.Height - 10; 
-                                    }
-                                }
-
-                                pb.Controls.Add(nouvelObjet);
-
-                                pb.BorderStyle = BorderStyle.Fixed3D;
-                                pb.Paint += pic_Paint;
-                                pb.MouseEnter += pic_MouseEnter;
-                                pb.MouseLeave += pic_MouseLeave;
-                                pb.Click += Control_Click;
-
-                                nouvelObjet.MouseEnter += Control_MouseEnter;
-                                nouvelObjet.Click += Control_Click;
-                                nouvelObjet.MouseClick += Control_MouseClick;
-
-                                // Ajouter le PictureBox au panel
-                                forme.panel1.Controls.Add(pb);
-                            }
-                        }
-                        else if (string.IsNullOrWhiteSpace(ligne)) // Incrémenter le compteur pour les lignes vides
-                        {
-                            compteur++;
-                        }
-                    }
+                    ControlSélectionner = lstToolbox.SelectedItem.ToString();
+                    this.Cursor = Cursors.Cross;
                 }
             }
-            catch (Exception ex)
-            {
-                LogException(ex);
-            }
         }
+        #endregion
 
-        private Control? CreerObjetDepuisTexte(string[] splitPvirgule, string FilePath)
+        #region PictureBox Enter/Leave
+
+        private void pic_MouseLeave(object? sender, EventArgs e)
         {
-            Control? objet = splitPvirgule[0] switch
-            {
-                "AM60" => new AM60(),
-                "CONT1" => new CONT1(),
-                "INTEG" => new INTEG(),
-                "AD" => new OrthoAD(),
-                "ALA" => new OrthoAla(),
-                "CMD" => new OrthoCMDLib(),
-                "COMBO" => new OrthoCombo(),
-                "DI" => new OrthoDI(),
-                "EDIT" => new OrthoEdit(),
-                "IMAGE" => new OrthoImage(),
-                "LABEL" => new OrthoLabel(),
-                "PBAR" => new OrthoPbar(),
-                "REL" => new OrthoRel(),
-                "RESULT" => new OrthoResult(),
-                "VARNAME" => new OrthoVarname(),
-                "RETICULE" => new Reticule(),
-                "TABNAME" => new OrthoTabname(),
-                _ => null
-            };
+            ////PictureBoxSelectonner = "";
 
-            if (objet == null)
-            {
-                objet = splitPvirgule[1] switch
-                {
-                    "AM60" => new AM60(),
-                    "CONT1" => new CONT1(),
-                    "INTEG" => new INTEG(),
-                    "AD" => new OrthoAD(),
-                    "ALA" => new OrthoAla(),
-                    "CMD" => new OrthoCMDLib(),
-                    "COMBO" => new OrthoCombo(),
-                    "DI" => new OrthoDI(),
-                    "EDIT" => new OrthoEdit(),
-                    "IMAGE" => new OrthoImage(),
-                    "LABEL" => new OrthoLabel(),
-                    "PBAR" => new OrthoPbar(),
-                    "REL" => new OrthoRel(),
-                    "RESULT" => new OrthoResult(),
-                    "VARNAME" => new OrthoVarname(),
-                    "RETICULE" => new Reticule(),
-                    "TABNAME" => new OrthoTabname(),
-                    _ => null
-                };
-            }
-            if (objet != null)
-            {
-                dynamic objDynamic = objet;
-                objDynamic.ReadFile(splitPvirgule, "", FilePath, false);
-            }
+            //PictureBox? p = sender as PictureBox;
+            //p.Paint -= pic_Paint;
+            //foreach (Control ctrl in p.Controls)
+            //{
+            //    p.Size = ctrl.Size;
 
-            return objet;
+            //    p.Width += 10;
+            //    p.Height += 10;
+            //}
+
+            //p.Invalidate();
+
+            //this.Cursor = DefaultCursor;
+
+            //this.Bouger = false;
+            //this.EnMoouvement = false;
+
+            //Control? a = sender as Control;
+
+            //if (a != null)
+            //{
+            //    foreach (Control tmp in a.Controls)
+            //    {
+            //        a.Enabled = false;
+            //    }
+            //}
+
+            return;
         }
+
+        private void pic_MouseEnter(object? sender, EventArgs e)
+        {
+            //PictureBoxSelectonner = "";
+
+            //PictureBox? pic = sender as PictureBox;
+
+            //if (pic != null)
+            //{
+            //    pic.Paint += pic_Paint;
+            //}
+        }
+
+        #endregion
     }
 }

@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+StageCode/Form1_BACKUP_1620.cs
+StageCode/Form1_BASE_1620.cs
+StageCode/Form1_LOCAL_1620.cs
+StageCode/Form1_REMOTE_1620.cs

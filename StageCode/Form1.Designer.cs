@@ -188,7 +188,7 @@
             Nouveau.Name = "Nouveau";
             Nouveau.Size = new Size(12, 20);
             Nouveau.Tag = "New";
-            Nouveau.Click += Nouveau_Click;
+            Nouveau.Click += NouveauLogo_Click;
             // 
             // menuStrip1
             // 
@@ -208,7 +208,7 @@
             Open.Name = "Open";
             Open.Size = new Size(12, 20);
             Open.Tag = "Open";
-            Open.Click += Open_Click;
+            Open.Click += OpenLogo_Click;
             // 
             // Save
             // 
@@ -217,7 +217,7 @@
             Save.Name = "Save";
             Save.Size = new Size(12, 20);
             Save.Tag = "Save";
-            Save.Click += toolStripMenuItem2_Click;
+            Save.Click += SavecLogoClick;
             // 
             // SaveALL
             // 
@@ -272,7 +272,6 @@
             CollerLogo.Name = "CollerLogo";
             CollerLogo.Size = new Size(12, 20);
             CollerLogo.Tag = "Paste";
-            CollerLogo.Click += CollerLogo_Click;
             // 
             // Form1
             // 
@@ -288,7 +287,7 @@
             MainMenuStrip = MainMenu;
             Name = "Form1";
             Text = "Form1";
-            FormClosing += Form1_FormClosing;
+            FormClosing += FormePrincipaleClose;
             Load += Form1_Load;
             MainMenu.ResumeLayout(false);
             MainMenu.PerformLayout();
