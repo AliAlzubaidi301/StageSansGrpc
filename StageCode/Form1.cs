@@ -535,6 +535,7 @@ namespace StageCode
                     newToolStripMenuItem1.Text = "New";
                     openToolStripMenuItem1.Text = "Open";
                     saveToolStripMenuItem1.Text = "Save";
+                    saveAsToolStripMenuItem1.Text = "Save As"; // Save As ajouté
                     btnInfos.Text = "Info";
 
                     // Menu Infos
@@ -562,6 +563,7 @@ namespace StageCode
                     newToolStripMenuItem1.Text = "新建";
                     openToolStripMenuItem1.Text = "打开";
                     saveToolStripMenuItem1.Text = "保存";
+                    saveAsToolStripMenuItem1.Text = "另存为"; // "Save As" en chinois
                     btnInfos.Text = "信息";
 
                     // Menu Infos
@@ -589,6 +591,7 @@ namespace StageCode
                     newToolStripMenuItem1.Text = "Neu";
                     openToolStripMenuItem1.Text = "Öffnen";
                     saveToolStripMenuItem1.Text = "Speichern";
+                    saveAsToolStripMenuItem1.Text = "Speichern unter"; // "Save As" en allemand
                     btnInfos.Text = "Info";
 
                     // Menu Infos
@@ -616,6 +619,7 @@ namespace StageCode
                     newToolStripMenuItem1.Text = "Nouveau";
                     openToolStripMenuItem1.Text = "Ouvrir";
                     saveToolStripMenuItem1.Text = "Enregistrer";
+                    saveAsToolStripMenuItem1.Text = "Enregistrer sous"; // "Save As" en français
                     btnInfos.Text = "Infos";
 
                     // Menu Infos
@@ -643,6 +647,7 @@ namespace StageCode
                     newToolStripMenuItem1.Text = "Naujas";
                     openToolStripMenuItem1.Text = "Atidaryti";
                     saveToolStripMenuItem1.Text = "Išsaugoti";
+                    saveAsToolStripMenuItem1.Text = "Išsaugoti kaip"; // "Save As" en lituanien
                     btnInfos.Text = "Informacija";
 
                     // Menu Infos
@@ -1671,7 +1676,7 @@ namespace StageCode
                     }
                     else if (type == "OrthoTabname")
                     {
-                        OrthoTabname TabeNameControl = OrthoTabname.ReadFileXML(componentText);
+                        OrthoSTMLINES TabeNameControl = OrthoSTMLINES.ReadFileXML(componentText);
 
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
@@ -1704,6 +1709,42 @@ namespace StageCode
                             forme.panel1.Controls.Add(pic);
                         }
                     }
+                    else if (type == "OrthoTabname")
+                    {
+                        OrthoSTMLINES TabeNameControl = OrthoSTMLINES.ReadFileXML(componentText);
+
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            TabeNameControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(TabeNameControl.Size.Width + 10, TabeNameControl.Size.Height + 10),
+                                Location = new Point(locationX, locationY)
+
+                            };
+
+                            pic.BorderStyle = BorderStyle.FixedSingle;
+
+                            TabeNameControl.Location = new Point(5, 5);
+
+                            pic.MouseLeave += pic_MouseLeave;
+
+                            pic.Controls.Add(TabeNameControl);
+
+                            TabeNameControl.Click += Control_Click;
+                            TabeNameControl.MouseEnter += Control_MouseEnter;
+
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+
                 }
             }
             catch (Exception ex)
@@ -1754,7 +1795,7 @@ namespace StageCode
                                 // Déplacer l'objet à l'intérieur du PictureBox
                                 nouvelObjet.Location = new Point(5, 5);
 
-                                if (nouvelObjet is OrthoTabname orthoTabname)
+                                if (nouvelObjet is OrthoSTMLINES orthoTabname)
                                 {
                                     if (orthoTabname.btn != null)
                                     {
@@ -1812,7 +1853,8 @@ namespace StageCode
                 "RESULT" => new OrthoResult(),
                 "VARNAME" => new OrthoVarname(),
                 "RETICULE" => new Reticule(),
-                "TABNAME" => new OrthoTabname(),
+                "TABNAME" => new OrthoSTMLINES(),
+                "STMLINES" => new OrthoStmLineGroupe(),
                 _ => null
             };
 
@@ -1836,7 +1878,8 @@ namespace StageCode
                     "RESULT" => new OrthoResult(),
                     "VARNAME" => new OrthoVarname(),
                     "RETICULE" => new Reticule(),
-                    "TABNAME" => new OrthoTabname(),
+                    "TABNAME" => new OrthoSTMLINES(),
+                    "STMLINES" => new OrthoStmLineGroupe(),
                     _ => null
                 };
             }
@@ -1951,6 +1994,10 @@ namespace StageCode
                         else if (childControl is Reticule reticuleControl)
                         {
                             accumulatedText.AppendLine(reticuleControl.WriteFile());
+                        }
+                        else if (childControl is OrthoStmLineGroupe Stmlines)
+                        {
+                            accumulatedText.AppendLine(Stmlines.WriteFile());
                         }
 
                         childControl.Location = new Point(5, 5);
@@ -2071,9 +2118,9 @@ namespace StageCode
                         {
                             accumulatedText.AppendLine(reticuleControl.WriteFileXML());
                         }
-                        if (childControl is OrthoTabname TabNAME)
+                        if (childControl is OrthoStmLineGroupe StmlInes)
                         {
-                            accumulatedText.AppendLine(TabNAME.WriteFileXML());
+                            accumulatedText.AppendLine(StmlInes.WriteFileXML());
                         }
 
                         childControl.Location = new Point(5, 5);
@@ -2269,7 +2316,8 @@ namespace StageCode
                 "OrthoResult",
                 "OrthoVarname",
                 "Reticule",
-                "TABNAME"
+                "TABNAME",
+                "STMLINES"
             });
 
         }
@@ -2381,9 +2429,11 @@ namespace StageCode
                     Ctrl = new Reticule();
                     break;
                 case "TABNAME":
-                    Ctrl = new OrthoTabname();
+                    Ctrl = new OrthoSTMLINES();
                     break;
-
+                case "STMLINES":
+                    Ctrl = new OrthoStmLineGroupe();
+                    break;
                 default:
                     return;
             }

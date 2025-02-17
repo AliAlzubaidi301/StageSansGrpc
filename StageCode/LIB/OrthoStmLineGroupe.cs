@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualBasic.FileIO;
+using StageCode;
+using StageCode.LIB;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,15 +10,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
 using System.Xml.Linq;
-using static StageCode.LIB.OrthoAD;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
-namespace StageCode.LIB
+namespace OrthoDesigner.LIB
 {
-    [Serializable]
-    public partial class OrthoEdit : UserControl
+    public partial class OrthoStmLineGroupe : UserControl
     {
         private int _LevelVisible = 0; // Niveau d'accès minimum pour rendre l'objet visible
         private int _LevelEnabled = 0; // Niveau d'accès minimum pour rendre l'objet accessible
@@ -43,19 +42,10 @@ namespace StageCode.LIB
         public event EventHandler VisibilityChanging;
         public event EventHandler VisibilityChanged;
 
-        public OrthoEdit()
-        {
-            InitializeComponent();
-            AutoSize = false;
-            TextBox1.Multiline = true;
-            ControlUtils.RegisterControl(TextBox1, () => Visibility, h => VisibilityChanging += h, h => VisibilityChanged += h);
-            base.Resize += OrthoEdit_Resize;
-            base.Load += OrthoEdit_Load;
-        }
-        private void OrthoEdit_Resize(object sender, EventArgs e)
-        {
-            TextBox1.Size = this.Size;
-        }
+        //private void OrthoEdit_Resize(object sender, EventArgs e)
+        //{
+        //    TextBox1.Size = this.Size;
+        //}
 
         /// <summary>
         /// Convertion des couleurs dans différents mode d'encodage
@@ -130,7 +120,7 @@ namespace StageCode.LIB
             LevelVisible = int.Parse(splitPvirgule[31]);
             LevelEnabled = int.Parse(splitPvirgule[32]);
             this.comment = comment;
-            TextAlign = (HorizontalAlignment)(int.Parse(splitPvirgule[3]) % 10);
+            //TextAlign = (HorizontalAlignment)(int.Parse(splitPvirgule[3]) % 10);
             VarMeM = splitPvirgule[19];
             if (Enum.TryParse(splitPvirgule[20], out FieldType result))
             {
@@ -155,14 +145,14 @@ namespace StageCode.LIB
             }
             return this;
         }
-        public OrthoEdit ReadFileXML(string txt)
+        public OrthoStmLineGroupe ReadFileXML(string txt)
         {
             XElement component = XElement.Parse(txt);
 
             var appearance = component.Element("Apparence");
 
             Text = appearance.Element("Text")?.Value ?? "";
-            TextAlign = (HorizontalAlignment)(ContentAlignment)Enum.Parse(typeof(ContentAlignment), appearance.Element("TextAlign")?.Value ?? "MiddleCenter");
+            //TextAlign = (HorizontalAlignment)(ContentAlignment)Enum.Parse(typeof(ContentAlignment), appearance.Element("TextAlign")?.Value ?? "MiddleCenter");
             Format = appearance.Element("Format")?.Value ?? "";
             BackColor = ColorTranslator.FromOle(int.Parse(appearance.Element("BackColor")?.Value ?? "0"));
             ForeColor = ColorTranslator.FromOle(int.Parse(appearance.Element("ForeColor")?.Value ?? "0"));
@@ -207,7 +197,9 @@ namespace StageCode.LIB
 
         public string WriteFile()
         {
-            return "ORTHO;EDIT;" + this.Text + ";" + TextAlign.ToString() + ";" + Format + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";5;" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + VarMeM + ";" + Convert.ToInt32(FieldType).ToString() + ";" + ValMin + ";" + ValMax + ";;" + MaxLength.ToString() + ";" + PasswordChar + ";" + TextVirtualKeyboard + ";" + Det + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+            //return "ORTHO;EDIT;" + this.Text + ";" + TextAlign.ToString() + ";" + Format + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";5;" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + VarMeM + ";" + Convert.ToInt32(FieldType).ToString() + ";" + ValMin + ";" + ValMax + ";;" + MaxLength.ToString() + ";" + PasswordChar + ";" + TextVirtualKeyboard + ";" + Det + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+            return "ORTHO;STMLINES;" + this.Text + ";" + ";" + Format + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";5;" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + VarMeM + ";" + Convert.ToInt32(FieldType).ToString() + ";" + ValMin + ";" + ValMax + ";;" + MaxLength.ToString() + ";" + PasswordChar + ";" + TextVirtualKeyboard + ";" + Det + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+
         }
         public string WriteFileXML()
         {
@@ -216,7 +208,7 @@ namespace StageCode.LIB
             xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
             xmlContent.AppendLine("      <Apparence>");
             xmlContent.AppendLine($"        <Text>{Text}</Text>");
-            xmlContent.AppendLine($"        <TextAlign>{TextAlign.ToString()}</TextAlign>");
+          //  xmlContent.AppendLine($"        <TextAlign>{TextAlign.ToString()}</TextAlign>");
             xmlContent.AppendLine($"        <Format>{Format}</Format>");
             xmlContent.AppendLine($"        <BackColor>{ToOle(BackColor)}</BackColor>");
             xmlContent.AppendLine($"        <ForeColor>{ToOle(ForeColor)}</ForeColor>");
@@ -257,64 +249,64 @@ namespace StageCode.LIB
         #region TextBox Properties
         [Category("Apparence")]
         [Description("Indique la façon dont le texte doit être aligné dans le contrôle d'édition.")]
-        public HorizontalAlignment TextAlign
-        {
-            get
-            {
-                return TextBox1.TextAlign;
-            }
-            set
-            {
-                TextBox1.TextAlign = value;
-            }
-        }
-        [Category("Apparence")]
-        [Description("La couleur d'arrière plan du contrôle.")]
-        public Color BackColor
-        {
-            get
-            {
-                return TextBox1.BackColor;
-            }
-            set
-            {
-                TextBox1.BackColor = value;
-            }
-        }
-        [Category("Apparence")]
-        [ShowOnProtectedMode()]
-        [Description("La couleur d'arrière plan du contrôle.")]
-        public Font Font
-        {
-            get
-            {
-                return TextBox1.Font;
-            }
-            set
-            {
-                TextBox1.Font = value;
-            }
-        }
-        [Category("Apparence")]
-        [Description("La couleur d'arrière plan du contrôle.")]
-        public Color ForeColor
-        {
-            get
-            {
-                return TextBox1.ForeColor;
-            }
-            set
-            {
-                TextBox1.ForeColor = value;
-            }
-        }
+        //public HorizontalAlignment TextAlign
+        //{
+        //    get
+        //    {
+        //        return TextBox1.TextAlign;
+        //    }
+        //    set
+        //    {
+        //        TextBox1.TextAlign = value;
+        //    }
+        //}
+        //[Category("Apparence")]
+        //[Description("La couleur d'arrière plan du contrôle.")]
+        //public Color BackColor
+        //{
+        //    get
+        //    {
+        //        return TextBox1.BackColor;
+        //    }
+        //    set
+        //    {
+        //        TextBox1.BackColor = value;
+        //    }
+        //}
+        //[Category("Apparence")]
+        //[ShowOnProtectedMode()]
+        //[Description("La couleur d'arrière plan du contrôle.")]
+        //public Font Font
+        //{
+        //    get
+        //    {
+        //        return TextBox1.Font;
+        //    }
+        //    set
+        //    {
+        //        TextBox1.Font = value;
+        //    }
+        //}
+        //[Category("Apparence")]
+        //[Description("La couleur d'arrière plan du contrôle.")]
+        //public Color ForeColor
+        //{
+        //    get
+        //    {
+        //        return TextBox1.ForeColor;
+        //    }
+        //    set
+        //    {
+        //        TextBox1.ForeColor = value;
+        //    }
+        //}
         #endregion
 
         #region Control properties
-        [Category("Orthodyne")]
+      //  [Category("Orthodyne")]
         [ShowOnProtectedMode()]
         [Browsable(true)]
-        [Description("Longueur maximum (0 pas de limite)")]
+     //   [Description("Longueur maximum (0 pas de limite)")]
         public int MaxLength
         {
             get
@@ -950,14 +942,20 @@ namespace StageCode.LIB
             return GetType();
         }
 
-        private void OrthoEdit_Load(object sender, EventArgs e)
-        {
 
+        public OrthoStmLineGroupe()
+        {
+            InitializeComponent();
         }
 
-        private void TextBox1_TextChanged(object sender, EventArgs e)
+        private void OrthoStmLineGroupe_Load(object sender, EventArgs e)
         {
-
+            InitializeComponent();
+            AutoSize = false;
+           // TextBox1.Multiline = true;
+            //ControlUtils.RegisterControl(TextBox1, () => Visibility, h => VisibilityChanging += h, h => VisibilityChanged += h);
+            //base.Resize += OrthoEdit_Resize;
+            //base.Load += OrthoEdit_Load;
         }
     }
 }

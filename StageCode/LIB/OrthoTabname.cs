@@ -18,7 +18,7 @@ using static StageCode.Other.Langs;
 
 namespace OrthoDesigner.LIB
 {
-    public partial class OrthoTabname : UserControl
+    public partial class OrthoSTMLINES : UserControl
     {
         private int _LevelVisible = 0; // Niveau d'accès minimum pour rendre l'objet visible
         private int _LevelEnabled = 0; // Niveau d'accès minimum pour rendre l'objet accessible
@@ -38,7 +38,7 @@ namespace OrthoDesigner.LIB
 
         public event EventHandler VisibilityChanging;
         public event EventHandler VisibilityChanged;
-        public OrthoTabname()
+        public OrthoSTMLINES()
         {
             InitializeComponent();
         }
@@ -176,11 +176,11 @@ namespace OrthoDesigner.LIB
             return this;
         }
 
-        public static OrthoTabname ReadFileXML(string xmlText)
+        public static OrthoSTMLINES ReadFileXML(string xmlText)
         {
             XElement xml = XElement.Parse(xmlText);
 
-            OrthoTabname am60Control = new OrthoTabname();
+            OrthoSTMLINES am60Control = new OrthoSTMLINES();
 
             am60Control.Caption = xml.Attribute("name")?.Value ?? "";
 
@@ -1050,7 +1050,7 @@ namespace OrthoDesigner.LIB
         }
         private void Tmp_Load(object sender, EventArgs e)
         {
-            Debug.WriteLine(typeof(OrthoTabname).AssemblyQualifiedName);
+            Debug.WriteLine(typeof(OrthoSTMLINES).AssemblyQualifiedName);
 
             this.Controls.Add(btn);
             BackColor = Color.Transparent;

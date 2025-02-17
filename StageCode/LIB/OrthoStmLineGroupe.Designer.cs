@@ -1,6 +1,6 @@
 ﻿namespace OrthoDesigner.LIB
 {
-    partial class OrthoSTMLINES
+    partial class OrthoStmLineGroupe
     {
         /// <summary>
         /// Required designer variable.
@@ -30,12 +30,12 @@
         {
             SuspendLayout();
             // 
-            // OrthoTabnameDesigner
+            // OrthoStmLineGroupe
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Name = "OrthoTabnameDesigner";
-            Load += Tmp_Load;
+            Name = "OrthoStmLineGroupe";
+            Load += OrthoStmLineGroupe_Load;
             ResumeLayout(false);
         }
 

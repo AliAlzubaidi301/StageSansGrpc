@@ -60,6 +60,7 @@
             CouperLogo = new ToolStripMenuItem();
             CopierLogo = new ToolStripMenuItem();
             CollerLogo = new ToolStripMenuItem();
+            saveAsToolStripMenuItem1 = new ToolStripMenuItem();
             MainMenu.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -75,7 +76,7 @@
             // 
             // btnFile
             // 
-            btnFile.DropDownItems.AddRange(new ToolStripItem[] { newToolStripMenuItem1, openToolStripMenuItem1, saveToolStripMenuItem1 });
+            btnFile.DropDownItems.AddRange(new ToolStripItem[] { newToolStripMenuItem1, openToolStripMenuItem1, saveToolStripMenuItem1, saveAsToolStripMenuItem1 });
             btnFile.Name = "btnFile";
             btnFile.Size = new Size(37, 20);
             btnFile.Text = "File";
@@ -159,10 +160,10 @@
             // 
             // saveAsToolStripMenuItem
             // 
-            saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new Size(127, 22);
-            saveAsToolStripMenuItem.Text = "Save As";
-            saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
+            saveAsToolStripMenuItem1.Name = "saveAsToolStripMenuItem";
+            saveAsToolStripMenuItem1.Size = new Size(127, 22);
+            saveAsToolStripMenuItem1.Text = "Save As";
+            saveAsToolStripMenuItem1.Click += saveAsToolStripMenuItem_Click;
             // 
             // newFormeToolStripMenuItem
             // 
@@ -293,6 +294,12 @@
             CollerLogo.Size = new Size(12, 20);
             CollerLogo.Tag = "Paste";
             // 
+            // saveAsToolStripMenuItem1
+            // 
+            saveAsToolStripMenuItem1.Name = "saveAsToolStripMenuItem1";
+            saveAsToolStripMenuItem1.Size = new Size(180, 22);
+            saveAsToolStripMenuItem1.Text = "Save As";
+            // 
             // Forme1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -351,5 +358,6 @@
         private ToolStripMenuItem newToolStripMenuItem1;
         private ToolStripMenuItem openToolStripMenuItem1;
         private ToolStripMenuItem saveToolStripMenuItem1;
+        private ToolStripMenuItem saveAsToolStripMenuItem1;
     }
 }
