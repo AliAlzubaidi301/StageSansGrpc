@@ -14,6 +14,7 @@ using static StageCode.LIB.OrthoAD;
 
 namespace StageCode.LIB
 {
+    [Serializable]
     public partial class OrthoAla :UserControl
     {
         private int _LevelVisible = 0; // Niveau d'accès minimum pour rendre l'objet visible

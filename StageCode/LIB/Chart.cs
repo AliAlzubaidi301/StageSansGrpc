@@ -12,7 +12,7 @@ using System.Xml.Linq;
 namespace StageCode
 {
     [Serializable]
-    public partial class AM60 : UserControl
+    public partial class Chart : UserControl
     {
         #region "Orthodyne Data"
         private int _LevelVisible = 0;
@@ -29,11 +29,11 @@ namespace StageCode
         public event EventHandler VisibilityChanged;
 
         #region "Read/Write on .syn file"
-        public static AM60 ReadFileXML(string xmlText)
+        public static Chart ReadFileXML(string xmlText)
         {
             XElement xml = XElement.Parse(xmlText);
 
-            AM60 am60Control = new AM60();
+            Chart am60Control = new Chart();
 
             string? type = xml.Attribute("type")?.Value;
             am60Control.Name = xml.Attribute("name")?.Value;
@@ -63,7 +63,7 @@ namespace StageCode
             // Return the populated AM60 object
             return am60Control;
         }
-        public AM60 ReadFile(string[] splitPvirgule, string comment, string file, bool fromCopy)
+        public Chart ReadFile(string[] splitPvirgule, string comment, string file, bool fromCopy)
         {
             this._comment = comment;
             this.Name = splitPvirgule[1];
@@ -126,7 +126,7 @@ namespace StageCode
 
         public string WriteFile()
         {
-            return $"AM60;{this.Name};{this.Size.Height};{this.Size.Width};{this.Location.Y};{this.Location.X};{this.Detecteur};{this.LevelVisible};{this.LevelEnabled};{this.Visibility}";
+            return $"Chart;{this.Name};{this.Size.Height};{this.Size.Width};{this.Location.Y};{this.Location.X};{this.Detecteur};{this.LevelVisible};{this.LevelEnabled};{this.Visibility}";
         }
 
 
@@ -200,7 +200,7 @@ namespace StageCode
         }
 
         [Browsable(false)]
-        public new BorderStyle BorderStyle
+        public BorderStyle BorderStyle
         {
             get { return BorderStyle; }
             set { BorderStyle = value; }
@@ -383,7 +383,7 @@ namespace StageCode
 
         public string Type
         {
-            get { return "AM60"; }
+            get { return "Chart"; }
         }
 
         public string SType
@@ -396,12 +396,12 @@ namespace StageCode
             return this.GetType();
         }
 
-        public AM60()
+        public Chart()
         {
             InitializeComponent();
         }
 
-        private void AM60_Load(object sender, EventArgs e)
+        private void Chart_Load(object sender, EventArgs e)
         {
 
         }

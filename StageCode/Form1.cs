@@ -149,9 +149,14 @@ namespace StageCode
 
         private void AjouterRaccourcisMenuFile()
         {
-            newToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.N;
-            openToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.O;
-            saveToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.S;
+            newToolStripMenuItem1.ShortcutKeys = Keys.Control | Keys.N;
+            newToolStripMenuItem1.Click += newToolStripMenuItem1_Click;
+
+            openToolStripMenuItem1.ShortcutKeys = Keys.Control | Keys.O;
+            openToolStripMenuItem1.Click += openToolStripMenuItem1_Click;
+
+            saveToolStripMenuItem1.ShortcutKeys = Keys.Control | Keys.S;
+            saveToolStripMenuItem1.Click += saveToolStripMenuItem_Click;
         }
 
         private void AjouterbtnQuit()
@@ -254,7 +259,7 @@ namespace StageCode
                     return control;
                 }
 
-                return null; 
+                return null;
             });
         }
 
@@ -462,68 +467,58 @@ namespace StageCode
 
         private async void Couper(object sender, EventArgs e)
         {
-            PictureBox? pic = await RechercherPictureBoxAsync();
-            if(pic == null)
-            {
-                return;
-            }
-
-            PictureBox tmp = pic;
-            CopyAndPasteAndCut cut = new CopyAndPasteAndCut();
-            cut.TransformeToTxt(pic);
-
-            foreach (FormVide forme2 in pnlViewHost.Controls)
-            {
-                foreach (Control ctrl in forme2.panel1.Controls)
-                {
-                    if (ctrl == pic)
-                        forme2.panel1.Controls.Remove(tmp);
-                }
-            }
-        }
-
-        private async void Copier(object sender, EventArgs e)
-        {
+            // Recherche d'un PictureBox
             PictureBox? pic = await RechercherPictureBoxAsync();
             if (pic == null)
             {
                 return;
             }
 
-            CopyAndPasteAndCut Copy = new CopyAndPasteAndCut();
-            Copy.TransformeToTxt(pic);
+            // Copier l'image et le contrôle dans le presse-papiers
+            CopyPasteHandler cut = new CopyPasteHandler();
+            CopyPasteHandler.CopyToClipboard(pic);
+
+            // Supprimer le PictureBox du formulaire
+            forme.Controls.Remove(pic);
+        }
+
+        private async void Copier(object sender, EventArgs e)
+        {
+            // Recherche d'un PictureBox
+            PictureBox? pic = await RechercherPictureBoxAsync();
+            if (pic == null)
+            {
+                return;
+            }
+
+            // Copier le PictureBox dans le presse-papiers
+            CopyPasteHandler.CopyToClipboard(pic.Controls[0]);
         }
 
         private async void Coller(object sender, EventArgs e)
         {
-            CopyAndPasteAndCut paste = new CopyAndPasteAndCut();
-            Point souris = forme.panel1.PointToClient(Control.MousePosition);
+            // Si le presse-papiers contient des données de type "ControlFormat"
+            if (Clipboard.ContainsData("ControlFormat"))
+            {
+                // Coller depuis le presse-papiers
+                CopyPasteHandler pasteHandler = new CopyPasteHandler();
+                Control ctrl = pasteHandler.PasteFromClipboard();
 
-            paste.Paste(souris);
+                // Vérifier si le contrôle est un PictureBox
+                if (ctrl is PictureBox pic)
+                {
+                    // Récupérer la position de la souris
+                    Point souris = forme.panel1.PointToClient(Control.MousePosition);
 
-            PictureBox? pic = CopyAndPasteAndCut.pic;
-            Control? ctrl = CopyAndPasteAndCut.ctrl;
+                    // Positionner le PictureBox collé
+                    pic.Location = souris;
 
-            if (pic == null || ctrl == null)
-                return;
-
-            pic.BorderStyle = BorderStyle.FixedSingle;
-            pic.Paint += pic_Paint;
-            pic.MouseLeave += pic_MouseLeave;
-
-            ctrl.MouseEnter += Control_MouseEnter;
-            ctrl.Click += Control_Click;
-            ctrl.MouseClick += Control_MouseClick;
-
-            ctrl.Location = new Point(5, 5);
-            pic.Location = souris;
-
-            pic.Controls.Add(ctrl);
-
-            forme.panel1.Controls.Add(pic);
-
-            this.Cursor = Cursors.Default;
+                    // Ajouter le PictureBox au formulaire
+                    forme.panel1.Controls.Add(pic);
+                }
+            }
         }
+
 
         #endregion
 
@@ -537,9 +532,9 @@ namespace StageCode
                     btnFile.Text = "File";
                     btnEdition.Text = "Edit";
                     btnView.Text = "View";
-                    newToolStripMenuItem.Text = "New";
-                    openToolStripMenuItem.Text = "Open";
-                    saveToolStripMenuItem.Text = "Save";
+                    newToolStripMenuItem1.Text = "New";
+                    openToolStripMenuItem1.Text = "Open";
+                    saveToolStripMenuItem1.Text = "Save";
                     btnInfos.Text = "Info";
 
                     // Menu Infos
@@ -564,9 +559,9 @@ namespace StageCode
                     btnFile.Text = "文件";
                     btnEdition.Text = "编辑";
                     btnView.Text = "视图";
-                    newToolStripMenuItem.Text = "新建";
-                    openToolStripMenuItem.Text = "打开";
-                    saveToolStripMenuItem.Text = "保存";
+                    newToolStripMenuItem1.Text = "新建";
+                    openToolStripMenuItem1.Text = "打开";
+                    saveToolStripMenuItem1.Text = "保存";
                     btnInfos.Text = "信息";
 
                     // Menu Infos
@@ -591,9 +586,9 @@ namespace StageCode
                     btnFile.Text = "Datei";
                     btnEdition.Text = "Bearbeiten";
                     btnView.Text = "Ansicht";
-                    newToolStripMenuItem.Text = "Neu";
-                    openToolStripMenuItem.Text = "Öffnen";
-                    saveToolStripMenuItem.Text = "Speichern";
+                    newToolStripMenuItem1.Text = "Neu";
+                    openToolStripMenuItem1.Text = "Öffnen";
+                    saveToolStripMenuItem1.Text = "Speichern";
                     btnInfos.Text = "Info";
 
                     // Menu Infos
@@ -618,9 +613,9 @@ namespace StageCode
                     btnFile.Text = "Fichier";
                     btnEdition.Text = "Édition";
                     btnView.Text = "Voir";
-                    newToolStripMenuItem.Text = "Nouveau";
-                    openToolStripMenuItem.Text = "Ouvrir";
-                    saveToolStripMenuItem.Text = "Enregistrer";
+                    newToolStripMenuItem1.Text = "Nouveau";
+                    openToolStripMenuItem1.Text = "Ouvrir";
+                    saveToolStripMenuItem1.Text = "Enregistrer";
                     btnInfos.Text = "Infos";
 
                     // Menu Infos
@@ -645,9 +640,9 @@ namespace StageCode
                     btnFile.Text = "Byla";
                     btnEdition.Text = "Redaguoti";
                     btnView.Text = "Peržiūra";
-                    newToolStripMenuItem.Text = "Naujas";
-                    openToolStripMenuItem.Text = "Atidaryti";
-                    saveToolStripMenuItem.Text = "Išsaugoti";
+                    newToolStripMenuItem1.Text = "Naujas";
+                    openToolStripMenuItem1.Text = "Atidaryti";
+                    saveToolStripMenuItem1.Text = "Išsaugoti";
                     btnInfos.Text = "Informacija";
 
                     // Menu Infos
@@ -737,7 +732,7 @@ namespace StageCode
 
             AfficherFormDansPanel(tmp, pnlViewHost);
         }
-        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        private void newToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             string message = "";
             string title = "";
@@ -923,7 +918,7 @@ namespace StageCode
         #endregion
 
         #region OpenFile
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        private void openToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             string message = "";
             string title = "";
@@ -1090,9 +1085,9 @@ namespace StageCode
 
                     string componentText = component.ToString();
 
-                    if (type == "AM60")
+                    if (type == "Chart")
                     {
-                        AM60 am60Control = AM60.ReadFileXML(componentText);
+                        Chart ChartControl = Chart.ReadFileXML(componentText);
 
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
@@ -1103,26 +1098,26 @@ namespace StageCode
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            am60Control.Size = new Size(sizeWidth, sizeHeight);
+                            ChartControl.Size = new Size(sizeWidth, sizeHeight);
 
                             //Mes
                             PictureBox pic = new PictureBox
                             {
-                                Size = new Size(am60Control.Size.Width + 10, am60Control.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Size = new Size(ChartControl.Size.Width + 10, ChartControl.Size.Height + 10), // Augmenter la taille de 10 pixels
                                 Location = new Point(locationX, locationY) // Appliquer la position
 
                             };
 
                             pic.BorderStyle = BorderStyle.FixedSingle;
 
-                            am60Control.Location = new Point(5, 5);
+                            ChartControl.Location = new Point(5, 5);
 
                             pic.MouseLeave += pic_MouseLeave;
 
-                            pic.Controls.Add(am60Control);
+                            pic.Controls.Add(ChartControl);
 
-                            am60Control.Click += Control_Click;
-                            am60Control.MouseEnter += Control_MouseEnter;
+                            ChartControl.Click += Control_Click;
+                            ChartControl.MouseEnter += Control_MouseEnter;
 
                             forme.panel1.Controls.Add(pic);
                         }
@@ -1676,7 +1671,7 @@ namespace StageCode
                     }
                     else if (type == "OrthoTabname")
                     {
-                        OrthoTabname am60Control = OrthoTabname.ReadFileXML(componentText);
+                        OrthoTabname TabeNameControl = OrthoTabname.ReadFileXML(componentText);
 
                         XElement? appearance = component.Element("Apparence");
                         if (appearance != null)
@@ -1686,25 +1681,25 @@ namespace StageCode
                             int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
                             int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
 
-                            am60Control.Size = new Size(sizeWidth, sizeHeight);
+                            TabeNameControl.Size = new Size(sizeWidth, sizeHeight);
 
                             PictureBox pic = new PictureBox
                             {
-                                Size = new Size(am60Control.Size.Width + 10, am60Control.Size.Height + 10),
+                                Size = new Size(TabeNameControl.Size.Width + 10, TabeNameControl.Size.Height + 10),
                                 Location = new Point(locationX, locationY)
 
                             };
 
                             pic.BorderStyle = BorderStyle.FixedSingle;
 
-                            am60Control.Location = new Point(5, 5);
+                            TabeNameControl.Location = new Point(5, 5);
 
                             pic.MouseLeave += pic_MouseLeave;
 
-                            pic.Controls.Add(am60Control);
+                            pic.Controls.Add(TabeNameControl);
 
-                            am60Control.Click += Control_Click;
-                            am60Control.MouseEnter += Control_MouseEnter;
+                            TabeNameControl.Click += Control_Click;
+                            TabeNameControl.MouseEnter += Control_MouseEnter;
 
                             forme.panel1.Controls.Add(pic);
                         }
@@ -1801,7 +1796,7 @@ namespace StageCode
         {
             Control? objet = splitPvirgule[0] switch
             {
-                "AM60" => new AM60(),
+                "Chart" => new Chart(),
                 "CONT1" => new CONT1(),
                 "INTEG" => new INTEG(),
                 "AD" => new OrthoAD(),
@@ -1825,7 +1820,7 @@ namespace StageCode
             {
                 objet = splitPvirgule[1] switch
                 {
-                    "AM60" => new AM60(),
+                    "Chart" => new Chart(),
                     "CONT1" => new CONT1(),
                     "INTEG" => new INTEG(),
                     "AD" => new OrthoAD(),
@@ -1893,9 +1888,9 @@ namespace StageCode
                     {
                         childControl.Location = pictureBox.Location;
 
-                        if (childControl is AM60 am60Control)
+                        if (childControl is Chart CharteControle)
                         {
-                            accumulatedText.AppendLine(am60Control.WriteFile());
+                            accumulatedText.AppendLine(CharteControle.WriteFile());
                         }
                         else if (childControl is CONT1 cont1Control)
                         {
@@ -2012,9 +2007,9 @@ namespace StageCode
                     {
                         childControl.Location = pictureBox.Location;
 
-                        if (childControl is AM60 am60Control)
+                        if (childControl is Chart CharteControleControl)
                         {
-                            accumulatedText.AppendLine(" " + " " + am60Control.WriteFileXML());
+                            accumulatedText.AppendLine(" " + " " + CharteControleControl.WriteFileXML());
                         }
                         else if (childControl is CONT1 cont1Control)
                         {
@@ -2258,7 +2253,7 @@ namespace StageCode
             lstToolbox.Items.Clear();
             lstToolbox.Items.AddRange(new string[]
             {
-                "AM60",
+                "Chart",
                 "Cont1",
                 "INTEG",
                 "OrthoAD",
@@ -2301,6 +2296,7 @@ namespace StageCode
                 var wrapper = new FormPanelWrapper(forme);
 
                 propertyGrid1.SelectedObject = wrapper;
+                propertyGrid1.ExpandAllGridItems();
 
                 foreach (Control control in forme.panel1.Controls)
                 {
@@ -2321,8 +2317,8 @@ namespace StageCode
 
             switch (ControlSélectionner)
             {
-                case "AM60":
-                    Ctrl = new AM60();
+                case "Chart":
+                    Ctrl = new Chart();
                     break;
 
                 case "Cont1":
@@ -2472,6 +2468,9 @@ namespace StageCode
                     var tmp = new ControlPictureBoxWrapper(pic, controle);
 
                     propertyGrid1.SelectedObject = tmp;
+                    propertyGrid1.ExpandAllGridItems();
+
+                    // tmp.
                 }
             }
         }
@@ -2571,6 +2570,7 @@ namespace StageCode
 
         #region Mouse (Resize et Move Control & PictureBox
 
+        #region Move
         private void pic_MouseDown(object sender, MouseEventArgs e)
         {
             if (!EnMoouvement) return;
@@ -2739,6 +2739,9 @@ namespace StageCode
             Bouger = false;
         }
 
+        #endregion
+
+        #region Resize Picturebox
         private void pic_MouseDown2(object sender, MouseEventArgs e)
         {
             PictureBox? pictureBox = sender as PictureBox;
@@ -2771,8 +2774,8 @@ namespace StageCode
                 if (ChangerPicture.Controls.Count > 0)
                 {
                     Control child = ChangerPicture.Controls[0];
-                    child.Width = ChangerPicture.Width -10;
-                    child.Height = ChangerPicture.Height -10;
+                    child.Width = ChangerPicture.Width - 10;
+                    child.Height = ChangerPicture.Height - 10;
                 }
 
                 SourisDecalage = e.Location;
@@ -2803,7 +2806,7 @@ namespace StageCode
             }
         }
 
-
+        #endregion
 
         #endregion
 
@@ -2853,7 +2856,7 @@ namespace StageCode
 
         private void OpenLogo_Click(object sender, EventArgs e)
         {
-            openToolStripMenuItem_Click(sender, e);
+            openToolStripMenuItem1_Click(sender, e);
         }
         private void SaveALL_Click(object sender, EventArgs e)
         {

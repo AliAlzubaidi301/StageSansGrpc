@@ -1,6 +1,6 @@
 ﻿namespace StageCode
 {
-    partial class AM60
+    partial class Chart
     {
         /// <summary>
         /// Required designer variable.
@@ -38,7 +38,7 @@
             Margin = new Padding(4, 3, 4, 3);
             Name = "AM60";
             Size = new Size(175, 173);
-            Load += AM60_Load;
+            Load += Chart_Load;
             ResumeLayout(false);
         }
 

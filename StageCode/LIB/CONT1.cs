@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -12,6 +13,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace StageCode.LIB
 {
+    [Serializable]
     public partial class CONT1 : UserControl
     {
         private int _levelVisible = 0;

@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Design;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,6 +54,36 @@ namespace StageCode.LIB
         public event EventHandler VisibilityChanging;
         public event EventHandler VisibilityChanged;
 
+
+        // Déclaration des champs privés
+        private string _simpleName;
+        private bool _flage;
+        private String _ioStream;
+
+        #region "Accesseurs"
+
+        // Propriété pour SimpleName
+        public string SimpleName
+        {
+            get { return _simpleName; }
+            set { _simpleName = value; }
+        }
+
+        // Propriété pour Flage
+        public bool Flage
+        {
+            get { return _flage; }
+            set { _flage = value; }
+        }
+
+        // Propriété pour IoStream
+        public String IoStream
+        {
+            get { return _ioStream; }
+            set { _ioStream = value; }
+        }
+
+        #endregion
         private void LanguageChangedEventHandler(AvailableLanguage NewLanguage)
         {
             if (_captionValues.Contains("|"))
@@ -142,9 +173,6 @@ namespace StageCode.LIB
 
             this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
             Precision = splitPvirgule[4];
-          //  Font = new Font(splitPvirgule[7], float.Parse(splitPvirgule[8]), StyleText);
-            // LBO 2012 03 19 Correction
-            // Me.Text = splitPvirgule(2)
             Caption = splitPvirgule[2];
             BackColor = FromOle(splitPvirgule[5]);
             ForeColor = FromOle(splitPvirgule[6]);
@@ -159,6 +187,7 @@ namespace StageCode.LIB
             {
                 this.Location = new Point(int.Parse(splitPvirgule[18]), int.Parse(splitPvirgule[17]));
             }
+
             _VL[0] = splitPvirgule[19];
             _VL[1] = splitPvirgule[20];
             _VL[2] = splitPvirgule[21];
@@ -168,6 +197,7 @@ namespace StageCode.LIB
             _VL[6] = splitPvirgule[25];
             _VL[7] = splitPvirgule[26];
             _VL[8] = splitPvirgule[27];
+
             ColorOn = FromOle(splitPvirgule[28]);
             ColorOff = FromOle(splitPvirgule[29]);
             ColorErr = FromOle(splitPvirgule[30]);
@@ -175,10 +205,16 @@ namespace StageCode.LIB
             LevelEnabled = int.Parse(splitPvirgule[32]);
             this.comment = comment;
 
-            if (splitPvirgule.Length >= 34)
+            // Add SimpleName, Flag, and IOStream
+            SimpleName = splitPvirgule[34];  // Example, adjust accordingly based on where it appears in the splitPvirgule array
+            Flage = bool.Parse(splitPvirgule[35]);  // Adjust index based on position in the array
+            IoStream = splitPvirgule[36];  // Adjust index based on position
+
+            if (splitPvirgule.Length >= 37)
             {
-                Visibility = splitPvirgule[33];
+                Visibility = splitPvirgule[37];
             }
+
             return this;
         }
         public static OrthoDI ReadFileXML(string xmlText)
@@ -241,7 +277,7 @@ namespace StageCode.LIB
 
         public string WriteFile()
         {
-            return "ORTHO;DI;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + _VL[0] + ";" + _VL[1] + ";" + _VL[2] + ";" + _VL[3] + ";" + _VL[4] + ";" + _VL[5] + ";" + _VL[6] + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+            return "ORTHO;DI;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + _VL[0] + ";" + _VL[1] + ";" + _VL[2] + ";" + _VL[3] + ";" + _VL[4] + ";" + _VL[5] + ";" + _VL[6] + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility + ";" + SimpleName + ";" + Flage.ToString() + ";" + IoStream;
         }
         public string WriteFileXML()
         {
@@ -280,6 +316,11 @@ namespace StageCode.LIB
             xmlContent.AppendLine($"      <LevelVisible>{LevelVisible}</LevelVisible>");
             xmlContent.AppendLine($"      <LevelEnabled>{LevelEnabled}</LevelEnabled>");
             xmlContent.AppendLine($"      <Visibility>{Visibility}</Visibility>");
+
+            // Add SimpleName, Flag, and IOStream
+            xmlContent.AppendLine($"      <SimpleName>{SimpleName}</SimpleName>");
+            xmlContent.AppendLine($"      <Flag>{Flage}</Flag>");
+            xmlContent.AppendLine($"      <IOStream>{IoStream}</IOStream>");
 
             xmlContent.AppendLine("    </Component>");
 

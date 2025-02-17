@@ -31,17 +31,20 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Forme1));
             MainMenu = new MenuStrip();
             btnFile = new ToolStripMenuItem();
-            newToolStripMenuItem = new ToolStripMenuItem();
-            openToolStripMenuItem = new ToolStripMenuItem();
-            saveToolStripMenuItem = new ToolStripMenuItem();
-            saveAsToolStripMenuItem = new ToolStripMenuItem();
-            newFormeToolStripMenuItem = new ToolStripMenuItem();
+            newToolStripMenuItem1 = new ToolStripMenuItem();
+            openToolStripMenuItem1 = new ToolStripMenuItem();
+            saveToolStripMenuItem1 = new ToolStripMenuItem();
             btnEdition = new ToolStripMenuItem();
             btnView = new ToolStripMenuItem();
             btnInfos = new ToolStripMenuItem();
             controlCommentToolStripMenuItem = new ToolStripMenuItem();
             aboutToolStripMenuItem = new ToolStripMenuItem();
             btnVersion = new ToolStripMenuItem();
+            newToolStripMenuItem = new ToolStripMenuItem();
+            openToolStripMenuItem = new ToolStripMenuItem();
+            saveToolStripMenuItem = new ToolStripMenuItem();
+            saveAsToolStripMenuItem = new ToolStripMenuItem();
+            newFormeToolStripMenuItem = new ToolStripMenuItem();
             openFileDialog = new OpenFileDialog();
             saveFileDialog1 = new SaveFileDialog();
             pnlViewHost = new Panel();
@@ -72,44 +75,28 @@
             // 
             // btnFile
             // 
+            btnFile.DropDownItems.AddRange(new ToolStripItem[] { newToolStripMenuItem1, openToolStripMenuItem1, saveToolStripMenuItem1 });
             btnFile.Name = "btnFile";
             btnFile.Size = new Size(37, 20);
             btnFile.Text = "File";
             // 
-            // newToolStripMenuItem
+            // newToolStripMenuItem1
             // 
-            newToolStripMenuItem.Name = "newToolStripMenuItem";
-            newToolStripMenuItem.Size = new Size(127, 22);
-            newToolStripMenuItem.Text = "New";
-            newToolStripMenuItem.Click += newToolStripMenuItem_Click;
+            newToolStripMenuItem1.Name = "newToolStripMenuItem1";
+            newToolStripMenuItem1.Size = new Size(180, 22);
+            newToolStripMenuItem1.Text = "New";
             // 
-            // openToolStripMenuItem
+            // openToolStripMenuItem1
             // 
-            openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(127, 22);
-            openToolStripMenuItem.Text = "Open";
-            openToolStripMenuItem.Click += openToolStripMenuItem_Click;
+            openToolStripMenuItem1.Name = "openToolStripMenuItem1";
+            openToolStripMenuItem1.Size = new Size(180, 22);
+            openToolStripMenuItem1.Text = "Open";
             // 
-            // saveToolStripMenuItem
+            // saveToolStripMenuItem1
             // 
-            saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new Size(127, 22);
-            saveToolStripMenuItem.Text = "Save";
-            saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
-            // 
-            // saveAsToolStripMenuItem
-            // 
-            saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new Size(127, 22);
-            saveAsToolStripMenuItem.Text = "Save As";
-            saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
-            // 
-            // newFormeToolStripMenuItem
-            // 
-            newFormeToolStripMenuItem.Name = "newFormeToolStripMenuItem";
-            newFormeToolStripMenuItem.Size = new Size(127, 22);
-            newFormeToolStripMenuItem.Text = "New Page";
-            newFormeToolStripMenuItem.Click += newFormeToolStripMenuItem_Click;
+            saveToolStripMenuItem1.Name = "saveToolStripMenuItem1";
+            saveToolStripMenuItem1.Size = new Size(180, 22);
+            saveToolStripMenuItem1.Text = "Save";
             // 
             // btnEdition
             // 
@@ -150,6 +137,39 @@
             btnVersion.Name = "btnVersion";
             btnVersion.Size = new Size(29, 20);
             btnVersion.Text = "V ";
+            // 
+            // newToolStripMenuItem
+            // 
+            newToolStripMenuItem.Name = "newToolStripMenuItem";
+            newToolStripMenuItem.Size = new Size(127, 22);
+            newToolStripMenuItem.Text = "New";
+            // 
+            // openToolStripMenuItem
+            // 
+            openToolStripMenuItem.Name = "openToolStripMenuItem";
+            openToolStripMenuItem.Size = new Size(127, 22);
+            openToolStripMenuItem.Text = "Open";
+            // 
+            // saveToolStripMenuItem
+            // 
+            saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            saveToolStripMenuItem.Size = new Size(127, 22);
+            saveToolStripMenuItem.Text = "Save";
+            saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
+            // 
+            // saveAsToolStripMenuItem
+            // 
+            saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
+            saveAsToolStripMenuItem.Size = new Size(127, 22);
+            saveAsToolStripMenuItem.Text = "Save As";
+            saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
+            // 
+            // newFormeToolStripMenuItem
+            // 
+            newFormeToolStripMenuItem.Name = "newFormeToolStripMenuItem";
+            newFormeToolStripMenuItem.Size = new Size(127, 22);
+            newFormeToolStripMenuItem.Text = "New Page";
+            newFormeToolStripMenuItem.Click += newFormeToolStripMenuItem_Click;
             // 
             // openFileDialog
             // 
@@ -273,7 +293,7 @@
             CollerLogo.Size = new Size(12, 20);
             CollerLogo.Tag = "Paste";
             // 
-            // Form1
+            // Forme1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -285,7 +305,7 @@
             Controls.Add(pnlViewHost);
             Controls.Add(MainMenu);
             MainMenuStrip = MainMenu;
-            Name = "Form1";
+            Name = "Forme1";
             Text = "Form1";
             FormClosing += FormePrincipaleClose;
             Load += Form1_Load;
@@ -328,5 +348,8 @@
         private ToolStripMenuItem CouperLogo;
         private ToolStripMenuItem CopierLogo;
         private ToolStripMenuItem CollerLogo;
+        private ToolStripMenuItem newToolStripMenuItem1;
+        private ToolStripMenuItem openToolStripMenuItem1;
+        private ToolStripMenuItem saveToolStripMenuItem1;
     }
 }

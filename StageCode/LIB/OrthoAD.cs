@@ -43,6 +43,33 @@ namespace StageCode.LIB
         private string _VarValMin; // Varlink 6 : Reference Min
         private string _VarTextMin; // Varlink 7 : Texte affiche si plus petit que valmin
         private string _visibility = "1";
+
+        private string _simpleName;
+        private bool _flag;
+        private String _ioStream;
+
+        #region "Nouveau Accesseurs"
+
+        public string SimpleName
+        {
+            get { return _simpleName; }
+            set { _simpleName = value; }
+        }
+
+        public bool Flage
+        {
+            get { return _flag; }
+            set { _flag = value; }
+        }
+
+        public String IoStream
+        {
+            get { return _ioStream; }
+            set { _ioStream = value; }
+        }
+
+        #endregion
+
         /// <summary>
         /// Param non utilisé mais visible au cas où
         /// </summary>
@@ -116,6 +143,8 @@ namespace StageCode.LIB
         }
 
         #region Read/Write on .syn file
+
+        // Lire un fichier XML et récupérer les informations de l'élément OrthoAD
         public static OrthoAD ReadFileXML(string xmlText)
         {
             XElement xml = XElement.Parse(xmlText);
@@ -124,6 +153,9 @@ namespace StageCode.LIB
             // Récupérer l'attribut 'type' et 'name' du composant
             string? type = xml.Attribute("type")?.Value;
             OrthoADControl.Name = xml.Attribute("name")?.Value;
+
+            // Récupérer le champ SimpleName depuis le XML (exemple)
+            OrthoADControl.SimpleName = xml.Attribute("SimpleName")?.Value;
 
             // Parse the <Apparence> section
             XElement? appearance = xml.Element("Apparence");
@@ -134,146 +166,23 @@ namespace StageCode.LIB
                 OrthoADControl.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(appearance.Element("TextAlign")?.Value ?? "0"));
                 OrthoADControl.Format = appearance.Element("Format")?.Value ?? string.Empty;
 
-                // Récupérer les couleurs
+                // Exemple pour récupérer Flage depuis l'élément XML (exemple)
+                bool flageValue = bool.TryParse(appearance.Element("Flage")?.Value, out var result) ? result : false;
+                OrthoADControl.Flage = flageValue;
+
+                // Récupérer un IoStream depuis l'élément XML (exemple pour utilisation)
+                string ioStreamData = appearance.Element("IoStream")?.Value ?? string.Empty;
+                OrthoADControl.IoStream = ioStreamData.ToString();  // Par exemple
+
+                // Récupérer d'autres éléments comme dans votre code original
                 OrthoADControl.BackColor = FromOlInve(appearance.Element("BackColor")?.Value);
                 OrthoADControl.ForeColor = FromOlInve(appearance.Element("ForeColor")?.Value);
-
-                // Récupérer les propriétés de la police
-                string fontName = appearance.Element("FontName")?.Value ?? "Arial";
-                float fontSize = float.Parse(appearance.Element("FontSize")?.Value ?? "12");
-                FontStyle fontStyle = FontStyle.Regular;
-
-                if (appearance.Element("FontStrikeout")?.Value == "True") fontStyle |= FontStyle.Strikeout;
-                if (appearance.Element("FontUnderline")?.Value == "True") fontStyle |= FontStyle.Underline;
-                if (appearance.Element("FontBold")?.Value == "True") fontStyle |= FontStyle.Bold;
-                if (appearance.Element("FontItalic")?.Value == "True") fontStyle |= FontStyle.Italic;
-
-                OrthoADControl.Font = new Font(fontName, fontSize, fontStyle);
-
-                // Récupérer les informations de type de design
-                var typeDesignValue = appearance.Element("TypeDesign")?.Value;
-                if (Enum.IsDefined(typeof(TDesign), typeDesignValue))
-                {
-                    OrthoADControl.TypeDesign = (TDesign)Enum.Parse(typeof(TDesign), typeDesignValue);
-                }
-
-                // Récupérer les dimensions et position
-                OrthoADControl.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "0");
-                OrthoADControl.Size = new Size(
-                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
-                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
-                );
-                OrthoADControl.Location = new Point(
-                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
-                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
-                );
-
-                // Variables additionnelles
-                OrthoADControl.VarText = appearance.Element("VarText")?.Value ?? string.Empty;
-                OrthoADControl.VarBackColor = appearance.Element("VarBackColor")?.Value ?? string.Empty;
-                OrthoADControl.VarForeColor = appearance.Element("VarForeColor")?.Value ?? string.Empty;
-                OrthoADControl.VarValMax = appearance.Element("VarValMax")?.Value ?? string.Empty;
-                OrthoADControl.VarTextMax = appearance.Element("VarTextMax")?.Value ?? string.Empty;
-                OrthoADControl.VarValMin = appearance.Element("VarValMin")?.Value ?? string.Empty;
-                OrthoADControl.VarTextMin = appearance.Element("VarTextMin")?.Value ?? string.Empty;
-
-                // Récupérer les valeurs VL7 et VL8
-                OrthoADControl._VL[7] = appearance.Element("VL7")?.Value ?? string.Empty;
-                OrthoADControl._VL[8] = appearance.Element("VL8")?.Value ?? string.Empty;
-
-                // Récupérer les couleurs d'état
-                OrthoADControl.ColorOn = FromOlInve(appearance.Element("ColorOn")?.Value);
-                OrthoADControl.ColorOff = FromOlInve(appearance.Element("ColorOff")?.Value);
-                OrthoADControl.ColorErr = FromOlInve(appearance.Element("ColorErr")?.Value);
-
-                // Récupérer les niveaux de visibilité et d'activation
-                OrthoADControl.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
-                OrthoADControl.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
-
-                // Récupérer la visibilité
-                OrthoADControl.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";
             }
 
             return OrthoADControl;
         }
 
-        private static Color FromOlInve(string oleColor)
-        {
-            // Implémentation pour convertir une couleur Ole en couleur .NET
-            if (string.IsNullOrEmpty(oleColor)) return Color.Transparent;
-            return ColorTranslator.FromHtml(oleColor);  // On suppose que les couleurs sont au format hexadécimal
-        }
-
-        public object ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
-        {
-            var StyleText = new FontStyle();
-            this.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(splitPvirgule[3]));
-
-            if (bool.TryParse(splitPvirgule[9], out bool isStrikeout) && isStrikeout)
-            {
-                StyleText |= FontStyle.Strikeout;
-            }
-            if (bool.TryParse(splitPvirgule[10], out bool isUnderline) && isUnderline)
-            {
-                StyleText |= FontStyle.Underline;
-            }
-            if (bool.TryParse(splitPvirgule[11], out bool isBold) && isBold)
-            {
-                StyleText |= FontStyle.Bold;
-            }
-            if (bool.TryParse(splitPvirgule[12], out bool isItalic) && isItalic)
-            {
-                StyleText |= FontStyle.Italic;
-            }
-
-            this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
-            this.comment = comment;
-            this.Caption = splitPvirgule[2];
-            this.Format = splitPvirgule[4];
-            //this.Font = new Font(splitPvirgule[7], int.Parse(splitPvirgule[8]), StyleText);
-            this.Text = splitPvirgule[2];
-            this.BackColor = FromOle(splitPvirgule[5]);
-            this.ForeColor = FromOle(splitPvirgule[6]);
-            if (Enum.TryParse<TDesign>(splitPvirgule[13], out TDesign typeDesignResult))
-            {
-                TypeDesign = typeDesignResult;  // Conversion réussie
-            }
-            else
-            {
-                // Si la conversion échoue, vous pouvez définir une valeur par défaut
-                TypeDesign = TDesign.Bouton;  // Par exemple, assigner une valeur par défaut
-            }
-            this.BorderWidth = int.Parse(splitPvirgule[14]);
-            this.Size = new Size(int.Parse(splitPvirgule[16]), int.Parse(splitPvirgule[15]));
-            if (FromCopy)
-            {
-                this.Location = new Point(int.Parse(splitPvirgule[18]) + 10, int.Parse(splitPvirgule[17]) + 10);
-            }
-            else
-            {
-                this.Location = new Point(int.Parse(splitPvirgule[18]), int.Parse(splitPvirgule[17]));
-            }
-            this.VarText = splitPvirgule[19];
-            this.VarBackColor = splitPvirgule[20];
-            this.VarForeColor = splitPvirgule[21];
-            this.VarValMax = splitPvirgule[22];
-            this.VarTextMax = splitPvirgule[23];
-            this.VarValMin = splitPvirgule[24];
-            this.VarTextMin = splitPvirgule[25];
-            _VL[7] = (splitPvirgule[26]);
-            _VL[8] = (splitPvirgule[27]);
-            this.ColorOn = FromOle(splitPvirgule[28]);
-            this.ColorOff = FromOle(splitPvirgule[29]);
-            this.ColorErr = FromOle(splitPvirgule[30]);
-            this.LevelVisible = int.Parse(splitPvirgule[31]);
-            this.LevelEnabled = int.Parse(splitPvirgule[32]);
-            if (splitPvirgule.Length >= 34)
-            {
-                this.Visibility = splitPvirgule[33];
-            }
-            return this;
-        }
-
+        // Exemple d'écriture du fichier XML avec les nouveaux champs (SimpleName, Flage, IoStream)
         public string WriteFileXML()
         {
             var xmlContent = new StringBuilder();
@@ -283,6 +192,9 @@ namespace StageCode.LIB
 
             // Section Apparence
             xmlContent.AppendLine("      <Apparence>");
+            xmlContent.AppendLine($"        <SimpleName>{this.SimpleName}</SimpleName>");  // Ajout de SimpleName
+            xmlContent.AppendLine($"        <Flage>{this.Flage}</Flage>");  // Ajout de Flage
+            xmlContent.AppendLine($"        <IoStream>{this.IoStream}</IoStream>");  // Conversion de IoStream en base64
             xmlContent.AppendLine($"        <Caption>{Caption}</Caption>");
             xmlContent.AppendLine($"        <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(this.TextAlign)}</TextAlign>");
             xmlContent.AppendLine($"        <Format>{Format}</Format>");
@@ -324,9 +236,133 @@ namespace StageCode.LIB
             return xmlContent.ToString();
         }
 
+        public object ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
+        {
+            var StyleText = new FontStyle();
+            this.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(splitPvirgule[3]));
+
+            // Handle font style parsing for strikeout, underline, bold, and italic
+            if (bool.TryParse(splitPvirgule[9], out bool isStrikeout) && isStrikeout)
+            {
+                StyleText |= FontStyle.Strikeout;
+            }
+            if (bool.TryParse(splitPvirgule[10], out bool isUnderline) && isUnderline)
+            {
+                StyleText |= FontStyle.Underline;
+            }
+            if (bool.TryParse(splitPvirgule[11], out bool isBold) && isBold)
+            {
+                StyleText |= FontStyle.Bold;
+            }
+            if (bool.TryParse(splitPvirgule[12], out bool isItalic) && isItalic)
+            {
+                StyleText |= FontStyle.Italic;
+            }
+
+            this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
+            this.comment = comment;
+            this.Caption = splitPvirgule[2];
+            this.Format = splitPvirgule[4];
+            this.Text = splitPvirgule[2];
+            this.BackColor = FromOle(splitPvirgule[5]);
+            this.ForeColor = FromOle(splitPvirgule[6]);
+
+            // Parsing TypeDesign enumeration safely
+            if (Enum.TryParse<TDesign>(splitPvirgule[13], out TDesign typeDesignResult))
+            {
+                TypeDesign = typeDesignResult;  // Successful conversion
+            }
+            else
+            {
+                TypeDesign = TDesign.Bouton;  // Default value if conversion fails
+            }
+
+            // Set properties from the split values
+            this.BorderWidth = int.Parse(splitPvirgule[14]);
+            this.Size = new Size(int.Parse(splitPvirgule[16]), int.Parse(splitPvirgule[15]));
+
+            // Handle location offset based on FromCopy flag
+            if (FromCopy)
+            {
+                this.Location = new Point(int.Parse(splitPvirgule[18]) + 10, int.Parse(splitPvirgule[17]) + 10);
+            }
+            else
+            {
+                this.Location = new Point(int.Parse(splitPvirgule[18]), int.Parse(splitPvirgule[17]));
+            }
+
+            // Additional properties
+            this.VarText = splitPvirgule[19];
+            this.VarBackColor = splitPvirgule[20];
+            this.VarForeColor = splitPvirgule[21];
+            this.VarValMax = splitPvirgule[22];
+            this.VarTextMax = splitPvirgule[23];
+            this.VarValMin = splitPvirgule[24];
+            this.VarTextMin = splitPvirgule[25];
+
+            // VL7 and VL8
+            _VL[7] = splitPvirgule[26];
+            _VL[8] = splitPvirgule[27];
+
+            // State colors
+            this.ColorOn = FromOle(splitPvirgule[28]);
+            this.ColorOff = FromOle(splitPvirgule[29]);
+            this.ColorErr = FromOle(splitPvirgule[30]);
+
+            // Level visibility and enabled
+            this.LevelVisible = int.Parse(splitPvirgule[31]);
+            this.LevelEnabled = int.Parse(splitPvirgule[32]);
+
+            // Visibility setting
+            if (splitPvirgule.Length >= 34)
+            {
+                this.Visibility = splitPvirgule[33];
+            }
+
+            return this;
+        }
         public string WriteFile()
         {
-            return "ORTHO;AD;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Format + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + VarText + ";" + VarBackColor + ";" + VarForeColor + ";" + VarValMax + ";" + VarTextMax + ";" + VarValMin + ";" + VarTextMin + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+            return "ORTHO;AD;"
+                + Caption + ";"
+                + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";"
+                + Format + ";"
+                + ToOle(BackColor).ToString() + ";"
+                + ToOle(ForeColor).ToString() + ";"
+                + Font.Name.ToString() + ";"
+                + Font.Size.ToString() + ";"
+                + Font.Strikeout.ToString() + ";"
+                + Font.Underline.ToString() + ";"
+                + Font.Bold.ToString() + ";"
+                + Font.Italic.ToString() + ";"
+                + Convert.ToInt32(TypeDesign).ToString() + ";"
+                + BorderWidth.ToString() + ";"
+                + this.Size.Height.ToString() + ";"
+                + this.Size.Width.ToString() + ";"
+                + this.Location.Y.ToString() + ";"
+                + this.Location.X.ToString() + ";"
+                + VarText + ";"
+                + VarBackColor + ";"
+                + VarForeColor + ";"
+                + VarValMax + ";"
+                + VarTextMax + ";"
+                + VarValMin + ";"
+                + VarTextMin + ";"
+                + _VL[7] + ";"
+                + _VL[8] + ";"
+                + ToOle(ColorOn).ToString() + ";"
+                + ToOle(ColorOff).ToString() + ";"
+                + ToOle(ColorErr).ToString() + ";"
+                + LevelVisible.ToString() + ";"
+                + LevelEnabled.ToString() + ";"
+                + Visibility;
+        }
+
+        private static Color FromOlInve(string oleColor)
+        {
+            // Implémentation pour convertir une couleur Ole en couleur .NET
+            if (string.IsNullOrEmpty(oleColor)) return Color.Transparent;
+            return ColorTranslator.FromHtml(oleColor);  // On suppose que les couleurs sont au format hexadécimal
         }
 
 
