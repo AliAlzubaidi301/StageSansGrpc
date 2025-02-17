@@ -2585,7 +2585,6 @@ namespace StageCode
                 picturebox.BringToFront();
             }
         }
-
         private void pic_MouseMove(object Sender, MouseEventArgs e)
         {
             if (!Bouger) return;
@@ -2739,6 +2738,7 @@ namespace StageCode
         {
             Bouger = false;
         }
+
         private void pic_MouseDown2(object sender, MouseEventArgs e)
         {
             PictureBox? pictureBox = sender as PictureBox;
@@ -2756,7 +2756,6 @@ namespace StageCode
                 }
             }
         }
-
         private void pic_MouseMove2(object sender, MouseEventArgs e)
         {
             PictureBox? pic = sender as PictureBox;
@@ -2772,8 +2771,8 @@ namespace StageCode
                 if (ChangerPicture.Controls.Count > 0)
                 {
                     Control child = ChangerPicture.Controls[0];
-                    child.Width = ChangerPicture.Width;
-                    child.Height = ChangerPicture.Height;
+                    child.Width = ChangerPicture.Width -10;
+                    child.Height = ChangerPicture.Height -10;
                 }
 
                 SourisDecalage = e.Location;
@@ -2792,7 +2791,6 @@ namespace StageCode
                 }
             }
         }
-
         private void pic_MouseUp2(object sender, MouseEventArgs e)
         {
             ChangerPicture = null;
