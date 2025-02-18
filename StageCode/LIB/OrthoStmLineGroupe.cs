@@ -108,7 +108,7 @@ namespace OrthoDesigner.LIB
             this.Size = new Size(int.Parse(splitPvirgule[16]), int.Parse(splitPvirgule[15]));
             if (FromCopy)
             {
-                this.Location = new Point((int)Math.Round(Double.Parse(splitPvirgule[18]) + 10d), (int)Math.Round(Double.Parse(splitPvirgule[17]) + 10d));
+                this.Location = new Point((int)Math.Round(Double.Parse(splitPvirgule[18]) + 10), (int)Math.Round(Double.Parse(splitPvirgule[17]) + 10d));
             }
             else
             {
@@ -208,7 +208,7 @@ namespace OrthoDesigner.LIB
             xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
             xmlContent.AppendLine("      <Apparence>");
             xmlContent.AppendLine($"        <Text>{Text}</Text>");
-          //  xmlContent.AppendLine($"        <TextAlign>{TextAlign.ToString()}</TextAlign>");
+            xmlContent.AppendLine($"        <TextAlign>{_TextVirtualKeyboard.ToString()}</TextAlign>");
             xmlContent.AppendLine($"        <Format>{Format}</Format>");
             xmlContent.AppendLine($"        <BackColor>{ToOle(BackColor)}</BackColor>");
             xmlContent.AppendLine($"        <ForeColor>{ToOle(ForeColor)}</ForeColor>");

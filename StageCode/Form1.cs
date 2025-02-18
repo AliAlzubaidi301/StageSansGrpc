@@ -1,5 +1,9 @@
 ﻿using CodeExceptionManager.Controller.DatabaseEngine.Implementation;
+using CodeExceptionManager.Model.Objects;
+using Grpc.Core;
+using IIOManager;
 using OrthoDesigner;
+using OrthoDesigner.GRPC;
 using OrthoDesigner.LIB;
 using OrthoDesigner.Other;
 using StageCode.LIB;
@@ -37,7 +41,21 @@ namespace StageCode
         private List<PictureBox> listPic = new List<PictureBox>();
         private ContextMenuStrip contextMenu = new ContextMenuStrip();
 
+        //private GrpcClient _grpcClient;
+
         //OrthoAla CMDLIB COMBO DI BUG EDIT 
+
+        #endregion
+
+        #region Attribut GRPC
+
+        private const string PORT_NUMBER = "50099";
+        private const string DEFAULT_CORE_IP = "10.1.6.11";
+        private static string applicationGuid = "TROP GALERE GRPC";
+        private static Channel grpcChannel;
+        private static Methods.MethodsClient clientInterface;
+
+        private List<IIOManager.ControllerElement> listeController;
 
         #endregion
 
@@ -50,14 +68,18 @@ namespace StageCode
 
             pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
 
+            // Affichage de la forme dans le panel
             AfficherFormDansPanel(forme, pnlViewHost);
 
             this.DoubleBuffered = true;
-
             this.ClientSizeChanged += Form1_ClientSizeChanged;
             forme.panel1.MouseClick += pnlViewHost_Click;
+
+            listeController = new List<IIOManager.ControllerElement>();
+            ControllerCoeur(); 
         }
-        private void Form1_Load(object sender, EventArgs e)
+
+        private async void Form1_Load(object sender, EventArgs e)
         {
             for (int i = 0; i < menuStrip1.Items.Count; i++)
             {
@@ -83,7 +105,6 @@ namespace StageCode
             tmp += Application.ProductVersion[3].ToString();
 
             this.btnVersion.Text = "V " + tmp;
-
             this.Text = "OrthoDesigner V " + tmp;
 
             AjouterRaccourcisMenuFile();
@@ -116,6 +137,8 @@ namespace StageCode
 
             if (sQ.ConnexionStatus)
             {
+                new LoggedException(Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Version.ToString(), this.GetType().Name, MethodBase.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
+
                 string dbPath = @"C:\Users\Alial\Desktop\Developpement\Tools\OrthoDesigner\StageCode\bin\Debug\Datas\Databases\ErrorLogs.db";
                 string connectionString = $"Data Source={dbPath};Version=3;";
 
@@ -2294,32 +2317,19 @@ namespace StageCode
         #endregion
 
         #region lstToolbox
-
         private void Initialize()
         {
-            lstToolbox.Items.Clear();
-            lstToolbox.Items.AddRange(new string[]
+            string[] toolboxItems = new string[]
             {
-                "Chart",
-                "Cont1",
-                "INTEG",
-                "OrthoAD",
-                "OrthoAla",
-                "OrthoCMDLib",
-                "OrthoCombo",
-                "OrthoDI",
-                "OrthoEdit",
-                "Ortholmage",
-                "OrthoLabel",
-                "OrthoPbar",
-                "OrthoRel",
-                "OrthoResult",
-                "OrthoVarname",
-                "Reticule",
-                "TABNAME",
-                "STMLINES"
-            });
+                "Chart", "Cont1", "INTEG", "OrthoAD", "OrthoAla", "OrthoCMDLib", "OrthoCombo",
+                "OrthoDI", "OrthoEdit", "Ortholmage", "OrthoLabel", "OrthoPbar", "OrthoRel",
+                "OrthoResult", "OrthoVarname", "Reticule", "TABNAME", "STMLINES"
+            };
 
+            string[] activationKeywords = new string[] { "AD", "REL", "ALA", "DI", "AO" };
+
+            lstToolbox.Items.Clear();
+            lstToolbox.Items.AddRange(toolboxItems);
         }
 
         #endregion
@@ -2341,9 +2351,9 @@ namespace StageCode
 
             if (this.Cursor == DefaultCursor)
             {
-                var wrapper = new FormPanelWrapper(forme);
+                var tmp2 = new FormPanelWrapper(forme);
 
-                propertyGrid1.SelectedObject = wrapper;
+                propertyGrid1.SelectedObject = tmp2;
                 propertyGrid1.ExpandAllGridItems();
 
                 foreach (Control control in forme.panel1.Controls)
@@ -2618,7 +2628,7 @@ namespace StageCode
 
         #endregion
 
-        #region Mouse (Resize et Move Control & PictureBox
+        #region Mouse (Resize et Move Control & PictureBox)
 
         #region Move
         private void pic_MouseDown(object sender, MouseEventArgs e)
@@ -2864,7 +2874,7 @@ namespace StageCode
 
         private bool IsNearBorder(Point mousePosition, PictureBox pic)
         {
-            int borderDistance = 10;
+            int borderDistance = 15;
             return mousePosition.X >= pic.Width - borderDistance ||
                    mousePosition.X <= borderDistance ||
                    mousePosition.Y >= pic.Height - borderDistance ||
@@ -2883,7 +2893,7 @@ namespace StageCode
 
             if (pic != null)
             {
-                using (Pen pen = new Pen(Color.SkyBlue, 4))
+                using (Pen pen = new Pen(Color.SkyBlue,4))
                 {
                     //  pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid; 
                     e.Graphics.DrawRectangle(pen, pic.ClientRectangle);
@@ -3086,6 +3096,43 @@ namespace StageCode
             //{
             //    pic.Paint += pic_Paint;
             //}
+        }
+
+        #endregion
+
+        #region Fonction GRPC
+        private void ControllerCoeur()
+        {
+            try
+            {
+                throw new InvalidOperationException("Erreur");
+
+                grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, ChannelCredentials.Insecure);
+                clientInterface = new Methods.MethodsClient(grpcChannel);
+
+                var A = new ModuleIoRemoteMethodInvocationService("", DEFAULT_CORE_IP);
+                var b = A.GetDefinedIoController();
+
+                string texte = "";
+
+                if (b != null && b.Controllers != null && b.Controllers.Count > 0)
+                {
+                    foreach (var controller in b.Controllers)
+                    {
+                        listeController.Add(controller);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Aucun contrôleur défini trouvé.");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogException(ex);
+            }
+
+            grpcChannel?.ShutdownAsync().Wait();
         }
 
         #endregion

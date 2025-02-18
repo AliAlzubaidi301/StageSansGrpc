@@ -8,12 +8,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\.editorconfig" Link="Other\.editorconfig" />
-  </ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup>
+    <PackageReference Include="DryIoc.dll" Version="5.4.3" />
     <PackageReference Include="Google.Protobuf" Version="3.29.3" />
+    <PackageReference Include="Grpc" Version="2.46.6" />
+    <PackageReference Include="Grpc.Core" Version="2.46.6" />
     <PackageReference Include="Grpc.Net.Client" Version="2.67.0" />
     <PackageReference Include="Grpc.Tools" Version="2.69.0">
       <PrivateAssets>all</PrivateAssets>
@@ -25,6 +25,9 @@
   <ItemGroup>
     <Reference Include="CButtonLib">
       <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\CButtonLib.dll</HintPath>
+    </Reference>
+    <Reference Include="ClassLibrary1">
+      <HintPath>..\..\..\..\ClassLibrary1\ClassLibrary1\bin\Debug\ClassLibrary1.dll</HintPath>
     </Reference>
     <Reference Include="CodeExceptionManager">
       <HintPath>Z:\_CurrentRelease\lib\CodeExceptionManager\CodeExceptionManager.dll</HintPath>
@@ -104,10 +107,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Protos\" />
   </ItemGroup>
 
 </Project>
