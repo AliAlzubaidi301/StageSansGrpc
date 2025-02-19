@@ -6,6 +6,7 @@ using OrthoDesigner;
 using OrthoDesigner.LIB;
 using OrthoDesigner.Other;
 using Orthodyne.CoreCommunicationLayer.Controllers;
+using Orthodyne.CoreCommunicationLayer.Models.IO;
 using Orthodyne.CoreCommunicationLayer.Services;
 using StageCode.LIB;
 using System.Data.SQLite;
@@ -13,12 +14,14 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml.Linq;
+using Timer = System.Windows.Forms.Timer;
 
 namespace StageCode
 {
     public partial class Forme1 : Form
     {
         #region Attribut
+        FormeIPEtPORT formePortAndIP = new FormeIPEtPORT();
 
         public static int Langue = 1; // 1 = English, 2 = Chinese, 3 = German, 4 = French, 5 = Lithuanian
         private Forme1 frm;
@@ -56,17 +59,19 @@ namespace StageCode
         private static Channel grpcChannel;
         private static Methods.MethodsClient clientInterface;
 
-        private List<IIOManager.ControllerElement> listeController;
+        private List<ControllerElement> elements;
 
         #endregion
 
         #region Constructeur/Load
+        private int initialPositionY;
+        private int targetPositionY;
+
         public Forme1()
         {
             InitializeComponent();
 
             forme = new FormVide();
-
             pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
 
             // Affichage de la forme dans le panel
@@ -76,8 +81,7 @@ namespace StageCode
             this.ClientSizeChanged += Form1_ClientSizeChanged;
             forme.panel1.MouseClick += pnlViewHost_Click;
 
-            listeController = new List<IIOManager.ControllerElement>();
-            ControllerCoeur(); 
+            formePortAndIP.ShowDialog();
         }
 
         private async void Form1_Load(object sender, EventArgs e)
@@ -115,6 +119,7 @@ namespace StageCode
             AppliquerLangue();
 
             Initialize();
+            ControlleurCoeur();
         }
 
         private void AfficherFormDansPanel(FormVide frm, Panel panel)
@@ -3102,32 +3107,15 @@ namespace StageCode
         #endregion
 
         #region Fonction GRPC
-        private void ControllerCoeur()
+        private void ControlleurCoeur()
         {
             try
             {
                 grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, ChannelCredentials.Insecure);
                 clientInterface = new Methods.MethodsClient(grpcChannel);
 
-                // var A = new ModuleIoRemoteMethodInvocationService("", DEFAULT_CORE_IP);
-                var A = new ModuleIoController(new ModuleIoRemoteMethodInvocationService(""),new GeneralController());
-
-                A.RefreshControllers();
-                //var b = A.GetDefinedIoController();
-
-                string texte = "";
-
-                //if (b != null && b.Controllers != null && b.Controllers.Count > 0)
-                //{
-                //    foreach (var controller in b.Controllers)
-                //    {
-                //        listeController.Add(controller);
-                //    }
-                //}
-                //else
-                //{
-                //    MessageBox.Show("Aucun contrôleur défini trouvé.");
-                //}
+                var b = new ModuleIoController(new ModuleIoRemoteMethodInvocationService(""),new GeneralController());
+                this.elements = b.RefreshControllers();
             }
             catch (Exception ex)
             {

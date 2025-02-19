@@ -20,7 +20,7 @@ namespace Orthodyne.CoreCommunicationLayer.Controllers
         public const string COMPONENT_NAME_PROPERTY_SIMPLE_NAME_TO_DISPLAY = "SimpleNameToDisplay";
         public const string COMPONENT_COMPUTE_METHOD_NAME = "authorized_compute_method";
 
-        private Dictionary<long, IoController> ioControllers = new Dictionary<long, IoController>();
+        public Dictionary<long, IoController> ioControllers = new Dictionary<long, IoController>();
         private List<IoStream> ioStreams = new List<IoStream>();
 
         private Dictionary<string, StreamMetadataItem> ioStreamMetadatas = new Dictionary<string, StreamMetadataItem>();
@@ -119,7 +119,7 @@ namespace Orthodyne.CoreCommunicationLayer.Controllers
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        public void RefreshControllers()
+        public List<ControllerElement> RefreshControllers()
         {
             try
             {
@@ -138,12 +138,16 @@ namespace Orthodyne.CoreCommunicationLayer.Controllers
                         RegisterController(controllerElement);
                         i++;
                     }
+
+                    return elements;
                 }
             }
             catch (Exception ex)
             {
                 new LoggedException(Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Version.ToString(), this.GetType().Name, MethodBase.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
             }
+
+            return null;
         }
 
         public void DeleteTechnology(TechnologyItem toDelete)
