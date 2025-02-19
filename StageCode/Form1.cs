@@ -3,9 +3,10 @@ using CodeExceptionManager.Model.Objects;
 using Grpc.Core;
 using IIOManager;
 using OrthoDesigner;
-using OrthoDesigner.GRPC;
 using OrthoDesigner.LIB;
 using OrthoDesigner.Other;
+using Orthodyne.CoreCommunicationLayer.Controllers;
+using Orthodyne.CoreCommunicationLayer.Services;
 using StageCode.LIB;
 using System.Data.SQLite;
 using System.Reflection;
@@ -3105,27 +3106,28 @@ namespace StageCode
         {
             try
             {
-                throw new InvalidOperationException("Erreur");
-
                 grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, ChannelCredentials.Insecure);
                 clientInterface = new Methods.MethodsClient(grpcChannel);
 
-                var A = new ModuleIoRemoteMethodInvocationService("", DEFAULT_CORE_IP);
-                var b = A.GetDefinedIoController();
+                // var A = new ModuleIoRemoteMethodInvocationService("", DEFAULT_CORE_IP);
+                var A = new ModuleIoController(new ModuleIoRemoteMethodInvocationService(""),new GeneralController());
+
+                A.RefreshControllers();
+                //var b = A.GetDefinedIoController();
 
                 string texte = "";
 
-                if (b != null && b.Controllers != null && b.Controllers.Count > 0)
-                {
-                    foreach (var controller in b.Controllers)
-                    {
-                        listeController.Add(controller);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Aucun contrôleur défini trouvé.");
-                }
+                //if (b != null && b.Controllers != null && b.Controllers.Count > 0)
+                //{
+                //    foreach (var controller in b.Controllers)
+                //    {
+                //        listeController.Add(controller);
+                //    }
+                //}
+                //else
+                //{
+                //    MessageBox.Show("Aucun contrôleur défini trouvé.");
+                //}
             }
             catch (Exception ex)
             {
