@@ -1,7 +1,9 @@
 ﻿using CodeExceptionManager.Controller.DatabaseEngine.Implementation;
 using CodeExceptionManager.Model.Objects;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using IIOManager;
+using Microsoft.VisualBasic.Devices;
 using OrthoDesigner;
 using OrthoDesigner.LIB;
 using OrthoDesigner.Other;
@@ -9,10 +11,15 @@ using Orthodyne.CoreCommunicationLayer.Controllers;
 using Orthodyne.CoreCommunicationLayer.Models.IO;
 using Orthodyne.CoreCommunicationLayer.Services;
 using StageCode.LIB;
+using System.Collections;
+using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Windows.Forms;
 using System.Xml.Linq;
 using Timer = System.Windows.Forms.Timer;
 
@@ -45,6 +52,8 @@ namespace StageCode
         private List<PictureBox> listPic = new List<PictureBox>();
         private ContextMenuStrip contextMenu = new ContextMenuStrip();
 
+        private ToolStripMenuItem imageTmpLogo;
+
         //private GrpcClient _grpcClient;
 
         //OrthoAla CMDLIB COMBO DI BUG EDIT 
@@ -59,13 +68,9 @@ namespace StageCode
         private static Channel grpcChannel;
         private static Methods.MethodsClient clientInterface;
 
-        private List<ControllerElement> elements;
-
         #endregion
 
         #region Constructeur/Load
-        private int initialPositionY;
-        private int targetPositionY;
 
         public Forme1()
         {
@@ -81,7 +86,7 @@ namespace StageCode
             this.ClientSizeChanged += Form1_ClientSizeChanged;
             forme.panel1.MouseClick += pnlViewHost_Click;
 
-            formePortAndIP.ShowDialog();
+            // formePortAndIP.ShowDialog();
         }
 
         private async void Form1_Load(object sender, EventArgs e)
@@ -101,6 +106,8 @@ namespace StageCode
                 item.MouseLeave += MenuItem_MouseLeave;
             }
 
+           // formePortAndIP.ShowDialog();
+
             ToolStripSeparator separator = new ToolStripSeparator();
             menuStrip1.Items.Insert(6, separator);
 
@@ -119,7 +126,12 @@ namespace StageCode
             AppliquerLangue();
 
             Initialize();
-            ControlleurCoeur();
+
+            this.imageTmpLogo = new ToolStripMenuItem();
+
+            this.imageTmpLogo.Image = toolStripMenuItem1.Image;
+            toolStripMenuItem1.Image = toolStripMenuItem2.Image;
+            toolStripMenuItem2.Image = imageTmpLogo.Image;
         }
 
         private void AfficherFormDansPanel(FormVide frm, Panel panel)
@@ -717,7 +729,7 @@ namespace StageCode
                 {
                     foreach (Control childControl in ctrl.Controls)
                     {
-                        Type controlType = childControl.GetType();
+                        System.Type controlType = childControl.GetType();
 
                         if (childControl.Name == ControlSélectionner)
                         {
@@ -2899,7 +2911,7 @@ namespace StageCode
 
             if (pic != null)
             {
-                using (Pen pen = new Pen(Color.SkyBlue,4))
+                using (Pen pen = new Pen(Color.SkyBlue, 4))
                 {
                     //  pen.DashStyle = System.Drawing.Drawing2D.DashStyle.Solid; 
                     e.Graphics.DrawRectangle(pen, pic.ClientRectangle);
@@ -2910,6 +2922,56 @@ namespace StageCode
         #endregion
 
         #region Logo Click
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (toolStripMenuItem2.Image != null)
+            {
+                bool AncienConnecter = FormeIPEtPORT.connecter;
+
+                if (FormeIPEtPORT.connecter)
+                {
+                    this.imageTmpLogo.Image = toolStripMenuItem1.Image;
+                    toolStripMenuItem1.Image = toolStripMenuItem2.Image;
+                    toolStripMenuItem2.Image = imageTmpLogo.Image;
+
+                    if (!AncienConnecter)
+                    {
+                        toolStripMenuItem1.Tag = "Conexion";
+                    }
+                    else
+                    {
+                        toolStripMenuItem1.Tag = "Deconnexion";
+                    }
+
+                    FormeIPEtPORT.connecter = !FormeIPEtPORT.connecter;
+
+                    return;
+                }
+
+                formePortAndIP.ShowDialog();
+
+                if (AncienConnecter != FormeIPEtPORT.connecter)
+                {
+                    this.imageTmpLogo.Image = toolStripMenuItem1.Image;
+                    toolStripMenuItem1.Image = toolStripMenuItem2.Image;
+                    toolStripMenuItem2.Image = imageTmpLogo.Image;
+
+                    if (!AncienConnecter)
+                    {
+                        toolStripMenuItem1.Tag = "Conexion";
+                    }
+                    else
+                    {
+                        toolStripMenuItem1.Tag = "Deconnexion";
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Aucune image de fond définie sur toolStripMenuItem2.");
+            }
+        }
+
         private void SavecLogoClick(object sender, EventArgs e)
         {
             saveToolStripMenuItem_Click(sender, e);
@@ -3107,23 +3169,112 @@ namespace StageCode
         #endregion
 
         #region Fonction GRPC
-        private void ControlleurCoeur()
+
+        //public static List<string> AfficherContenuListeGRPCParType(string typeFiltre)
+        //{
+        //    List<string> listes = new List<string>();
+        //    Dictionary<long, IoController> ioControllers = new Dictionary<long, IoController>();
+
+        //    try
+        //    {
+        //        grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, ChannelCredentials.Insecure);
+        //        clientInterface = new Methods.MethodsClient(grpcChannel);
+
+        //        var b = new ModuleIoController(new ModuleIoRemoteMethodInvocationService(""), new GeneralController());
+        //        b.RefreshControllers();
+
+        //        ioControllers = b.ioControllers;
+
+        //        var liste = ioControllers.Keys.ToList();
+
+        //        foreach (var tmpKey in liste)
+        //        {
+        //            string tmp = "";
+
+        //            var Nom = ioControllers[tmpKey].FullName;
+        //            string type = "";
+
+        //            for (int i = 0; i < Nom.Length; i++)
+        //            {
+        //                if (Nom[i] == '(')
+        //                {
+        //                    for (int j = i + 1; j < Nom.Length; j++)
+        //                    {
+        //                        if (Nom[j] == ')')
+        //                            break;
+        //                        type += Nom[j];
+        //                    }
+        //                    break;
+        //                }
+        //            }
+
+        //            if (type == typeFiltre)
+        //            {
+        //                tmp += $"Clé : {tmpKey}, Valeur : {Nom}\n";
+        //                listes.Add(tmp);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Erreur: {ex.Message}");
+        //    }
+        //    finally
+        //    {
+        //        grpcChannel?.ShutdownAsync().Wait();
+        //    }
+
+        //    return listes;
+
+        //}
+
+        public static List<string> AfficherContenuListeGRPCParType(string typeFiltre)
         {
+            List<string> listes = new List<string>();
+            Dictionary<long, IoController> ioControllers = new Dictionary<long, IoController>();
+
             try
             {
                 grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, ChannelCredentials.Insecure);
                 clientInterface = new Methods.MethodsClient(grpcChannel);
 
-                var b = new ModuleIoController(new ModuleIoRemoteMethodInvocationService(""),new GeneralController());
-                this.elements = b.RefreshControllers();
+                var b = new ModuleIoController(new ModuleIoRemoteMethodInvocationService(""), new GeneralController());
+                b.RefreshControllers();
+
+                ioControllers = b.ioControllers;
+
+                listes = ioControllers
+                    .Where(kv => ExtraireTypeDepuisNom(kv.Value.FullName) == typeFiltre)
+                    .Select(kv => $"Clé : {kv.Key}, Valeur : {kv.Value.FullName}\n")
+                    .ToList();
             }
             catch (Exception ex)
             {
-                LogException(ex);
+                MessageBox.Show($"Erreur: {ex.Message}");
+            }
+            finally
+            {
+                grpcChannel?.ShutdownAsync().Wait();
             }
 
-            grpcChannel?.ShutdownAsync().Wait();
+            return listes;
         }
+
+        // Méthode pour extraire le type entre parenthèses dans le nom complet
+        private static string ExtraireTypeDepuisNom(string fullName)
+        {
+            int debut = fullName.IndexOf('(');
+            int fin = fullName.IndexOf(')');
+
+            if (debut >= 0 && fin > debut)
+            {
+                return fullName.Substring(debut + 1, fin - debut - 1);
+            }
+
+            return string.Empty;
+        }
+
+
 
         #endregion
     }

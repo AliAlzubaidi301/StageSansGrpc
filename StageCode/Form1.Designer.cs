@@ -34,6 +34,7 @@
             newToolStripMenuItem1 = new ToolStripMenuItem();
             openToolStripMenuItem1 = new ToolStripMenuItem();
             saveToolStripMenuItem1 = new ToolStripMenuItem();
+            saveAsToolStripMenuItem1 = new ToolStripMenuItem();
             btnEdition = new ToolStripMenuItem();
             btnView = new ToolStripMenuItem();
             btnInfos = new ToolStripMenuItem();
@@ -60,7 +61,8 @@
             CouperLogo = new ToolStripMenuItem();
             CopierLogo = new ToolStripMenuItem();
             CollerLogo = new ToolStripMenuItem();
-            saveAsToolStripMenuItem1 = new ToolStripMenuItem();
+            toolStripMenuItem1 = new ToolStripMenuItem();
+            toolStripMenuItem2 = new ToolStripMenuItem();
             MainMenu.SuspendLayout();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -84,20 +86,27 @@
             // newToolStripMenuItem1
             // 
             newToolStripMenuItem1.Name = "newToolStripMenuItem1";
-            newToolStripMenuItem1.Size = new Size(180, 22);
+            newToolStripMenuItem1.Size = new Size(114, 22);
             newToolStripMenuItem1.Text = "New";
             // 
             // openToolStripMenuItem1
             // 
             openToolStripMenuItem1.Name = "openToolStripMenuItem1";
-            openToolStripMenuItem1.Size = new Size(180, 22);
+            openToolStripMenuItem1.Size = new Size(114, 22);
             openToolStripMenuItem1.Text = "Open";
             // 
             // saveToolStripMenuItem1
             // 
             saveToolStripMenuItem1.Name = "saveToolStripMenuItem1";
-            saveToolStripMenuItem1.Size = new Size(180, 22);
+            saveToolStripMenuItem1.Size = new Size(114, 22);
             saveToolStripMenuItem1.Text = "Save";
+            // 
+            // saveAsToolStripMenuItem1
+            // 
+            saveAsToolStripMenuItem1.Name = "saveAsToolStripMenuItem1";
+            saveAsToolStripMenuItem1.Size = new Size(114, 22);
+            saveAsToolStripMenuItem1.Text = "Save As";
+            saveAsToolStripMenuItem1.Click += saveAsToolStripMenuItem_Click;
             // 
             // btnEdition
             // 
@@ -160,10 +169,8 @@
             // 
             // saveAsToolStripMenuItem
             // 
-            saveAsToolStripMenuItem1.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem1.Size = new Size(127, 22);
-            saveAsToolStripMenuItem1.Text = "Save As";
-            saveAsToolStripMenuItem1.Click += saveAsToolStripMenuItem_Click;
+            saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
+            saveAsToolStripMenuItem.Size = new Size(32, 19);
             // 
             // newFormeToolStripMenuItem
             // 
@@ -215,7 +222,7 @@
             // 
             menuStrip1.BackgroundImageLayout = ImageLayout.Zoom;
             menuStrip1.GripStyle = ToolStripGripStyle.Visible;
-            menuStrip1.Items.AddRange(new ToolStripItem[] { Nouveau, Open, Save, SaveALL, Close, CloseALL, CouperLogo, CopierLogo, CollerLogo });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { Nouveau, Open, Save, SaveALL, Close, CloseALL, CouperLogo, CopierLogo, CollerLogo, toolStripMenuItem1, toolStripMenuItem2 });
             menuStrip1.Location = new Point(0, 24);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(1012, 24);
@@ -294,11 +301,21 @@
             CollerLogo.Size = new Size(12, 20);
             CollerLogo.Tag = "Paste";
             // 
-            // saveAsToolStripMenuItem1
+            // toolStripMenuItem1
             // 
-            saveAsToolStripMenuItem1.Name = "saveAsToolStripMenuItem1";
-            saveAsToolStripMenuItem1.Size = new Size(180, 22);
-            saveAsToolStripMenuItem1.Text = "Save As";
+            toolStripMenuItem1.BackgroundImage = (Image)resources.GetObject("toolStripMenuItem1.BackgroundImage");
+            toolStripMenuItem1.BackgroundImageLayout = ImageLayout.Stretch;
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(12, 20);
+            toolStripMenuItem1.Tag = "Deconnexion";
+            toolStripMenuItem1.Click += toolStripMenuItem1_Click;
+            // 
+            // toolStripMenuItem2
+            // 
+            toolStripMenuItem2.BackgroundImage = (Image)resources.GetObject("toolStripMenuItem2.BackgroundImage");
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new Size(12, 20);
+            toolStripMenuItem2.Visible = false;
             // 
             // Forme1
             // 
@@ -359,5 +376,7 @@
         private ToolStripMenuItem openToolStripMenuItem1;
         private ToolStripMenuItem saveToolStripMenuItem1;
         private ToolStripMenuItem saveAsToolStripMenuItem1;
+        private ToolStripMenuItem toolStripMenuItem1;
+        private ToolStripMenuItem toolStripMenuItem2;
     }
 }

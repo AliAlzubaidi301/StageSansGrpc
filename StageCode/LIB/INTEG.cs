@@ -25,13 +25,12 @@ namespace StageCode
 
         public INTEG()
         {
-            // Cet appel est requis par le Concepteur Windows Form.
+
             InitializeComponent();
 
-            // Ajoutez une initialisation quelconque après l'appel InitializeComponent().
             ControlUtils.RegisterControl(this, () => Visibility,
-                            (h) => VisibilityChanging += h,
-                            (h) => VisibilityChanged += h);
+                                (h) => VisibilityChanging += h,
+                                (h) => VisibilityChanged += h);
         }
 
         #region "Read/Write on .syn file"
