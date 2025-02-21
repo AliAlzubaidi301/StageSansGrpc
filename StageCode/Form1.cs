@@ -1,9 +1,7 @@
 ﻿using CodeExceptionManager.Controller.DatabaseEngine.Implementation;
 using CodeExceptionManager.Model.Objects;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using IIOManager;
-using Microsoft.VisualBasic.Devices;
 using OrthoDesigner;
 using OrthoDesigner.LIB;
 using OrthoDesigner.Other;
@@ -11,17 +9,12 @@ using Orthodyne.CoreCommunicationLayer.Controllers;
 using Orthodyne.CoreCommunicationLayer.Models.IO;
 using Orthodyne.CoreCommunicationLayer.Services;
 using StageCode.LIB;
-using System.Collections;
-using System.Collections.Generic;
 using System.Data.SQLite;
-using System.Net;
-using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
 using System.Text;
-using System.Windows.Forms;
 using System.Xml.Linq;
-using Timer = System.Windows.Forms.Timer;
 
 namespace StageCode
 {
@@ -62,11 +55,12 @@ namespace StageCode
 
         #region Attribut GRPC
 
-        private const string PORT_NUMBER = "50099";
-        private const string DEFAULT_CORE_IP = "10.1.6.11";
+        private string PORT_NUMBER = "50099";
+        private string DEFAULT_CORE_IP = "10.1.6.11";
         private static string applicationGuid = "TROP GALERE GRPC";
         private static Channel grpcChannel;
         private static Methods.MethodsClient clientInterface;
+        public static Dictionary<long, IoController> ioControllers = new Dictionary<long, IoController>();
 
         #endregion
 
@@ -104,20 +98,16 @@ namespace StageCode
 
                 item.MouseHover += Item_MouseHover;
                 item.MouseLeave += MenuItem_MouseLeave;
+
+                item.Size = new Size((int)(item.Width * 0.7), (int)(item.Height * 0.7));
             }
 
-           // formePortAndIP.ShowDialog();
+            // formePortAndIP.ShowDialog();
 
             ToolStripSeparator separator = new ToolStripSeparator();
             menuStrip1.Items.Insert(6, separator);
 
-            string tmp = Application.ProductVersion[0].ToString();
-            tmp += Application.ProductVersion[1].ToString();
-            tmp += Application.ProductVersion[2].ToString();
-            tmp += Application.ProductVersion[3].ToString();
-
-            this.btnVersion.Text = "V " + tmp;
-            this.Text = "OrthoDesigner V " + tmp;
+            this.Text = "OrthoDesigner V" + 1;
 
             AjouterRaccourcisMenuFile();
             AjouterMenuEdition();
@@ -132,8 +122,10 @@ namespace StageCode
             this.imageTmpLogo.Image = toolStripMenuItem1.Image;
             toolStripMenuItem1.Image = toolStripMenuItem2.Image;
             toolStripMenuItem2.Image = imageTmpLogo.Image;
-        }
 
+            this.WindowState = FormWindowState.Maximized;
+        }
+        
         private void AfficherFormDansPanel(FormVide frm, Panel panel)
         {
             frm.TopLevel = false;  // Le formulaire n'est pas un formulaire principal
@@ -491,9 +483,10 @@ namespace StageCode
 
         #region Copy/Paste/Cut
 
-        private async void Supprimer(object sender, EventArgs e)
+        private void Supprimer(object sender, EventArgs e)
         {
-            PictureBox? pic = await RechercherPictureBoxAsync();
+            PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
+                                      .FirstOrDefault(p => p.Tag == PictureBoxSelectonner);
 
             if (pic != null)
             {
@@ -505,61 +498,147 @@ namespace StageCode
                 MessageBox.Show("Aucune PictureBox sélectionnée.");
             }
         }
-
-        private async void Couper(object sender, EventArgs e)
+        private void Couper(object sender, EventArgs e)
         {
-            // Recherche d'un PictureBox
-            PictureBox? pic = await RechercherPictureBoxAsync();
-            if (pic == null)
+            PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
+                                              .FirstOrDefault(p => p.Tag == PictureBoxSelectonner);
+
+            if (pic != null)
             {
-                return;
-            }
+                List<SerializableControl> controlsData = new List<SerializableControl>();
 
-            // Copier l'image et le contrôle dans le presse-papiers
-            CopyPasteHandler cut = new CopyPasteHandler();
-            CopyPasteHandler.CopyToClipboard(pic);
-
-            // Supprimer le PictureBox du formulaire
-            forme.Controls.Remove(pic);
-        }
-
-        private async void Copier(object sender, EventArgs e)
-        {
-            // Recherche d'un PictureBox
-            PictureBox? pic = await RechercherPictureBoxAsync();
-            if (pic == null)
-            {
-                return;
-            }
-
-            // Copier le PictureBox dans le presse-papiers
-            CopyPasteHandler.CopyToClipboard(pic.Controls[0]);
-        }
-
-        private async void Coller(object sender, EventArgs e)
-        {
-            // Si le presse-papiers contient des données de type "ControlFormat"
-            if (Clipboard.ContainsData("ControlFormat"))
-            {
-                // Coller depuis le presse-papiers
-                CopyPasteHandler pasteHandler = new CopyPasteHandler();
-                Control ctrl = pasteHandler.PasteFromClipboard();
-
-                // Vérifier si le contrôle est un PictureBox
-                if (ctrl is PictureBox pic)
+                foreach (Control ctrl in pic.Controls)
                 {
-                    // Récupérer la position de la souris
-                    Point souris = forme.panel1.PointToClient(Control.MousePosition);
+                    controlsData.Add(new SerializableControl
+                    {
+                        TypeName = ctrl.GetType().AssemblyQualifiedName ?? "",
+                        Name = ctrl.Name,
+                        X = ctrl.Location.X,
+                        Y = ctrl.Location.Y,
+                        Width = ctrl.Width,
+                        Height = ctrl.Height,
+                        Text = (ctrl is TextBox textBox) ? textBox.Text : ctrl.Text
+                    });
+                }
 
-                    // Positionner le PictureBox collé
-                    pic.Location = souris;
+                DataObject data = new DataObject();
+                using (MemoryStream ms = new MemoryStream())
+                {
+#pragma warning disable SYSLIB0011 // Le type ou le membre est obsolète
+                    BinaryFormatter bf = new BinaryFormatter();
+#pragma warning restore SYSLIB0011 // Le type ou le membre est obsolète
+                    bf.Serialize(ms, controlsData);
+                    data.SetData("ControlsData", ms.ToArray());
+                }
 
-                    // Ajouter le PictureBox au formulaire
-                    forme.panel1.Controls.Add(pic);
+                Clipboard.SetDataObject(data, true);
+
+                pic.Controls.Clear();
+                forme.panel1.Controls.Remove(pic);
+            }
+        }
+        private void Copier(object sender, EventArgs e)
+        {
+            PictureBox? pic = forme.panel1.Controls.OfType<PictureBox>()
+                                              .FirstOrDefault(p => p.Tag == PictureBoxSelectonner);
+
+            if (pic != null)
+            {
+                List<SerializableControl> controlsData = new List<SerializableControl>();
+
+                foreach (Control ctrl in pic.Controls)
+                {
+                    controlsData.Add(new SerializableControl
+                    {
+                        TypeName = ctrl.GetType().AssemblyQualifiedName ?? "",
+                        Name = ctrl.Name,
+                        X = ctrl.Location.X,
+                        Y = ctrl.Location.Y,
+                        Width = ctrl.Width,
+                        Height = ctrl.Height,
+                        Text = (ctrl is TextBox textBox) ? textBox.Text : ctrl.Text
+                    });
+                }
+
+                DataObject data = new DataObject();
+                using (MemoryStream ms = new MemoryStream())
+                {
+#pragma warning disable SYSLIB0011 
+                    BinaryFormatter bf = new BinaryFormatter();
+#pragma warning restore SYSLIB0011 
+                    bf.Serialize(ms, controlsData);
+                    data.SetData("ControlsData", ms.ToArray());
+                }
+
+                Clipboard.SetDataObject(data, true);
+
+                //  MessageBox.Show("Copie effectuée !");
+            }
+            else
+            {
+                MessageBox.Show("Aucune PictureBox sélectionnée.");
+            }
+        }
+
+        private void Coller(object sender, EventArgs e)
+        {
+            if (Clipboard.ContainsData("ControlsData"))
+            {
+                Point mousePosition = forme.panel1.PointToClient(Cursor.Position);
+
+                byte[] rawData = (byte[])Clipboard.GetData("ControlsData")!;
+                using (MemoryStream ms = new MemoryStream(rawData))
+                {
+#pragma warning disable SYSLIB0011 
+                    BinaryFormatter bf = new BinaryFormatter();
+#pragma warning restore SYSLIB0011
+                    List<SerializableControl> controlsData = (List<SerializableControl>)bf.Deserialize(ms);
+
+                    PictureBox newpic = new PictureBox
+                    {
+                        BorderStyle = BorderStyle.FixedSingle,
+                        BackColor = Color.White,
+                        Size = new Size(200, 200),
+                        Location = mousePosition,
+                        AllowDrop = true
+                    };
+
+                    newpic.Paint += pic_Paint;
+                    newpic.Click += Control_Click;
+                    newpic.MouseLeave += pic_MouseLeave;
+                    newpic.MouseEnter += pic_MouseEnter;
+
+                    foreach (var controlData in controlsData)
+                    {
+                        System.Type? controlType = System.Type.GetType(controlData.TypeName);
+                        if (controlType != null)
+                        {
+                            Control Control = (Control)Activator.CreateInstance(controlType)!;
+                            Control.Name = controlData.Name;
+                            Control.Location = new Point(controlData.X, controlData.Y);
+                            Control.Size = new Size(controlData.Width, controlData.Height);
+                            if (Control is TextBox textBox) textBox.Text = controlData.Text;
+                            else Control.Text = controlData.Text;
+
+                            newpic.Controls.Add(Control);
+
+                            Control.MouseEnter += Control_MouseEnter;
+
+                            Control.Click += Control_Click;
+
+                            Control.MouseClick += Control_MouseClick;
+
+                            newpic.Width = Control.Size.Width + 10;
+                            newpic.Height = Control.Size.Height + 10;
+                        }
+                    }
+
+                    forme.panel1.Controls.Add(newpic);
+                    newpic.Invalidate();
+                    PictureBoxSelectonner = "";
                 }
             }
         }
-
 
         #endregion
 
@@ -1094,6 +1173,12 @@ namespace StageCode
                     {
                         charger_fichierTXT(file.FileName);
                     }
+
+                    string fileName = file.FileName;
+
+                    string fileNameWithoutPath = System.IO.Path.GetFileName(fileName);
+
+                    forme.label.Text = fileNameWithoutPath;
                 }
 
             }
@@ -1828,14 +1913,43 @@ namespace StageCode
                             {
                                 compteur = 0;  // Réinitialiser le compteur pour les lignes valides
 
+                                // Vérification du Tag de nouvelObjet avant de l'ajouter au PictureBox
+                                if (nouvelObjet.Tag != null && !string.IsNullOrEmpty(nouvelObjet.Tag.ToString()))
+                                {
+                                    string tmp2 = nouvelObjet.Tag.ToString();
+                                    PictureBoxSelectonner = tmp2;
+                                }
+                                else
+                                {
+                                    int pictureBoxCount = forme.panel1.Controls.OfType<PictureBox>().Count();
+                                    nouvelObjet.Tag = "PictureBox" + (pictureBoxCount + 1);
+                                }
+
                                 // Créer un PictureBox pour afficher l'objet
-                                PictureBox pb = new PictureBox();
-                                pb.Size = new Size(nouvelObjet.Size.Width + 10, nouvelObjet.Size.Height + 10);
-                                pb.Location = nouvelObjet.Location;
+                                PictureBox pb = new PictureBox
+                                {
+                                    BorderStyle = BorderStyle.FixedSingle,
+                                    BackColor = Color.White,
+                                    Size = new Size(nouvelObjet.Size.Width + 15, nouvelObjet.Size.Height + 15),
+                                    Location = nouvelObjet.Location,
+                                    AllowDrop = true
+                                };
+
+                                // Appliquer les événements au PictureBox
+                                pb.Paint += pic_Paint;
+                                pb.MouseEnter += pic_MouseEnter;
+                                pb.MouseLeave += pic_MouseLeave;
+                                pb.Click += Control_Click;
 
                                 // Déplacer l'objet à l'intérieur du PictureBox
                                 nouvelObjet.Location = new Point(5, 5);
 
+                                // Ajouter les événements pour l'objet
+                                nouvelObjet.MouseEnter += Control_MouseEnter;
+                                nouvelObjet.Click += Control_Click;
+                                nouvelObjet.MouseClick += Control_MouseClick;
+
+                                // Vérification pour les objets spécifiques comme OrthoSTMLINES
                                 if (nouvelObjet is OrthoSTMLINES orthoTabname)
                                 {
                                     if (orthoTabname.btn != null)
@@ -1845,17 +1959,8 @@ namespace StageCode
                                     }
                                 }
 
+                                // Ajouter l'objet au PictureBox
                                 pb.Controls.Add(nouvelObjet);
-
-                                pb.BorderStyle = BorderStyle.Fixed3D;
-                                pb.Paint += pic_Paint;
-                                pb.MouseEnter += pic_MouseEnter;
-                                pb.MouseLeave += pic_MouseLeave;
-                                pb.Click += Control_Click;
-
-                                nouvelObjet.MouseEnter += Control_MouseEnter;
-                                nouvelObjet.Click += Control_Click;
-                                nouvelObjet.MouseClick += Control_MouseClick;
 
                                 // Ajouter le PictureBox au panel
                                 forme.panel1.Controls.Add(pb);
@@ -1957,6 +2062,12 @@ namespace StageCode
                     }
 
                     MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    string fileName = saveFileDialog.FileName;
+
+                    string fileNameWithoutPath = System.IO.Path.GetFileName(fileName);
+
+                    forme.label.Text = fileNameWithoutPath;
                 }
             }
         }
@@ -2080,6 +2191,13 @@ namespace StageCode
                     }
 
                     MessageBox.Show("Fichier sauvegardé avec succès!", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+
+                    string fileName = saveFileDialog.FileName;
+
+                    string fileNameWithoutPath = System.IO.Path.GetFileName(fileName);
+
+                    forme.label.Text = fileNameWithoutPath;
                 }
             }
         }
@@ -2308,17 +2426,25 @@ namespace StageCode
                 item.Font = new Font(item.Font.FontFamily, fontSize);
             }
 
+            int sidebarWidth = Math.Max(180, (int)(this.ClientSize.Width * 0.29));
+            int sidebarX = this.ClientSize.Width - sidebarWidth;
+
             pnlViewHost.Location = new Point(0, menuStrip1.Bottom);
-            pnlViewHost.Width = (int)(this.ClientSize.Width * 0.8);
+            pnlViewHost.Width = sidebarX - 1;
             pnlViewHost.Height = this.ClientSize.Height - pnlViewHost.Top;
 
-            lstToolbox.Width = (int)(pnlViewHost.Width * 0.3);
-            lstToolbox.Height = pnlViewHost.Height / 2;
-            lstToolbox.Location = new Point(pnlViewHost.Right, pnlViewHost.Top);
+            lstToolbox.Width = sidebarWidth - 1;
+            lstToolbox.Height = pnlViewHost.Height / 2 - 1;
+            lstToolbox.Location = new Point(sidebarX, pnlViewHost.Top + 1);
 
-            propertyGrid1.Width = lstToolbox.Width;
-            propertyGrid1.Height = pnlViewHost.Height - lstToolbox.Height;
-            propertyGrid1.Location = new Point(lstToolbox.Left, lstToolbox.Bottom);
+            propertyGrid1.Width = sidebarWidth - 1;
+            propertyGrid1.Height = pnlViewHost.Height - lstToolbox.Height - 1;
+            propertyGrid1.Location = new Point(sidebarX, lstToolbox.Bottom + 1);
+
+            lstToolbox.Refresh();
+            propertyGrid1.Refresh();
+            propertyGrid1.PerformLayout();
+            propertyGrid1.Invalidate();
 
             foreach (FormVide tmp in pnlViewHost.Controls)
             {
@@ -2330,7 +2456,6 @@ namespace StageCode
                 }
             }
         }
-
 
         #endregion
 
@@ -2537,7 +2662,17 @@ namespace StageCode
 
                 pic.Paint += pic_Paint;
 
-                PictureBoxSelectonner = pic.Tag.ToString();
+                if (pic.Tag != null && !string.IsNullOrEmpty(pic.Tag.ToString()))
+                {
+                    string tmp2 = pic.Tag.ToString();
+
+                    PictureBoxSelectonner = tmp2;
+                }
+                else
+                {
+                    int pictureBoxCount = forme.panel1.Controls.OfType<PictureBox>().Count();
+                    pic.Tag = "PictureBox" + (pictureBoxCount + 1);
+                }
 
                 pic.Invalidate();
 
@@ -2669,7 +2804,7 @@ namespace StageCode
 
             PictureBox? pictureBox = (Sender as PictureBox) ?? (Sender as Control)?.Parent as PictureBox;
 
-            int tolerance = 1;
+            int tolerance = 0;
 
             List<(Point start, Point end)> drawnLines = new List<(Point, Point)>();
 
@@ -2936,11 +3071,13 @@ namespace StageCode
 
                     if (!AncienConnecter)
                     {
-                        toolStripMenuItem1.Tag = "Conexion";
+                        toolStripMenuItem1.Tag = "Deconnexion";
                     }
                     else
                     {
-                        toolStripMenuItem1.Tag = "Deconnexion";
+                        toolStripMenuItem1.Tag = "Conexion";
+                        FormeIPEtPORT.ip = "";
+                        this.btnIP.Text = FormeIPEtPORT.ip.ToString();
                     }
 
                     FormeIPEtPORT.connecter = !FormeIPEtPORT.connecter;
@@ -2958,17 +3095,49 @@ namespace StageCode
 
                     if (!AncienConnecter)
                     {
-                        toolStripMenuItem1.Tag = "Conexion";
+                        toolStripMenuItem1.Tag = "Deconnexion";
                     }
                     else
                     {
-                        toolStripMenuItem1.Tag = "Deconnexion";
+                        toolStripMenuItem1.Tag = "Conexion";
+                        FormeIPEtPORT.ip = "";
                     }
+
+                    this.btnIP.Text = FormeIPEtPORT.ip.ToString();
                 }
             }
             else
             {
                 MessageBox.Show("Aucune image de fond définie sur toolStripMenuItem2.");
+            }
+
+            if(FormeIPEtPORT.connecter)
+            {
+                DEFAULT_CORE_IP = FormeIPEtPORT.ip;
+                PORT_NUMBER = formePortAndIP.portNumbers;
+
+                try
+                {
+                    grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, ChannelCredentials.Insecure);
+                    clientInterface = new Methods.MethodsClient(grpcChannel);
+
+                    MessageBox.Show("Connexion reussis");
+
+                    ChargerContenuOrthoCore();
+                }
+                catch(Exception ex)
+                {
+                    LogException(ex);
+                }
+            }
+            else
+            {
+                DEFAULT_CORE_IP = "";
+                PORT_NUMBER = "";
+
+                grpcChannel?.ShutdownAsync().Wait();
+
+                Forme1.ioControllers.Clear();
             }
         }
 
@@ -3010,7 +3179,7 @@ namespace StageCode
                     foreach (FormVide vide in this.pnlViewHost.Controls)
                     {
                         forme = vide;
-                        string filePath = Path.Combine(selectedPath, forme.Text + ".Syno");
+                        string filePath = Path.Combine(selectedPath, forme.Text + ".Syn");
 
                         if (saveResult == DialogResult.Yes)
                         {
@@ -3170,10 +3339,33 @@ namespace StageCode
 
         #region Fonction GRPC
 
+        public void ChargerContenuOrthoCore()
+        {
+            try
+            {
+                ioControllers.Clear();
+
+                Task.Run(() =>
+                {
+                    var module = new ModuleIoRemoteMethodInvocationService("");
+                    module.DEFAULT_CORE_IP = DEFAULT_CORE_IP;
+                    module.PORT_NUMBER = PORT_NUMBER;
+
+                    var b = new ModuleIoController(module, new GeneralController());
+                    b.RefreshControllers();
+
+                    ioControllers = b.ioControllers;
+                });
+            }
+            catch (Exception ex)
+            {
+                LogException(ex); 
+            }
+        }
+
         //public static List<string> AfficherContenuListeGRPCParType(string typeFiltre)
         //{
         //    List<string> listes = new List<string>();
-        //    Dictionary<long, IoController> ioControllers = new Dictionary<long, IoController>();
 
         //    try
         //    {
@@ -3185,94 +3377,32 @@ namespace StageCode
 
         //        ioControllers = b.ioControllers;
 
-        //        var liste = ioControllers.Keys.ToList();
-
-        //        foreach (var tmpKey in liste)
-        //        {
-        //            string tmp = "";
-
-        //            var Nom = ioControllers[tmpKey].FullName;
-        //            string type = "";
-
-        //            for (int i = 0; i < Nom.Length; i++)
-        //            {
-        //                if (Nom[i] == '(')
-        //                {
-        //                    for (int j = i + 1; j < Nom.Length; j++)
-        //                    {
-        //                        if (Nom[j] == ')')
-        //                            break;
-        //                        type += Nom[j];
-        //                    }
-        //                    break;
-        //                }
-        //            }
-
-        //            if (type == typeFiltre)
-        //            {
-        //                tmp += $"Clé : {tmpKey}, Valeur : {Nom}\n";
-        //                listes.Add(tmp);
-        //            }
-        //        }
+        //        listes = ioControllers
+        //            .Where(kv => ExtraireTypeDepuisNom(kv.Value.FullName) == typeFiltre)
+        //            .Select(kv => $"Clé : {kv.Key}, Valeur : {kv.Value.FullName}\n")
+        //            .ToList();
         //    }
         //    catch (Exception ex)
         //    {
         //        MessageBox.Show($"Erreur: {ex.Message}");
         //    }
-        //    finally
-        //    {
-        //        grpcChannel?.ShutdownAsync().Wait();
-        //    }
 
         //    return listes;
-
         //}
 
-        public static List<string> AfficherContenuListeGRPCParType(string typeFiltre)
-        {
-            List<string> listes = new List<string>();
-            Dictionary<long, IoController> ioControllers = new Dictionary<long, IoController>();
+        //// Méthode pour extraire le type entre parenthèses dans le nom complet
+        //private static string ExtraireTypeDepuisNom(string fullName)
+        //{
+        //    int debut = fullName.IndexOf('(');
+        //    int fin = fullName.IndexOf(')');
 
-            try
-            {
-                grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, ChannelCredentials.Insecure);
-                clientInterface = new Methods.MethodsClient(grpcChannel);
+        //    if (debut >= 0 && fin > debut)
+        //    {
+        //        return fullName.Substring(debut + 1, fin - debut - 1);
+        //    }
 
-                var b = new ModuleIoController(new ModuleIoRemoteMethodInvocationService(""), new GeneralController());
-                b.RefreshControllers();
-
-                ioControllers = b.ioControllers;
-
-                listes = ioControllers
-                    .Where(kv => ExtraireTypeDepuisNom(kv.Value.FullName) == typeFiltre)
-                    .Select(kv => $"Clé : {kv.Key}, Valeur : {kv.Value.FullName}\n")
-                    .ToList();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur: {ex.Message}");
-            }
-            finally
-            {
-                grpcChannel?.ShutdownAsync().Wait();
-            }
-
-            return listes;
-        }
-
-        // Méthode pour extraire le type entre parenthèses dans le nom complet
-        private static string ExtraireTypeDepuisNom(string fullName)
-        {
-            int debut = fullName.IndexOf('(');
-            int fin = fullName.IndexOf(')');
-
-            if (debut >= 0 && fin > debut)
-            {
-                return fullName.Substring(debut + 1, fin - debut - 1);
-            }
-
-            return string.Empty;
-        }
+        //    return string.Empty;
+        //}
 
 
 

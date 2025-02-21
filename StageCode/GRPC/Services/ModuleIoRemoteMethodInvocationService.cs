@@ -12,8 +12,8 @@ namespace Orthodyne.CoreCommunicationLayer.Services
 {
     public class ModuleIoRemoteMethodInvocationService
     {
-        private const string PORT_NUMBER = "50052";
-        private const string DEFAULT_CORE_IP = "10.1.6.11";
+        public string PORT_NUMBER = "50052";
+        public string DEFAULT_CORE_IP = "10.1.6.11";
         private string applicationGuid;
         private Channel grpcChannel;
         private IIOManager.Methods.MethodsClient clientInterface;

@@ -40,7 +40,7 @@
             btnInfos = new ToolStripMenuItem();
             controlCommentToolStripMenuItem = new ToolStripMenuItem();
             aboutToolStripMenuItem = new ToolStripMenuItem();
-            btnVersion = new ToolStripMenuItem();
+            btnIP = new ToolStripMenuItem();
             newToolStripMenuItem = new ToolStripMenuItem();
             openToolStripMenuItem = new ToolStripMenuItem();
             saveToolStripMenuItem = new ToolStripMenuItem();
@@ -69,7 +69,7 @@
             // 
             // MainMenu
             // 
-            MainMenu.Items.AddRange(new ToolStripItem[] { btnFile, btnEdition, btnView, btnInfos, btnVersion });
+            MainMenu.Items.AddRange(new ToolStripItem[] { btnFile, btnEdition, btnView, btnInfos, btnIP });
             MainMenu.Location = new Point(0, 0);
             MainMenu.Name = "MainMenu";
             MainMenu.Size = new Size(1012, 24);
@@ -141,12 +141,11 @@
             aboutToolStripMenuItem.Text = "About";
             aboutToolStripMenuItem.Click += aboutToolStripMenuItem_Click;
             // 
-            // btnVersion
+            // btnIP
             // 
-            btnVersion.Enabled = false;
-            btnVersion.Name = "btnVersion";
-            btnVersion.Size = new Size(29, 20);
-            btnVersion.Text = "V ";
+            btnIP.Enabled = false;
+            btnIP.Name = "btnIP";
+            btnIP.Size = new Size(12, 20);
             // 
             // newToolStripMenuItem
             // 
@@ -348,7 +347,7 @@
         private ToolStripMenuItem btnEdition;
         private ToolStripMenuItem btnView;
         private ToolStripMenuItem btnInfos;
-        private ToolStripMenuItem btnVersion;
+        private ToolStripMenuItem btnIP;
         private OpenFileDialog openFileDialog;
         private ToolStripMenuItem newToolStripMenuItem;
         private ToolStripMenuItem openToolStripMenuItem;

@@ -20,6 +20,10 @@ namespace OrthoDesigner
         private float maxSpeed = 10;
         private float damping = 0.50f;
         public static bool connecter = false;
+        public static string ip=""; 
+        public string portNumbers = "";
+
+        public object FormeIPEtPort { get; private set; }
 
         public FormeIPEtPORT()
         {
@@ -196,7 +200,8 @@ namespace OrthoDesigner
 
         private async void BtnSubmit_Click(object sender, EventArgs e)
         {
-            string ip = string.Join(".", Array.ConvertAll(txtIP, txt => txt.Text));
+            string IP = string.Join(".", Array.ConvertAll(txtIP, txt => txt.Text));
+            ip = IP;
             string port = txtPort.Text;
 
             if (string.IsNullOrEmpty(port) || !int.TryParse(port, out int portNumber) || portNumber <= 0 || portNumber > 65535)
@@ -209,19 +214,20 @@ namespace OrthoDesigner
             {
                 using (Ping ping = new Ping())
                 {
-                    PingReply reply = await ping.SendPingAsync(ip, 1000);
+                    PingReply reply = await ping.SendPingAsync(IP, 1000);
                     if (reply.Status == IPStatus.Success)
                     {
-                        MessageBox.Show($"Connexion à {ip}:{portNumber} réussie !", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        //MessageBox.Show($"Connexion à {IP}:{portNumber} réussie !", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         connecter = true;
+                        this.portNumbers = portNumber.ToString();
                         this.Close();
                     }
                     else
                     {
                         connecter = false;
 
-                        MessageBox.Show($"Impossible de joindre l'adresse IP : {ip}.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show($"Impossible de joindre l'adresse IP : {IP}.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }

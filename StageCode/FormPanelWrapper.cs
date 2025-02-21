@@ -1,176 +1,208 @@
-﻿using OrthoDesigner.LIB;
-using StageCode;
-using StageCode.LIB;
+﻿using StageCode;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using static System.Net.Mime.MediaTypeNames;
+using System.Drawing;
+using System.Drawing.Design;
+using System.Globalization;
+using System.Linq;
+using System.Windows.Forms;
+using System.Windows.Forms.Design;
+
+public class ControlPictureBoxWrapper
+{
+    public bool Clicks { get; set; } = false;
+    private PictureBox PictureBox { get; }
+    public Control Control { get; }
+    public const string a = "v";
+
+    [Browsable(true), Description("Sélectionner une référence"), Editor(typeof(CheckBoxListEditor), typeof(UITypeEditor)), TypeConverter(typeof(CheckBoxItemListConverter))]
+    [DisplayName("Donnée OrthoCoeur")]
+    public List<CheckBoxItem> OrthoCoreItem { get; } = new();
+
+    public Point Location
+    {
+        get => PictureBox?.Location ?? new Point(5, 5);
+        set { if (PictureBox != null) PictureBox.Location = value; }
+    }
+
+    public ControlPictureBoxWrapper(PictureBox pictureBox, Control control)
+    {
+        PictureBox = pictureBox ?? throw new ArgumentNullException(nameof(pictureBox));
+        Control = control ?? throw new ArgumentNullException(nameof(control));
+
+        if(Forme1.ioControllers.Count >0)
+        OrthoCORE();
+    }
+
+    public void OrthoCORE()
+    {
+        if (Forme1.ioControllers.Count == 0) return;
+
+        string texte = Control?.GetType().Name switch
+        {
+            "Chart" => "CHART",
+            "Cont1" => "CONT1",
+            "INTEG" => "INTEG",
+            "OrthoAD" => "AD",
+            "OrthoAla" => "ALA",
+            "OrthoCMDLib" => "CMDLIB",
+            "OrthoCombo" => "COMBO",
+            "OrthoDI" => "DI",
+            "OrthoEdit" => "EDIT",
+            "OrthoImage" => "IMAGE",
+            "OrthoLabel" => "LABEL",
+            "OrthoPbar" => "PBAR",
+            "OrthoRel" => "REL",
+            "OrthoResult" => "RESULT",
+            "OrthoVarname" => "VARNAME",
+            "Reticule" => "RETICULE",
+            "OrthoSTMLINES" => "STMLINES",
+            "OrthoStmLineGroupe" => "STMLINEGROUPE",
+            _ => "TYPE INCONNU"
+        };
+
+        foreach (var tmp in TrierOrthoCoeurParGrpc(texte))
+        {
+            var checkbox = new CheckBoxItem { Name = tmp, Selected = false };
+            OrthoCoreItem.Add(checkbox);
+        }
+    }
+
+    public List<string> TrierOrthoCoeurParGrpc(string typeFiltre)
+    {
+        List<string> listes = new List<string>();
+
+        var liste = Forme1.ioControllers.Keys.ToList();
+
+        foreach (var tmpKey in liste)
+        {
+            var controller = Forme1.ioControllers[tmpKey];
+            string type = "";
+
+            for (int i = 0; i < controller.FullName.Length; i++)
+            {
+                if (controller.FullName[i] == '(')
+                {
+                    for (int j = i + 1; j < controller.FullName.Length; j++)
+                    {
+                        if (controller.FullName[j] == ')')
+                            break;
+                        type += controller.FullName[j];
+                    }
+                    break;
+                }
+            }
+
+            if (type == typeFiltre)
+            {
+                listes.Add(controller.SimpleNameNewValue); 
+            }
+        }
+
+        return listes;
+    }
+}
+
+public class CheckBoxItemListConverter : ExpandableObjectConverter
+{
+    public override bool GetPropertiesSupported(ITypeDescriptorContext context) => true;
+
+    public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
+    {
+        if (value is List<CheckBoxItem> items)
+        {
+            return new PropertyDescriptorCollection(
+                items.Select((item, i) => new CheckBoxItemPropertyDescriptor(item, i)).ToArray()
+            );
+        }
+        return base.GetProperties(context, value, attributes);
+    }
+}
+
+// ✅ Propriétés des éléments dans le PropertyGrid
+public class CheckBoxItemPropertyDescriptor : PropertyDescriptor
+{
+    private readonly CheckBoxItem item;
+
+    public CheckBoxItemPropertyDescriptor(CheckBoxItem item, int index) : base(item.Name, null)
+    {
+        this.item = item;
+    }
+
+    public override Type ComponentType => typeof(CheckBoxItem);
+    public override bool IsReadOnly => false;
+    public override Type PropertyType => typeof(bool);
+    public override bool CanResetValue(object component) => false;
+    public override object GetValue(object component) => item.Selected;
+    public override void SetValue(object component, object value) => item.Selected = (bool)value;
+    public override void ResetValue(object component) { }
+    public override bool ShouldSerializeValue(object component) => false;
+}
+
+// ✅ Classe CheckBoxItem
+public class CheckBoxItem
+{
+    public static string A = "Bonjour";
+
+    [DisplayName(nameof(A))]
+    public string Name { get; set; }
+
+    [Category("Options"), Description("Cochez cette option")]
+    public bool Selected { get; set; }
+
+    public override string ToString() => Name; // Permet l'affichage du Name directement
+}
+
+// ✅ Éditeur de liste de CheckBoxItem
+public class CheckBoxListEditor : UITypeEditor
+{
+    public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) => UITypeEditorEditStyle.DropDown;
+
+    public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
+    {
+        if (provider.GetService(typeof(IWindowsFormsEditorService)) is IWindowsFormsEditorService editorService && value is List<CheckBoxItem> items)
+        {
+            var checkedListBox = new CheckedListBox { BorderStyle = BorderStyle.None, CheckOnClick = true };
+            foreach (var item in items) checkedListBox.Items.Add(item, item.Selected);
+            checkedListBox.ItemCheck += (s, e) => items[e.Index].Selected = e.NewValue == CheckState.Checked;
+            editorService.DropDownControl(checkedListBox);
+        }
+        return value;
+    }
+}
+
+
 
 public class FormPanelWrapper
 {
-    public Panel Panel { get; set; }
+    public Panel Panel { get; set; }  // Propriété représentant un panneau (panel)
 
-    private string Name;
+    private string name;  // Variable pour stocker le nom de la forme
+
+    // Propriété avec un attribut pour définir la description et la catégorie de la propriété
     [Category("Form")]
     [Description("Nom de la forme")]
     public string FormName
     {
-        get { return Name; }
+        get { return name; }  // Renvoie le nom de la forme
         set
         {
-            if (Name != value)
+            if (name != value)  // Si la valeur du nom change
             {
-                Name = value;
-                if (Panel?.Parent is Form parentForm)
+                name = value;  // Modifie le nom de la forme
+                if (Panel?.Parent is Form parentForm)  // Si le parent du panneau est un formulaire
                 {
-                    parentForm.Text = value;  
+                    parentForm.Text = value;  // Modifie le titre du formulaire
                 }
             }
         }
     }
 
+    // Constructeur qui prend un formulaire en paramètre et initialise le nom et le panneau
     public FormPanelWrapper(Form forme)
     {
-        FormName = forme.Text;
-
-        Panel = forme.Controls["panel1"] as Panel;  
+        FormName = forme.Text;  // Initialise le nom de la forme avec le texte du formulaire
+        Panel = forme.Controls["panel1"] as Panel;  // Récupère le panneau nommé "panel1" du formulaire
     }
 }
-public class ControlPictureBoxWrapper
-{
-    private PictureBox PictureBox { get; set; }
-    public Control Control { get; set; }
-
-    [Description("Selectionner une réfèrence")]
-    public List<CheckBoxItem> OrthoCoreItem {get;set;}
-
-    public Point Location
-    {
-        get { return PictureBox?.Location ?? new Point(5, 5); }
-        set
-        {
-            if (PictureBox != null && PictureBox.Location != value)
-            {
-                PictureBox.Location = value;
-                PictureBox.Invalidate();
-            }
-        }
-    }
-
-    public ControlPictureBoxWrapper(PictureBox pictureBox, Control control)
-    {
-        this.PictureBox = pictureBox;
-        this.Control = control;
-        this.OrthoCoreItem = new List<CheckBoxItem>();
-
-        Task.Run(() =>
-        {
-            RecupererDonneOrthoCore();
-        });
-    }
-
-    public void RecupererDonneOrthoCore()
-    {
-        string texte = string.Empty;
-
-        if (this.Control != null)
-        {
-            switch (this.Control.GetType().Name)
-            {
-                case "Chart":
-                    texte = "Chart".ToUpper();
-                    break;
-
-                case "Cont1":
-                    texte = "Cont1".ToUpper();
-                    break;
-
-                case "INTEG":
-                    texte = "INTEG".ToUpper();
-                    break;
-
-                case "OrthoAD":
-                    texte = "AD".ToUpper();
-                    break;
-
-                case "OrthoAla":
-                    texte = "Ala".ToUpper();
-                    break;
-
-                case "OrthoCMDLib":
-                    texte = "CMDLib".ToUpper();
-                    break;
-
-                case "OrthoCombo":
-                    texte = "Combo".ToUpper();
-                    break;
-
-                case "OrthoDI":
-                    texte = "DI".ToUpper();
-                    break;
-
-                case "OrthoEdit":
-                    texte = "Edit".ToUpper();
-                    break;
-
-                case "OrthoImage":
-                    texte = "Image".ToUpper();
-                    break;
-
-                case "OrthoLabel":
-                    texte = "Label".ToUpper();
-                    break;
-
-                case "OrthoPbar":
-                    texte = "Pbar".ToUpper();
-                    break;
-
-                case "OrthoRel":
-                    texte = "Rel".ToUpper();
-                    break;
-
-                case "OrthoResult":
-                    texte = "Result".ToUpper();
-                    break;
-
-                case "OrthoVarname":
-                    texte = "Varname".ToUpper();
-                    break;
-
-                case "Reticule":
-                    texte = "Reticule".ToUpper();
-                    break;
-
-                case "OrthoSTMLINES":
-                    texte = "STMLINES".ToUpper();
-                    break;
-
-                case "OrthoStmLineGroupe":
-                    texte = "StmLineGroupe".ToUpper();
-                    break;
-
-                default:
-                    texte = "Type inconnu".ToUpper();
-                    break;
-            }
-        }
-
-        var liste = Forme1.AfficherContenuListeGRPCParType(texte);
-
-    //    MessageBox.Show("Le type de contrôle sélectionné est : " + texte);
-
-        foreach (var item in liste)
-        {
-            CheckBoxItem check = new CheckBoxItem();
-            check.Name = item;
-            OrthoCoreItem.Add(check);
-        }
-    }
-}
-public class CheckBoxItem
-{
-    public string Name { get; set; }
-
-    [Category("Options")]
-    [Description("Cochez cette option")]
-    public bool Selected { get; set; }
-}
-

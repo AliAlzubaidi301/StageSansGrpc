@@ -12,7 +12,7 @@ namespace OrthoDesigner
         private Point _dragStartPoint;
         private Size _resizeStartSize;
         private Point _resizeStartPoint;
-        private Label label; 
+        public Label label; 
 
         public FormVide()
         {
