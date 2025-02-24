@@ -174,6 +174,10 @@ namespace StageCode.LIB
             XElement xml = XElement.Parse(xmlText);
             OrthoResult orthoResultControl = new OrthoResult();
 
+            // Naviguer jusqu'à l'élément <Controls> et ensuite <Component>
+            XElement componentElement = xml.Element("Controls")?.Element("Component");
+            if (componentElement == null) return orthoResultControl;
+
             // Parse le type et le nom de l'objet
             orthoResultControl.Name = xml.Attribute("name")?.Value;
 

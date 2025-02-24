@@ -4,6 +4,7 @@ using Grpc.Core;
 using IIOManager;
 using OrthoDesigner;
 using OrthoDesigner.LIB;
+using OrthoDesigner.LIB___Copier;
 using OrthoDesigner.Other;
 using Orthodyne.CoreCommunicationLayer.Controllers;
 using Orthodyne.CoreCommunicationLayer.Models.IO;
@@ -15,6 +16,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace StageCode
 {
@@ -46,6 +48,10 @@ namespace StageCode
         private ContextMenuStrip contextMenu = new ContextMenuStrip();
 
         private ToolStripMenuItem imageTmpLogo;
+
+        private List<ControlPictureBoxWrapper> listeControle = new List<ControlPictureBoxWrapper>();
+
+        private string ChemainOuvert = "";
 
         //private GrpcClient _grpcClient;
 
@@ -517,7 +523,7 @@ namespace StageCode
                         Y = ctrl.Location.Y,
                         Width = ctrl.Width,
                         Height = ctrl.Height,
-                        Text = (ctrl is TextBox textBox) ? textBox.Text : ctrl.Text
+                        Text = (ctrl is System.Windows.Forms.TextBox textBox) ? textBox.Text : ctrl.Text
                     });
                 }
 
@@ -556,7 +562,7 @@ namespace StageCode
                         Y = ctrl.Location.Y,
                         Width = ctrl.Width,
                         Height = ctrl.Height,
-                        Text = (ctrl is TextBox textBox) ? textBox.Text : ctrl.Text
+                        Text = (ctrl is System.Windows.Forms.TextBox textBox) ? textBox.Text : ctrl.Text
                     });
                 }
 
@@ -617,7 +623,7 @@ namespace StageCode
                             Control.Name = controlData.Name;
                             Control.Location = new Point(controlData.X, controlData.Y);
                             Control.Size = new Size(controlData.Width, controlData.Height);
-                            if (Control is TextBox textBox) textBox.Text = controlData.Text;
+                            if (Control is System.Windows.Forms.TextBox textBox) textBox.Text = controlData.Text;
                             else Control.Text = controlData.Text;
 
                             newpic.Controls.Add(Control);
@@ -1173,6 +1179,8 @@ namespace StageCode
                     {
                         charger_fichierTXT(file.FileName);
                     }
+
+                    ChemainOuvert = file.FileName;
 
                     string fileName = file.FileName;
 
@@ -1800,7 +1808,7 @@ namespace StageCode
                             forme.panel1.Controls.Add(pic);
                         }
                     }
-                    else if (type == "OrthoTabname")
+                    else if (type == "STMLINES")
                     {
                         OrthoSTMLINES TabeNameControl = OrthoSTMLINES.ReadFileXML(componentText);
 
@@ -1866,6 +1874,76 @@ namespace StageCode
 
                             TabeNameControl.Click += Control_Click;
                             TabeNameControl.MouseEnter += Control_MouseEnter;
+
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+                    else if (type == "Checkbox")
+                    {
+                        OrthoCheckbox orthoAlaControl = new OrthoCheckbox();
+
+                        orthoAlaControl = OrthoCheckbox.ReadFileXML(componentText);
+
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            pic.Controls.Add(orthoAlaControl);
+
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
+
+                            forme.panel1.Controls.Add(pic);
+                        }
+                    }
+                    else if (type == "Selector")
+                    {
+                        OrthoSelector orthoAlaControl = new OrthoSelector();
+
+                        orthoAlaControl = OrthoSelector.ReadFileXML(componentText);
+
+                        XElement? appearance = component.Element("Apparence");
+                        if (appearance != null)
+                        {
+                            int sizeWidth = int.Parse(appearance.Element("SizeWidth")?.Value ?? "100");
+                            int sizeHeight = int.Parse(appearance.Element("SizeHeight")?.Value ?? "100");
+                            int locationX = int.Parse(appearance.Element("LocationX")?.Value ?? "0");
+                            int locationY = int.Parse(appearance.Element("LocationY")?.Value ?? "0");
+
+                            orthoAlaControl.Size = new Size(sizeWidth, sizeHeight);
+
+                            PictureBox pic = new PictureBox
+                            {
+                                Size = new Size(orthoAlaControl.Size.Width + 10, orthoAlaControl.Size.Height + 10), // Augmenter la taille de 10 pixels
+                                Location = new Point(locationX, locationY) // Appliquer la position
+                            };
+                            pic.BorderStyle = BorderStyle.FixedSingle;
+
+                            orthoAlaControl.Location = new Point(5, 5);
+
+
+                            pic.Controls.Add(orthoAlaControl);
+
+                            orthoAlaControl.MouseEnter += Control_MouseEnter;
+                            pic.MouseLeave += pic_MouseLeave;
+                            orthoAlaControl.Click += Control_Click;
 
                             forme.panel1.Controls.Add(pic);
                         }
@@ -1886,9 +1964,13 @@ namespace StageCode
         {
             try
             {
-                var forme2 = new FormVide();
-                pnlViewHost.Controls.Remove(forme);
-                AfficherFormDansPanel(forme2, pnlViewHost);
+                //var forme2 = new FormVide();
+                //pnlViewHost.Controls.Remove(forme);
+                //AfficherFormDansPanel(forme2, pnlViewHost);
+
+                forme.panel1.Controls.Clear();
+
+                forme.WindowState = FormWindowState.Maximized;
 
                 int compteur = 0;
 
@@ -2001,6 +2083,8 @@ namespace StageCode
                 "RETICULE" => new Reticule(),
                 "TABNAME" => new OrthoSTMLINES(),
                 "STMLINES" => new OrthoStmLineGroupe(),
+                "Checkbox" => new OrthoCheckbox(),
+                "Selector" => new OrthoSelector(),
                 _ => null
             };
 
@@ -2026,6 +2110,8 @@ namespace StageCode
                     "RETICULE" => new Reticule(),
                     "TABNAME" => new OrthoSTMLINES(),
                     "STMLINES" => new OrthoStmLineGroupe(),
+                    "Checkbox" => new OrthoCheckbox(),
+                    "Selector" => new OrthoSelector(),
                     _ => null
                 };
             }
@@ -2150,6 +2236,14 @@ namespace StageCode
                         else if (childControl is OrthoStmLineGroupe Stmlines)
                         {
                             accumulatedText.AppendLine(Stmlines.WriteFile());
+                        }
+                        else if (childControl is OrthoCheckbox checkbox)
+                        {
+                            accumulatedText.AppendLine(checkbox.WriteFile());
+                        }
+                        else if (childControl is OrthoCheckbox select)
+                        {
+                            accumulatedText.AppendLine(select.WriteFile());
                         }
 
                         childControl.Location = new Point(5, 5);
@@ -2322,6 +2416,13 @@ namespace StageCode
 
             DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
 
+            string tmp = ChemainOuvert;
+
+            if (tmp == "")
+            {
+                tmp = forme.Text + ".syno";
+            }
+
             if (saveResult == DialogResult.Yes)
             {
                 StringBuilder xmlContent = new StringBuilder();
@@ -2338,7 +2439,7 @@ namespace StageCode
 
                 xmlContent.AppendLine("</Syno>");
 
-                using (StreamWriter writer = new StreamWriter(forme.Text + ".Syno"))
+                using (StreamWriter writer = new StreamWriter(tmp))
                 {
                     writer.Write(xmlContent.ToString());
                 }
@@ -2349,7 +2450,7 @@ namespace StageCode
             {
                 StringBuilder accumulatedText = SaveAsTXT();
 
-                using (StreamWriter writer = new StreamWriter(forme.Text + ".Syno"))
+                using (StreamWriter writer = new StreamWriter(tmp))
                 {
                     writer.Write(accumulatedText.ToString());
                 }
@@ -2466,7 +2567,7 @@ namespace StageCode
             {
                 "Chart", "Cont1", "INTEG", "OrthoAD", "OrthoAla", "OrthoCMDLib", "OrthoCombo",
                 "OrthoDI", "OrthoEdit", "Ortholmage", "OrthoLabel", "OrthoPbar", "OrthoRel",
-                "OrthoResult", "OrthoVarname", "Reticule", "TABNAME", "STMLINES"
+                "OrthoResult", "OrthoVarname", "Reticule", "TABNAME", "STMLINES","Checkbox","Selector"
             };
 
             string[] activationKeywords = new string[] { "AD", "REL", "ALA", "DI", "AO" };
@@ -2587,6 +2688,12 @@ namespace StageCode
                 case "STMLINES":
                     Ctrl = new OrthoStmLineGroupe();
                     break;
+                case "Checkbox":
+                    Ctrl = new OrthoCheckbox();
+                    break;
+                case "Selector":
+                    Ctrl = new OrthoSelector();
+                    break;
                 default:
                     return;
             }
@@ -2664,9 +2771,7 @@ namespace StageCode
 
                 if (pic.Tag != null && !string.IsNullOrEmpty(pic.Tag.ToString()))
                 {
-                    string tmp2 = pic.Tag.ToString();
-
-                    PictureBoxSelectonner = tmp2;
+                    PictureBoxSelectonner = pic.Tag.ToString();
                 }
                 else
                 {
@@ -2676,14 +2781,20 @@ namespace StageCode
 
                 pic.Invalidate();
 
-                if (controle != null)
-                {
-                    var tmp = new ControlPictureBoxWrapper(pic, controle);
+                // Vérifier si le contrôle est déjà dans la liste
+                var tmp = listeControle.FirstOrDefault(c => c.Control == controle);
 
+                if (tmp == null && controle != null)
+                {
+                    // Ajouter seulement si le contrôle n'existe pas encore dans la liste
+                    tmp = new ControlPictureBoxWrapper(pic, controle);
+                    listeControle.Add(tmp);
+                }
+
+                if (tmp != null)
+                {
                     propertyGrid1.SelectedObject = tmp;
                     propertyGrid1.ExpandAllGridItems();
-
-                    // tmp.
                 }
             }
         }
@@ -2782,7 +2893,6 @@ namespace StageCode
         #endregion
 
         #region Mouse (Resize et Move Control & PictureBox)
-
         #region Move
         private void pic_MouseDown(object sender, MouseEventArgs e)
         {
@@ -2794,165 +2904,102 @@ namespace StageCode
             {
                 Bouger = true;
                 SourisDecalage = e.Location;
-
                 picturebox.BringToFront();
             }
         }
+
         private void pic_MouseMove(object Sender, MouseEventArgs e)
         {
             if (!Bouger) return;
 
             PictureBox? pictureBox = (Sender as PictureBox) ?? (Sender as Control)?.Parent as PictureBox;
 
-            int tolerance = 0;
+            if (pictureBox == null) return;
 
-            List<(Point start, Point end)> drawnLines = new List<(Point, Point)>();
+            int deltaX = e.X - SourisDecalage.X;
+            int deltaY = e.Y - SourisDecalage.Y;
 
-            if (pictureBox != null)
+            var pictureBoxes = forme.panel1.Controls.OfType<PictureBox>().ToList();
+
+            if (listPic.Count > 1)
             {
-                pictureBox.Left += e.X - SourisDecalage.X;
-                pictureBox.Top += e.Y - SourisDecalage.Y;
-
-                Task.Run(() =>
+                foreach (var pic in pictureBoxes)
                 {
-                    using (Graphics g = forme.panel1.CreateGraphics())
+                    pic.Left += deltaX;
+                    pic.Top += deltaY;
+                }
+            }
+            else
+            {
+                pictureBox.Left += deltaX;
+                pictureBox.Top += deltaY;
+            }
+
+            Task.Run(() =>
+            {
+                using (Graphics g = forme.panel1.CreateGraphics())
+                {
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    g.Clear(forme.panel1.BackColor);
+
+                    List<(Point start, Point end)> drawnLines = new List<(Point, Point)>();
+                    int tolerance = 0;
+
+                    foreach (Control ctrl in forme.panel1.Controls)
                     {
-                        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
-                        g.Clear(forme.panel1.BackColor);
-
-                        foreach (Control ctrl in forme.panel1.Controls)
+                        if (ctrl is PictureBox pic && pic != pictureBox)
                         {
-                            if (ctrl is PictureBox pic && pic != pictureBox)
+                            Point top1 = new Point(pictureBox.Left + pictureBox.Width / 2, pictureBox.Top);
+                            Point bottom1 = new Point(pictureBox.Left + pictureBox.Width / 2, pictureBox.Bottom);
+                            Point left1 = new Point(pictureBox.Left, pictureBox.Top + pictureBox.Height / 2);
+                            Point right1 = new Point(pictureBox.Right, pictureBox.Top + pictureBox.Height / 2);
+
+                            Point top2 = new Point(pic.Left + pic.Width / 2, pic.Top);
+                            Point bottom2 = new Point(pic.Left + pic.Width / 2, pic.Bottom);
+                            Point left2 = new Point(pic.Left, pic.Top + pic.Height / 2);
+                            Point right2 = new Point(pic.Right, pic.Top + pic.Height / 2);
+
+                            using (Pen pen = new Pen(Color.Blue, 2))
                             {
-                                Point top1 = new Point(pictureBox.Left + pictureBox.Width / 2, pictureBox.Top);
-                                Point bottom1 = new Point(pictureBox.Left + pictureBox.Width / 2, pictureBox.Bottom);
-                                Point left1 = new Point(pictureBox.Left, pictureBox.Top + pictureBox.Height / 2);
-                                Point right1 = new Point(pictureBox.Right, pictureBox.Top + pictureBox.Height / 2);
+                                if (Math.Abs(pictureBox.Top - pic.Top) <= tolerance)
+                                    g.DrawLine(pen, top1, top2);
 
-                                Point top2 = new Point(pic.Left + pic.Width / 2, pic.Top);
-                                Point bottom2 = new Point(pic.Left + pic.Width / 2, pic.Bottom);
-                                Point left2 = new Point(pic.Left, pic.Top + pic.Height / 2);
-                                Point right2 = new Point(pic.Right, pic.Top + pic.Height / 2);
+                                if (Math.Abs(pictureBox.Bottom - pic.Bottom) <= tolerance)
+                                    g.DrawLine(pen, bottom1, bottom2);
 
-                                using (Pen pen = new Pen(Color.Blue, 2))
+                                if (Math.Abs(pictureBox.Left - pic.Left) <= tolerance)
+                                    g.DrawLine(pen, left1, left2);
+
+                                if (Math.Abs(pictureBox.Right - pic.Right) <= tolerance)
+                                    g.DrawLine(pen, right1, right2);
+
+                                using (Pen pen2 = new Pen(Color.Red, 2))
                                 {
-                                    bool lineDrawn = false;
+                                    if (Math.Abs(pictureBox.Top - pic.Bottom) <= tolerance)
+                                        g.DrawLine(pen2, top1, bottom2);
 
-                                    if (Math.Abs(pictureBox.Top - pic.Top) <= tolerance)
-                                    {
-                                        var line = (start: top1, end: top2);
-                                        if (!drawnLines.Contains(line))
-                                        {
-                                            g.DrawLine(pen, top1, top2);
-                                            drawnLines.Add(line);
-                                            lineDrawn = true;
-                                        }
-                                    }
+                                    if (Math.Abs(pictureBox.Bottom - pic.Top) <= tolerance)
+                                        g.DrawLine(pen2, bottom1, top2);
 
-                                    if (Math.Abs(pictureBox.Bottom - pic.Bottom) <= tolerance) // Alignées en bas
-                                    {
-                                        var line = (start: bottom1, end: bottom2);
-                                        if (!drawnLines.Contains(line))
-                                        {
-                                            g.DrawLine(pen, bottom1, bottom2);
-                                            drawnLines.Add(line);
-                                            lineDrawn = true;
-                                        }
-                                    }
+                                    if (Math.Abs(pictureBox.Left - pic.Right) <= tolerance)
+                                        g.DrawLine(pen2, left1, right2);
 
-                                    if (Math.Abs(pictureBox.Left - pic.Left) <= tolerance) // Alignées à gauche
-                                    {
-                                        var line = (start: left1, end: left2);
-                                        if (!drawnLines.Contains(line))
-                                        {
-                                            g.DrawLine(pen, left1, left2);
-                                            drawnLines.Add(line);
-                                            lineDrawn = true;
-                                        }
-                                    }
-
-                                    if (Math.Abs(pictureBox.Right - pic.Right) <= tolerance) // Alignées à droite
-                                    {
-                                        var line = (start: right1, end: right2);
-                                        if (!drawnLines.Contains(line))
-                                        {
-                                            g.DrawLine(pen, right1, right2);
-                                            drawnLines.Add(line);
-                                            lineDrawn = true;
-                                        }
-                                    }
-
-                                    using (Pen pen2 = new Pen(Color.Red, 2))
-                                    {
-                                        bool lineDrawn2 = false;
-
-                                        if (Math.Abs(pictureBox.Top - pic.Bottom) <= tolerance)
-                                        {
-                                            var line = (start: top1, end: bottom2);
-                                            if (!drawnLines.Contains(line))
-                                            {
-                                                g.DrawLine(pen2, top1, bottom2);
-                                                drawnLines.Add(line);
-                                                lineDrawn = true;
-                                            }
-                                        }
-
-                                        if (Math.Abs(pictureBox.Bottom - pic.Top) <= tolerance)
-                                        {
-                                            var line = (start: bottom1, end: top2);
-                                            if (!drawnLines.Contains(line))
-                                            {
-                                                g.DrawLine(pen2, bottom1, top2);
-                                                drawnLines.Add(line);
-                                                lineDrawn = true;
-                                            }
-                                        }
-
-                                        if (Math.Abs(pictureBox.Left - pic.Right) <= tolerance)
-                                        {
-                                            var line = (start: left1, end: right2);
-                                            if (!drawnLines.Contains(line))
-                                            {
-                                                g.DrawLine(pen2, left1, right2);
-                                                drawnLines.Add(line);
-                                                lineDrawn = true;
-                                            }
-                                        }
-
-                                        if (Math.Abs(pictureBox.Right - pic.Left) <= tolerance)
-                                        {
-                                            var line = (start: right1, end: left2);
-                                            if (!drawnLines.Contains(line))
-                                            {
-                                                g.DrawLine(pen2, right1, left2);
-                                                drawnLines.Add(line);
-                                                lineDrawn = true;
-                                            }
-                                        }
-
-                                        if (lineDrawn)
-                                        {
-                                            pen2.Color = Color.Blue; // Change color to blue for shared part
-                                        }
-                                    }
-
+                                    if (Math.Abs(pictureBox.Right - pic.Left) <= tolerance)
+                                        g.DrawLine(pen2, right1, left2);
                                 }
                             }
                         }
                     }
-
-                    pictureBox.BringToFront();
-                });
-
-            }
+                }
+            });
         }
+
         private void pic_MouseUp(object Sender, MouseEventArgs e)
         {
             Bouger = false;
         }
-
         #endregion
+
 
         #region Resize Picturebox
         private void pic_MouseDown2(object sender, MouseEventArgs e)
@@ -3078,6 +3125,27 @@ namespace StageCode
                         toolStripMenuItem1.Tag = "Conexion";
                         FormeIPEtPORT.ip = "";
                         this.btnIP.Text = FormeIPEtPORT.ip.ToString();
+                        // Vérifie si SelectedObject est bien du type ControlPictureBoxWrapper
+                        if (propertyGrid1.SelectedObject is ControlPictureBoxWrapper tmp)
+                        {
+                            // Trouve l'élément dans la liste en fonction du contrôle sélectionné
+                            var controlWrapper = this.listeControle.Find(item => item.Control == tmp.Control);
+
+                            if (controlWrapper != null)
+                            {
+                                // Crée une nouvelle instance de ControlPictureBoxWrapper avec le PictureBox et le Control
+                                var tmp2 = new ControlPictureBoxWrapper(tmp.PictureBox, tmp.Control);
+
+                                // Retire l'élément existant de la liste
+                                listeControle.Remove(controlWrapper);
+
+                                // Ajoute la nouvelle instance à la liste
+                                listeControle.Add(tmp2);
+
+                                // Met à jour l'objet sélectionné dans le PropertyGrid
+                                propertyGrid1.SelectedObject = tmp2;
+                            }
+                        }
                     }
 
                     FormeIPEtPORT.connecter = !FormeIPEtPORT.connecter;
@@ -3266,14 +3334,30 @@ namespace StageCode
         #region PropertyGrid1
         private void propertyGrid1_PropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
         {
-            Control? objet = (Control)sender;
-            PictureBox? pic = objet.Parent as PictureBox;
+            PropertyGrid pr = sender as PropertyGrid;
 
-            if (objet != null && pic != null)
+            if (pr != null)
             {
-                pic.Size = new Size(objet.Size.Width + 10, objet.Size.Height + 10);
+                var selectedObject = pr.SelectedObject;
+
+                // Vérifie si l'objet sélectionné est de type ControlPictureBoxWrapper
+                if (selectedObject is ControlPictureBoxWrapper tmp)
+                {
+                    tmp.AfficherSelection();
+                }
+            }
+
+            if (sender is Control objet)
+            {
+                PictureBox? pic = objet.Parent as PictureBox;
+                if (pic != null)
+                {
+                    pic.Size = new Size(objet.Size.Width + 10, objet.Size.Height + 10);
+                }
             }
         }
+
+
         private void lstToolbox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (lstToolbox.SelectedIndex >= 0 && lstToolbox.SelectedIndex < lstToolbox.Items.Count)
@@ -3355,6 +3439,12 @@ namespace StageCode
                     b.RefreshControllers();
 
                     ioControllers = b.ioControllers;
+
+
+                    if (ioControllers.Count == 0)
+                    {
+                        MessageBox.Show("Aucun controllers");
+                    }
                 });
             }
             catch (Exception ex)

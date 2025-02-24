@@ -98,7 +98,7 @@ namespace OrthoDesigner
 
             for (int i = 0; i < 4; i++)
             {
-                txtIP[i] = CreateStyledTextBox(100 + (i * 60), 90, "0");
+                txtIP[i] = CreateStyledTextBox(100 + (i * 70), 90, "0");
                 txtIP[i].MaxLength = 3;
                 txtIP[i].KeyPress += TxtIP_KeyPress;
                 txtIP[i].TextChanged += TxtIP_TextChanged;
@@ -139,10 +139,10 @@ namespace OrthoDesigner
 
         private TextBox CreateStyledTextBox(int x, int y, string placeholder)
         {
-            return new TextBox()
+            var a = new TextBox()
             {
                 Location = new Point(x, y),
-                Size = new Size(50, 35),
+                Size = new Size(60, 35),
                 Font = new System.Drawing.Font("Segoe UI", 14),
                 ForeColor = Color.White,
                 BackColor = Color.FromArgb(50, 50, 50),
@@ -150,6 +150,13 @@ namespace OrthoDesigner
                 PlaceholderText = placeholder,
                 TextAlign = HorizontalAlignment.Center
             };
+
+            if(a.PlaceholderText== "Entrez le numéro de port")
+            {
+                a.Width = 270;
+            }
+
+            return a;
         }
 
         private void TxtIP_KeyPress(object sender, KeyPressEventArgs e)

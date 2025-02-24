@@ -85,13 +85,22 @@ namespace StageCode.LIB
         }
         public OrthoImage ReadFileXML(string txt)
         {
-            XElement component = new XElement(txt);
+            XElement component = XElement.Parse(txt);
 
-            var appearance = component.Element("Apparence");
+            // Naviguer jusqu'à l'élément <Controls> et ensuite <Component>
+            XElement componentElement = component.Element("Controls")?.Element("Component");
+            if (componentElement == null) return this;  // Si l'élément Component n'existe pas, retourner l'objet courant
 
+            // Vérifier que le type est bien "OrthoImage" (si nécessaire)
+            if (componentElement.Attribute("type")?.Value != "OrthoImage") return this;
+
+            // Accéder à l'élément <Apparence>
+            var appearance = componentElement.Element("Apparence");
+            if (appearance == null) return this;
+
+            // Lire les différentes valeurs et attribuer les propriétés
             ImageLocation = appearance.Element("ImageLocation")?.Value ?? "";
 
-            // Convert BorderStyle from int (0 = None, 1 = Other)
             BorderStyle = (int.Parse(appearance.Element("BorderStyle")?.Value ?? "0") == 0) ? BorderStyle.None : BorderStyle.FixedSingle;
 
             Size = new Size(

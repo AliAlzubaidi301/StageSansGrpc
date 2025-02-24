@@ -183,11 +183,11 @@ namespace StageCode.LIB
             orthoCombo.Name = xml.Attribute("name")?.Value;
 
             // Parse the <Apparence> section
-            XElement? appearance = xml.Element("Apparence");
+            XElement appearance = xml.Element("Apparence");
             if (appearance != null)
             {
                 orthoCombo.Text = appearance.Element("Text")?.Value ?? "";
-                orthoCombo.TextAlign = (HorizontalAlignment)(ContentAlignment)Enum.Parse(typeof(ContentAlignment), appearance.Element("TextAlign")?.Value ?? "MiddleCenter");
+               // orthoCombo.TextAlign = (HorizontalAlignment)(ContentAlignment)Enum.Parse(typeof(ContentAlignment), appearance.Element("TextAlign")?.Value ?? "MiddleCenter");
                 orthoCombo.Format = appearance.Element("Format")?.Value ?? "";
                 orthoCombo.BackColor = ColorTranslator.FromOle(int.Parse(appearance.Element("BackColor")?.Value ?? "16777215"));
                 orthoCombo.ForeColor = ColorTranslator.FromOle(int.Parse(appearance.Element("ForeColor")?.Value ?? "0"));
@@ -220,7 +220,7 @@ namespace StageCode.LIB
             List<string> vlList = new List<string>();
             for (int i = 2; ; i++)
             {
-                XElement? vlElement = xml.Element($"VL{i}");
+                XElement vlElement = xml.Element($"VL{i}");
                 if (vlElement == null) break;
                 vlList.Add(vlElement.Value);
             }

@@ -235,128 +235,126 @@ namespace StageCode.LIB
         }
         public static OrthoAla ReadFileXML(string xmlText)
         {
-            // Charger le texte XML dans un XElement
-            XElement xml = XElement.Parse(xmlText);
-
-            // Créer une instance de OrthoAla
-            OrthoAla orthoAlaControl = new OrthoAla();
-
-            // Extraire l'attribut "name" et "type"
-            string? type = xml.Attribute("type")?.Value;
-            orthoAlaControl.Name = xml.Attribute("name")?.Value;
-
-            // Extraire la section des propriétés du composant
-            XElement? properties = xml.Element("Apparence");
-            if (properties != null)
+            try
             {
-                // Extraire des valeurs des éléments du XML
-                orthoAlaControl.Caption = properties.Element("Caption")?.Value ?? string.Empty;
-                orthoAlaControl.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(properties.Element("TextAlign")?.Value ?? "0"));
-                orthoAlaControl.Precision = properties.Element("Precision")?.Value ?? "0";
-                orthoAlaControl.BackColor = FromOle2(properties.Element("BackColor")?.Value ?? "Transparent");
-                orthoAlaControl.ForeColor = FromOle2(properties.Element("ForeColor")?.Value ?? "Transparent");
+                // Charger le texte XML dans un XElement
+                XElement xml = XElement.Parse(xmlText);
 
-                // Extraction de la police
-                orthoAlaControl.Font = new Font(
-                    properties.Element("FontName")?.Value ?? "Arial",
-                    float.Parse(properties.Element("FontSize")?.Value ?? "10"),
-                    (FontStyle)Enum.Parse(typeof(FontStyle), properties.Element("FontStyle")?.Value ?? "Regular")
-                );
+                // Créer une instance de OrthoAla
+                OrthoAla orthoAlaControl = new OrthoAla
+                {
+                    Name = xml.Attribute("name")?.Value
+                };
 
-                // Extraction des autres propriétés
-                orthoAlaControl.TypeDesign = (TDesign)Enum.Parse(typeof(TDesign), properties.Element("TypeDesign")?.Value ?? "0");
-                orthoAlaControl.BorderWidth = int.Parse(properties.Element("BorderWidth")?.Value ?? "1");
-                orthoAlaControl.Size = new Size(
-                    int.Parse(properties.Element("SizeWidth")?.Value ?? "100"),
-                    int.Parse(properties.Element("SizeHeight")?.Value ?? "100")
-                );
-                orthoAlaControl.Location = new Point(
-                    int.Parse(properties.Element("LocationX")?.Value ?? "0"),
-                    int.Parse(properties.Element("LocationY")?.Value ?? "0")
-                );
-                orthoAlaControl.Etat = properties.Element("Etat")?.Value ?? string.Empty;
-                orthoAlaControl.VarLink2 = properties.Element("VarLink2")?.Value ?? string.Empty;
-                orthoAlaControl.NomFichier = properties.Element("NomFichier")?.Value ?? string.Empty;
+                // Extraire la section des propriétés du composant
+                XElement? properties = xml.Element("Apparence");
+                if (properties != null)
+                {
+                    // Extraction sécurisée des valeurs
+                    orthoAlaControl.Caption = properties.Element("Caption")?.Value ?? string.Empty;
 
-                // Extraire les variables VL
-                orthoAlaControl._VL[3] = properties.Element("VL3")?.Value ?? string.Empty;
-                orthoAlaControl._VL[4] = properties.Element("VL4")?.Value ?? string.Empty;
-                orthoAlaControl._VL[5] = properties.Element("VL5")?.Value ?? string.Empty;
-                orthoAlaControl._VL[6] = properties.Element("VL6")?.Value ?? string.Empty;
+                    if (int.TryParse(properties.Element("TextAlign")?.Value, out int textAlignValue))
+                        orthoAlaControl.TextAlign = ContentAlignment_Parser.Get_Alignment(textAlignValue);
 
-                // Extraction des commandes et liens
-                orthoAlaControl.Commande = properties.Element("Commande")?.Value ?? string.Empty;
-                orthoAlaControl.VarLink9 = properties.Element("VarLink9")?.Value ?? string.Empty;
+                    orthoAlaControl.Precision = properties.Element("Precision")?.Value ?? "0";
+                    orthoAlaControl.BackColor = FromOle2(properties.Element("BackColor")?.Value);
+                    orthoAlaControl.ForeColor = FromOle2(properties.Element("ForeColor")?.Value);
 
-                // Couleurs
-                orthoAlaControl.ColorOn = FromOle2(properties.Element("ColorOn")?.Value ?? "Transparent");
-                orthoAlaControl.ColorOff = FromOle2(properties.Element("ColorOff")?.Value ?? "Transparent");
-                orthoAlaControl.ColorErr = FromOle2(properties.Element("ColorErr")?.Value ?? "Transparent");
+                    // Extraction de la police avec gestion des exceptions
+                    string fontName = properties.Element("FontName")?.Value ?? "Arial";
+                    float fontSize = float.TryParse(properties.Element("FontSize")?.Value, out float size) ? size : 10;
+                    FontStyle fontStyle = Enum.TryParse(properties.Element("FontStyle")?.Value, out FontStyle style) ? style : FontStyle.Regular;
+                    orthoAlaControl.Font = new Font(fontName, fontSize, fontStyle);
 
-                // Niveaux de visibilité et activation
-                orthoAlaControl.LevelVisible = int.Parse(properties.Element("LevelVisible")?.Value ?? "0");
-                orthoAlaControl.LevelEnabled = int.Parse(properties.Element("LevelEnabled")?.Value ?? "0");
-                orthoAlaControl.Visibility = properties.Element("Visibility")?.Value ?? "Visible";
+                    // Autres propriétés avec conversion sécurisée
+                    orthoAlaControl.TypeDesign = Enum.TryParse(properties.Element("TypeDesign")?.Value, out TDesign typeDesign) ? typeDesign : 0;
+                    orthoAlaControl.BorderWidth = int.TryParse(properties.Element("BorderWidth")?.Value, out int borderWidth) ? borderWidth : 1;
+
+                    orthoAlaControl.Size = new Size(
+                        int.TryParse(properties.Element("SizeWidth")?.Value, out int width) ? width : 100,
+                        int.TryParse(properties.Element("SizeHeight")?.Value, out int height) ? height : 100
+                    );
+
+                    orthoAlaControl.Location = new Point(
+                        int.TryParse(properties.Element("LocationX")?.Value, out int locX) ? locX : 0,
+                        int.TryParse(properties.Element("LocationY")?.Value, out int locY) ? locY : 0
+                    );
+
+                    orthoAlaControl.Etat = properties.Element("Etat")?.Value ?? string.Empty;
+                    orthoAlaControl.VarLink2 = properties.Element("VarLink2")?.Value ?? string.Empty;
+                    orthoAlaControl.NomFichier = properties.Element("NomFichier")?.Value ?? string.Empty;
+
+                    // Extraire les variables VL
+                    orthoAlaControl._VL[3] = properties.Element("VL3")?.Value ?? string.Empty;
+                    orthoAlaControl._VL[4] = properties.Element("VL4")?.Value ?? string.Empty;
+                    orthoAlaControl._VL[5] = properties.Element("VL5")?.Value ?? string.Empty;
+                    orthoAlaControl._VL[6] = properties.Element("VL6")?.Value ?? string.Empty;
+
+                    // Extraction des commandes et liens
+                    orthoAlaControl.Commande = properties.Element("Commande")?.Value ?? string.Empty;
+                    orthoAlaControl.VarLink9 = properties.Element("VarLink9")?.Value ?? string.Empty;
+
+                    // Couleurs
+                    orthoAlaControl.ColorOn = FromOle2(properties.Element("ColorOn")?.Value);
+                    orthoAlaControl.ColorOff = FromOle2(properties.Element("ColorOff")?.Value);
+                    orthoAlaControl.ColorErr = FromOle2(properties.Element("ColorErr")?.Value);
+
+                    // Niveaux de visibilité et activation
+                    orthoAlaControl.LevelVisible = int.TryParse(properties.Element("LevelVisible")?.Value, out int lvlVisible) ? lvlVisible : 0;
+                    orthoAlaControl.LevelEnabled = int.TryParse(properties.Element("LevelEnabled")?.Value, out int lvlEnabled) ? lvlEnabled : 0;
+                    orthoAlaControl.Visibility = properties.Element("Visibility")?.Value ?? "Visible";
+                }
+
+                return orthoAlaControl;
             }
-
-            // Retourner l'objet OrthoAla avec toutes les propriétés remplies
-            return orthoAlaControl;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erreur lors de la lecture du fichier XML : {ex.Message}");
+                return null;
+            }
         }
+
         public string WriteFileXML()
         {
             var xmlContent = new StringBuilder();
 
-            // Début du composant spécifique
             xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine("      <Apparence>");
 
             // Section des propriétés du composant
-            xmlContent.AppendLine($"      <Caption>{Caption}</Caption>");
-            xmlContent.AppendLine($"      <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(TextAlign)}</TextAlign>");
-            xmlContent.AppendLine($"      <Precision>{Precision}</Precision>");
-            xmlContent.AppendLine($"      <BackColor>{ToOle(BackColor)}</BackColor>");
-            xmlContent.AppendLine($"      <ForeColor>{ToOle(ForeColor)}</ForeColor>");
-            xmlContent.AppendLine($"      <FontName>{Font.Name}</FontName>");
-            xmlContent.AppendLine($"      <FontSize>{Font.Size}</FontSize>");
-            xmlContent.AppendLine($"      <FontStrikeout>{Font.Strikeout}</FontStrikeout>");
-            xmlContent.AppendLine($"      <FontUnderline>{Font.Underline}</FontUnderline>");
-            xmlContent.AppendLine($"      <FontBold>{Font.Bold}</FontBold>");
-            xmlContent.AppendLine($"      <FontItalic>{Font.Italic}</FontItalic>");
-            xmlContent.AppendLine($"      <TypeDesign>{Convert.ToInt32(TypeDesign)}</TypeDesign>");
-            xmlContent.AppendLine($"      <BorderWidth>{BorderWidth}</BorderWidth>");
-            xmlContent.AppendLine($"      <SizeHeight>{Size.Height}</SizeHeight>");
-            xmlContent.AppendLine($"      <SizeWidth>{Size.Width}</SizeWidth>");
-            xmlContent.AppendLine($"      <LocationY>{Location.Y}</LocationY>");
-            xmlContent.AppendLine($"      <LocationX>{Location.X}</LocationX>");
-            xmlContent.AppendLine($"      <Etat>{Etat}</Etat>");
-            xmlContent.AppendLine($"      <VarLink2>{VarLink2}</VarLink2>");
-            xmlContent.AppendLine($"      <NomFichier>{NomFichier}</NomFichier>");
-            xmlContent.AppendLine($"      <VL3>{_VL[3]}</VL3>");
-            xmlContent.AppendLine($"      <VL4>{_VL[4]}</VL4>");
-            xmlContent.AppendLine($"      <VL5>{_VL[5]}</VL5>");
-            xmlContent.AppendLine($"      <VL6>{_VL[6]}</VL6>");
-            xmlContent.AppendLine($"      <Commande>{Commande}</Commande>");
-            xmlContent.AppendLine($"      <VarLink9>{VarLink9}</VarLink9>");
-            xmlContent.AppendLine($"      <ColorOn>{ToOle(ColorOn)}</ColorOn>");
-            xmlContent.AppendLine($"      <ColorOff>{ToOle(ColorOff)}</ColorOff>");
-            xmlContent.AppendLine($"      <ColorErr>{ToOle(ColorErr)}</ColorErr>");
-            xmlContent.AppendLine($"      <LevelVisible>{LevelVisible}</LevelVisible>");
-            xmlContent.AppendLine($"      <LevelEnabled>{LevelEnabled}</LevelEnabled>");
-            xmlContent.AppendLine($"      <Visibility>{Visibility}</Visibility>");
+            xmlContent.AppendLine($"        <Caption>{Caption}</Caption>");
+            xmlContent.AppendLine($"        <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(TextAlign)}</TextAlign>");
+            xmlContent.AppendLine($"        <Precision>{Precision}</Precision>");
+            xmlContent.AppendLine($"        <BackColor>{ToOle(BackColor)}</BackColor>");
+            xmlContent.AppendLine($"        <ForeColor>{ToOle(ForeColor)}</ForeColor>");
+            xmlContent.AppendLine($"        <FontName>{Font.Name}</FontName>");
+            xmlContent.AppendLine($"        <FontSize>{Font.Size}</FontSize>");
+            xmlContent.AppendLine($"        <FontStyle>{Font.Style}</FontStyle>");
+            xmlContent.AppendLine($"        <TypeDesign>{Convert.ToInt32(TypeDesign)}</TypeDesign>");
+            xmlContent.AppendLine($"        <BorderWidth>{BorderWidth}</BorderWidth>");
+            xmlContent.AppendLine($"        <SizeWidth>{Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"        <SizeHeight>{Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"        <LocationX>{Location.X}</LocationX>");
+            xmlContent.AppendLine($"        <LocationY>{Location.Y}</LocationY>");
+            xmlContent.AppendLine($"        <Etat>{Etat}</Etat>");
+            xmlContent.AppendLine($"        <VarLink2>{VarLink2}</VarLink2>");
+            xmlContent.AppendLine($"        <NomFichier>{NomFichier}</NomFichier>");
+            xmlContent.AppendLine($"        <VL3>{_VL[3]}</VL3>");
+            xmlContent.AppendLine($"        <VL4>{_VL[4]}</VL4>");
+            xmlContent.AppendLine($"        <VL5>{_VL[5]}</VL5>");
+            xmlContent.AppendLine($"        <VL6>{_VL[6]}</VL6>");
+            xmlContent.AppendLine($"        <Commande>{Commande}</Commande>");
+            xmlContent.AppendLine($"        <VarLink9>{VarLink9}</VarLink9>");
+            xmlContent.AppendLine($"        <ColorOn>{ToOle(ColorOn)}</ColorOn>");
+            xmlContent.AppendLine($"        <ColorOff>{ToOle(ColorOff)}</ColorOff>");
+            xmlContent.AppendLine($"        <ColorErr>{ToOle(ColorErr)}</ColorErr>");
+            xmlContent.AppendLine($"        <LevelVisible>{LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"        <LevelEnabled>{LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"        <Visibility>{Visibility}</Visibility>");
 
-            // Section Apparence supplémentaire
-            xmlContent.AppendLine("      <Apparence>");
-            xmlContent.AppendLine($"        <Backcolor value=\"{ToOle(BackColor)}\"/>");
-            xmlContent.AppendLine($"        <FontSize value=\"{Font.Size}\"/>");
-            xmlContent.AppendLine($"        <FontName value=\"{Font.Name}\"/>");
-            xmlContent.AppendLine($"        <LevelVisible value=\"{LevelVisible}\"/>");
-            xmlContent.AppendLine($"        <LevelEnabled value=\"{LevelEnabled}\"/>");
-            xmlContent.AppendLine($"        <Visibility value=\"{Visibility}\"/>");
             xmlContent.AppendLine("      </Apparence>");
-
-            // Fermeture du composant
             xmlContent.AppendLine("    </Component>");
 
-            // Retourner le contenu XML généré
             return xmlContent.ToString();
         }
 

@@ -1,7 +1,9 @@
 ﻿using StageCode;
+using StageCode.LIB;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data.Entity.Core.Metadata.Edm;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Globalization;
@@ -11,8 +13,9 @@ using System.Windows.Forms.Design;
 
 public class ControlPictureBoxWrapper
 {
-    public bool Clicks { get; set; } = false;
-    private PictureBox PictureBox { get; }
+
+    [Browsable(false)]
+    public PictureBox PictureBox { get; }
     public Control Control { get; }
     public const string a = "v";
 
@@ -65,6 +68,7 @@ public class ControlPictureBoxWrapper
         foreach (var tmp in TrierOrthoCoeurParGrpc(texte))
         {
             var checkbox = new CheckBoxItem { Name = tmp, Selected = false };
+           
             OrthoCoreItem.Add(checkbox);
         }
     }
@@ -102,6 +106,56 @@ public class ControlPictureBoxWrapper
 
         return listes;
     }
+
+    public void AfficherSelection()
+    {
+        var elementsSelectionnes = OrthoCoreItem
+            .Where(item => item.Selected)
+            .Select(item => item.Name)
+            .ToList();
+
+        if (elementsSelectionnes.Count > 0)
+        {
+            // Affiche les éléments sélectionnés dans un MessageBox
+          //  MessageBox.Show(string.Join("\n", elementsSelectionnes), "Éléments sélectionnés", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            // Modifie le champ SimpleName dans le control
+            if (Control is OrthoRel controlWrapper)
+            {
+                controlWrapper.SimpleNam = "";
+                // Met à jour le champ SimpleName avec les éléments sélectionnés
+                foreach (var element in elementsSelectionnes)
+                {
+
+                    controlWrapper.SimpleNam += element + ",";
+                }
+            }
+            // Modifie le champ SimpleName dans le control
+            if (Control is OrthoDI c2)
+            {
+                c2.SimpleName = "";
+
+                // Met à jour le champ SimpleName avec les éléments sélectionnés
+                foreach (var element in elementsSelectionnes)
+                {
+                    c2.SimpleName += element + ",";
+                }
+            }
+            // Modifie le champ SimpleName dans le control
+            if (Control is OrthoAD c3)
+            {
+                c3.SimpleName = "";
+
+                // Met à jour le champ SimpleName avec les éléments sélectionnés
+                foreach (var element in elementsSelectionnes)
+                {
+                    c3.SimpleName += element + ",";
+                }
+            }
+        }
+    }
+
+
 }
 
 public class CheckBoxItemListConverter : ExpandableObjectConverter

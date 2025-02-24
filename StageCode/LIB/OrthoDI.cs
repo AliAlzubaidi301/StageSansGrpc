@@ -205,8 +205,8 @@ namespace StageCode.LIB
             LevelEnabled = int.Parse(splitPvirgule[32]);
             this.comment = comment;
 
-            // Add SimpleName, Flag, and IOStream
-            SimpleName = splitPvirgule[34];  // Example, adjust accordingly based on where it appears in the splitPvirgule array
+            // Add SimpleName, Flag, and IoStream
+            SimpleName = splitPvirgule[34];  // Adjust based on your array position
             Flage = bool.Parse(splitPvirgule[35]);  // Adjust index based on position in the array
             IoStream = splitPvirgule[36];  // Adjust index based on position
 
@@ -217,6 +217,7 @@ namespace StageCode.LIB
 
             return this;
         }
+
         public static OrthoDI ReadFileXML(string xmlText)
         {
             XElement xml = XElement.Parse(xmlText);
@@ -272,6 +273,11 @@ namespace StageCode.LIB
             orthoCombo.LevelEnabled = int.Parse(xml.Element("LevelEnabled")?.Value ?? "0");
             orthoCombo.Visibility = xml.Element("Visibility")?.Value ?? "Visible";
 
+            // Read SimpleName, Flag, and IoStream
+            orthoCombo.SimpleName = xml.Element("SimpleName")?.Value ?? "";
+            orthoCombo.Flage = bool.Parse(xml.Element("Flag")?.Value ?? "False");
+            orthoCombo.IoStream = xml.Element("IOStream")?.Value ?? "";
+
             return orthoCombo;
         }
 
@@ -279,6 +285,7 @@ namespace StageCode.LIB
         {
             return "ORTHO;DI;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + _VL[0] + ";" + _VL[1] + ";" + _VL[2] + ";" + _VL[3] + ";" + _VL[4] + ";" + _VL[5] + ";" + _VL[6] + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility + ";" + SimpleName + ";" + Flage.ToString() + ";" + IoStream;
         }
+
         public string WriteFileXML()
         {
             var xmlContent = new StringBuilder();
@@ -326,7 +333,6 @@ namespace StageCode.LIB
 
             return xmlContent.ToString();
         }
-
         #endregion
 
         #region Control Properties

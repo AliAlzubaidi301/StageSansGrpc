@@ -39,6 +39,8 @@ namespace StageCode.LIB
         private ModeRelais _ModeRelais;
         private string _captionValues = "OrthoRelay";
         private string _visibility = "1";
+        public string SimpleNames = "";
+
 
         /// <summary>
         /// Param non utilisé mais visible au cas où
@@ -135,81 +137,97 @@ namespace StageCode.LIB
         }
 
         #region Read/Write on .syn file
+
+        // Ajout de SimpleName dans la classe
+        private string SimpleName = "";
+
+        public string SimpleNam
+        {
+            get { return SimpleName; }
+            set { SimpleName = value; }
+        }
+
         public OrthoRel ReadFileXML(string xmlText)
         {
             XElement xml = XElement.Parse(xmlText);
             OrthoRel orthoRelControl = new OrthoRel();
 
-            // Parse le type et le nom de l'objet
-            orthoRelControl.Name = xml.Attribute("name")?.Value;
+            // Naviguer jusqu'à l'élément <Controls> et ensuite <Component>
+            XElement componentElement = xml.Element("Controls")?.Element("Component");
+            if (componentElement == null) return orthoRelControl;  // Si l'élément Component n'existe pas, retourner l'objet courant
 
-            // Parse la section <Apparence>
-            XElement? appearance = xml.Element("Apparence");
-            if (appearance != null)
+            // Vérifier que le type est bien "OrthoRel" (si nécessaire)
+            if (componentElement.Attribute("type")?.Value != "OrthoRel") return orthoRelControl;
+
+            // Accéder à l'élément <Apparence>
+            XElement appearance = componentElement.Element("Apparence");
+            if (appearance == null) return orthoRelControl;
+
+            // Extraire les propriétés générales
+            orthoRelControl.Caption = appearance.Element("Caption")?.Value ?? string.Empty;
+            orthoRelControl.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(appearance.Element("TextAlign")?.Value ?? "MiddleCenter"));
+            orthoRelControl.Precision = appearance.Element("Precision")?.Value ?? "0";
+            orthoRelControl.BackColor = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("BackColor")?.Value ?? "0"));
+            orthoRelControl.ForeColor = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ForeColor")?.Value ?? "0"));
+
+            // Extraire les propriétés de la police
+            orthoRelControl.Font = new Font(
+                appearance.Element("FontName")?.Value ?? "Arial",
+                float.Parse(appearance.Element("FontSize")?.Value ?? "12"),
+                FontStyle.Regular
+            );
+            if (bool.TryParse(appearance.Element("FontBold")?.Value, out bool fontBold) && fontBold)
             {
-                // Extraire les propriétés générales
-                orthoRelControl.Caption = appearance.Element("Caption")?.Value ?? string.Empty;
-                orthoRelControl.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(appearance.Element("TextAlign")?.Value ?? "MiddleCenter"));
-                orthoRelControl.Precision = (appearance.Element("Precision")?.Value ?? "0");
-                orthoRelControl.BackColor = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("BackColor")?.Value ?? "0"));
-                orthoRelControl.ForeColor = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ForeColor")?.Value ?? "0"));
-
-                // Extraire les propriétés de la police
-                orthoRelControl.Font = new Font(
-                    appearance.Element("FontName")?.Value ?? "Arial",
-                    float.Parse(appearance.Element("FontSize")?.Value ?? "12"),
-                    FontStyle.Regular
-                );
-                if (bool.TryParse(appearance.Element("FontBold")?.Value, out bool fontBold) && fontBold)
-                {
-                    orthoRelControl.Font = new Font(orthoRelControl.Font, FontStyle.Bold);
-                }
-                if (bool.TryParse(appearance.Element("FontItalic")?.Value, out bool fontItalic) && fontItalic)
-                {
-                    orthoRelControl.Font = new Font(orthoRelControl.Font, FontStyle.Italic);
-                }
-                if (bool.TryParse(appearance.Element("FontStrikeout")?.Value, out bool fontStrikeout) && fontStrikeout)
-                {
-                    orthoRelControl.Font = new Font(orthoRelControl.Font, FontStyle.Strikeout);
-                }
-                if (bool.TryParse(appearance.Element("FontUnderline")?.Value, out bool fontUnderline) && fontUnderline)
-                {
-                    orthoRelControl.Font = new Font(orthoRelControl.Font, FontStyle.Underline);
-                }
-
-                // Extraire les autres propriétés
-                orthoRelControl.TypeDesign = (TDesign)int.Parse(appearance.Element("TypeDesign")?.Value ?? "0");
-                orthoRelControl.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "1");
-                orthoRelControl.Size = new Size(
-                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
-                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
-                );
-                orthoRelControl.Location = new Point(
-                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
-                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
-                );
-                orthoRelControl.Variable = appearance.Element("Variable")?.Value ?? string.Empty;
-                orthoRelControl.RelaisMode = (ModeRelais)int.Parse(appearance.Element("RelaisMode")?.Value ?? "0");
-                orthoRelControl.TextOff = appearance.Element("TextOff")?.Value ?? string.Empty;
-                orthoRelControl.TextOn = appearance.Element("TextOn")?.Value ?? string.Empty;
-
-                // Extraire les valeurs VL
-                var vlElements = appearance.Elements().Where(e => e.Name.ToString().StartsWith("VL"));
-                orthoRelControl._VL = new string[vlElements.Count()];
-                foreach (var vl in vlElements)
-                {
-                    int index = int.Parse(vl.Name.ToString().Replace("VL", ""));
-                    orthoRelControl._VL[index] = vl.Value;
-                }
-
-                // Extraire les couleurs et niveaux
-                orthoRelControl.ColorOn = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorOn")?.Value ?? "0"));
-                orthoRelControl.ColorOff = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorOff")?.Value ?? "0"));
-                orthoRelControl.ColorErr = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorErr")?.Value ?? "0"));
-                orthoRelControl.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
-                orthoRelControl.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
-                orthoRelControl.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";
+                orthoRelControl.Font = new Font(orthoRelControl.Font, FontStyle.Bold);
             }
+            if (bool.TryParse(appearance.Element("FontItalic")?.Value, out bool fontItalic) && fontItalic)
+            {
+                orthoRelControl.Font = new Font(orthoRelControl.Font, FontStyle.Italic);
+            }
+            if (bool.TryParse(appearance.Element("FontStrikeout")?.Value, out bool fontStrikeout) && fontStrikeout)
+            {
+                orthoRelControl.Font = new Font(orthoRelControl.Font, FontStyle.Strikeout);
+            }
+            if (bool.TryParse(appearance.Element("FontUnderline")?.Value, out bool fontUnderline) && fontUnderline)
+            {
+                orthoRelControl.Font = new Font(orthoRelControl.Font, FontStyle.Underline);
+            }
+
+            // Extraire les autres propriétés
+            orthoRelControl.TypeDesign = (TDesign)int.Parse(appearance.Element("TypeDesign")?.Value ?? "0");
+            orthoRelControl.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "1");
+            orthoRelControl.Size = new Size(
+                int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
+                int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+            );
+            orthoRelControl.Location = new Point(
+                int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
+                int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+            );
+            orthoRelControl.Variable = appearance.Element("Variable")?.Value ?? string.Empty;
+            orthoRelControl.RelaisMode = (ModeRelais)int.Parse(appearance.Element("RelaisMode")?.Value ?? "0");
+            orthoRelControl.TextOff = appearance.Element("TextOff")?.Value ?? string.Empty;
+            orthoRelControl.TextOn = appearance.Element("TextOn")?.Value ?? string.Empty;
+
+            // Extraire les valeurs VL
+            var vlElements = appearance.Elements().Where(e => e.Name.ToString().StartsWith("VL"));
+            orthoRelControl._VL = new string[vlElements.Count()];
+            foreach (var vl in vlElements)
+            {
+                int index = int.Parse(vl.Name.ToString().Replace("VL", ""));
+                orthoRelControl._VL[index] = vl.Value;
+            }
+
+            // Extraire les couleurs et niveaux
+            orthoRelControl.ColorOn = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorOn")?.Value ?? "0"));
+            orthoRelControl.ColorOff = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorOff")?.Value ?? "0"));
+            orthoRelControl.ColorErr = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorErr")?.Value ?? "0"));
+            orthoRelControl.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
+            orthoRelControl.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
+            orthoRelControl.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";
+
+            // Récupérer la valeur SimpleName
+            orthoRelControl.SimpleName = componentElement.Attribute("name")?.Value ?? string.Empty;
 
             return orthoRelControl;
         }
@@ -278,13 +296,17 @@ namespace StageCode.LIB
                 Visibility = splitPvirgule[33];
             }
 
+            // Assigner SimpleName depuis les données du fichier
+            SimpleName = splitPvirgule[1];
+
             return this;
         }
 
         public string WriteFile()
         {
-            return "ORTHO;REL;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Variable + ";" + Convert.ToInt32((int)RelaisMode).ToString() + ";;" + TextOff + ";" + TextOn + ";" + _VL[5] + ";" + _VL[6] + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+            return "ORTHO;REL;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Variable + ";" + Convert.ToInt32((int)RelaisMode).ToString() + ";;" + TextOff + ";" + TextOn + ";" + _VL[5] + ";" + _VL[6] + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility + ";" + SimpleName;
         }
+
         public string WriteFileXML()
         {
             var xmlContent = new StringBuilder();
@@ -330,10 +352,14 @@ namespace StageCode.LIB
             xmlContent.AppendLine("      </Apparence>");
             xmlContent.AppendLine("    </Component>");
 
+            // Ajouter SimpleName
+            xmlContent.AppendLine($"    <SimpleName>{SimpleName}</SimpleName>");
+
             return xmlContent.ToString();
         }
 
         #endregion
+
 
         #region Children Properties
         [Category("Apparence")]

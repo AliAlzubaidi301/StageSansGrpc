@@ -101,6 +101,39 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="LIB\Chart.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LIB\CONT1.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LIB\INTEG.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LIB\OrthoLabel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LIB\OrthoPbar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LIB\OrthoRel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LIB\OrthoResult.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LIB\OrthoStmLineGroupe.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LIB\OrthoTabname.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LIB\OrthoVarname.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="LIB\Reticule.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

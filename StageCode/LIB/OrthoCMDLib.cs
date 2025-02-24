@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -157,123 +158,69 @@ namespace StageCode.LIB
         public static OrthoCMDLib ReadFileXML(string xmlText)
         {
             XElement xml = XElement.Parse(xmlText);
-
             OrthoCMDLib orthoCMDLibControl = new OrthoCMDLib();
 
             orthoCMDLibControl.Name = xml.Attribute("name")?.Value;
-
             XElement? appearance = xml.Element("Apparence");
             if (appearance != null)
             {
-                orthoCMDLibControl.Caption = appearance.Element("Caption")?.Value;
+                orthoCMDLibControl._captionValues = appearance.Element("Caption")?.Value ?? "OrthoCMD";
+                orthoCMDLibControl._comment = appearance.Element("Comment")?.Value ?? "";
+                orthoCMDLibControl._Format = appearance.Element("Precision")?.Value ?? "";
+                orthoCMDLibControl._BorderW = int.Parse(appearance.Element("BorderWidth")?.Value ?? "1");
+                orthoCMDLibControl._Commande = appearance.Element("Commande")?.Value ?? "";
 
-                int textAlignValue = int.Parse(appearance.Element("TextAlign")?.Value ?? "2");
-                orthoCMDLibControl.TextAlign = ContentAlignment_Parser.Get_Alignment(textAlignValue);
-
-                orthoCMDLibControl.Precision = appearance.Element("Precision")?.Value ?? "0";
-                orthoCMDLibControl.BackColor = Color.FromName(appearance.Element("BackColor")?.Value ?? "Transparent");
-                orthoCMDLibControl.ForeColor = Color.FromName(appearance.Element("ForeColor")?.Value ?? "Transparent");
-
-                orthoCMDLibControl.Font = new Font(
-                    appearance.Element("FontName")?.Value ?? "Arial",
-                    float.Parse(appearance.Element("FontSize")?.Value ?? "10"),
-                    (FontStyle)Enum.Parse(typeof(FontStyle), appearance.Element("FontStyle")?.Value ?? "Regular")
-                );
-
-                // Extraire TypeDesign en tant qu'énumération
-                string typeDesignValue = appearance.Element("TypeDesign")?.Value ?? "0"; // Valeur par défaut
-                orthoCMDLibControl.TypeDesign = (TDesign)Enum.Parse(typeof(TDesign), typeDesignValue);
-
-                orthoCMDLibControl.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "1");
-                orthoCMDLibControl.Size = new Size(
-                    int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
-                    int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
-                );
-                orthoCMDLibControl.Location = new Point(
-                    int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
-                    int.Parse(appearance.Element("LocationY")?.Value ?? "0")
-                );
-                orthoCMDLibControl.Commande = appearance.Element("Commande")?.Value;
-
-                orthoCMDLibControl._VarLink = new string[10]; // Ajuste la taille si nécessaire
-                for (int i = 0; i < 10; i++)
+                orthoCMDLibControl._VarLink = new string[9];
+                for (int i = 0; i < 9; i++)
                 {
-                    orthoCMDLibControl._VarLink[i] = appearance.Element($"VarLink{i}")?.Value ?? string.Empty;
+                    orthoCMDLibControl._VarLink[i] = appearance.Element($"VarLink{i}")?.Value ?? "";
                 }
 
-                orthoCMDLibControl.ColorOn = Color.FromName(appearance.Element("ColorOn")?.Value ?? "Transparent");
-                orthoCMDLibControl.ColorOff = Color.FromName(appearance.Element("ColorOff")?.Value ?? "Transparent");
-                orthoCMDLibControl.ColorErr = Color.FromName(appearance.Element("ColorErr")?.Value ?? "Transparent");
-                orthoCMDLibControl.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
-                orthoCMDLibControl.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
-                orthoCMDLibControl.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";
-            }
+                orthoCMDLibControl._ColorOn = Color.FromName(appearance.Element("ColorOn")?.Value ?? "Lime");
+                orthoCMDLibControl._ColorOff = Color.FromName(appearance.Element("ColorOff")?.Value ?? "Red");
+                orthoCMDLibControl._ColorErr = Color.FromArgb(
+                    int.Parse(appearance.Element("ColorErrR")?.Value ?? "207"),
+                    int.Parse(appearance.Element("ColorErrG")?.Value ?? "192"),
+                    int.Parse(appearance.Element("ColorErrB")?.Value ?? "192"));
 
-            // Retourner l'objet OrthoCMDLib avec les données extraites
+                orthoCMDLibControl._LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
+                orthoCMDLibControl._LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
+                orthoCMDLibControl._visibility = appearance.Element("Visibility")?.Value ?? "1";
+            }
             return orthoCMDLibControl;
         }
 
-
-        public string WriteFile()
-        {
-            return "ORTHO;CMD;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Commande + ";" + _VarLink[0] + ";" + _VarLink[1] + ";" + _VarLink[2] + ";" + _VarLink[3] + ";" + _VarLink[4] + ";" + _VarLink[5] + ";" + _VarLink[6] + ";" + _VarLink[7] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
-        }
         public string WriteFileXML()
         {
             var xmlContent = new StringBuilder();
-
             xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine($"      <Caption>{_captionValues}</Caption>");
+            xmlContent.AppendLine($"      <Comment>{_comment}</Comment>");
+            xmlContent.AppendLine($"      <Precision>{_Format}</Precision>");
+            xmlContent.AppendLine($"      <BorderWidth>{_BorderW}</BorderWidth>");
+            xmlContent.AppendLine($"      <Commande>{_Commande}</Commande>");
 
-            // Section des propriétés du composant
-            xmlContent.AppendLine($"      <Caption>{Caption}</Caption>");
-            xmlContent.AppendLine($"      <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(TextAlign)}</TextAlign>");
-            xmlContent.AppendLine($"      <Precision>{Precision}</Precision>");
-            xmlContent.AppendLine($"      <BackColor>{ToOle(BackColor)}</BackColor>");
-            xmlContent.AppendLine($"      <ForeColor>{ToOle(ForeColor)}</ForeColor>");
-            xmlContent.AppendLine($"      <FontName>{Font.Name}</FontName>");
-            xmlContent.AppendLine($"      <FontSize>{Font.Size}</FontSize>");
-            xmlContent.AppendLine($"      <FontStrikeout>{Font.Strikeout}</FontStrikeout>");
-            xmlContent.AppendLine($"      <FontUnderline>{Font.Underline}</FontUnderline>");
-            xmlContent.AppendLine($"      <FontBold>{Font.Bold}</FontBold>");
-            xmlContent.AppendLine($"      <FontItalic>{Font.Italic}</FontItalic>");
-            xmlContent.AppendLine($"      <TypeDesign>{Convert.ToInt32(TypeDesign)}</TypeDesign>");
-            xmlContent.AppendLine($"      <BorderWidth>{BorderWidth}</BorderWidth>");
-            xmlContent.AppendLine($"      <SizeHeight>{Size.Height}</SizeHeight>");
-            xmlContent.AppendLine($"      <SizeWidth>{Size.Width}</SizeWidth>");
-            xmlContent.AppendLine($"      <LocationY>{Location.Y}</LocationY>");
-            xmlContent.AppendLine($"      <LocationX>{Location.X}</LocationX>");
-            xmlContent.AppendLine($"      <Commande>{Commande}</Commande>");
-
-            // _VarLink values
             for (int i = 0; i < _VarLink.Length; i++)
             {
                 xmlContent.AppendLine($"      <VarLink{i}>{_VarLink[i]}</VarLink{i}>");
             }
 
-            xmlContent.AppendLine($"      <ColorOn>{ToOle(ColorOn)}</ColorOn>");
-            xmlContent.AppendLine($"      <ColorOff>{ToOle(ColorOff)}</ColorOff>");
-            xmlContent.AppendLine($"      <ColorErr>{ToOle(ColorErr)}</ColorErr>");
-            xmlContent.AppendLine($"      <LevelVisible>{LevelVisible}</LevelVisible>");
-            xmlContent.AppendLine($"      <LevelEnabled>{LevelEnabled}</LevelEnabled>");
-            xmlContent.AppendLine($"      <Visibility>{Visibility}</Visibility>");
-
-            // Section Apparence supplémentaire
-            xmlContent.AppendLine("      <Apparence>");
-            xmlContent.AppendLine($"        <Backcolor value=\"{ToOle(BackColor)}\"/>");
-            xmlContent.AppendLine($"        <FontSize value=\"{Font.Size}\"/>");
-            xmlContent.AppendLine($"        <FontName value=\"{Font.Name}\"/>");
-            xmlContent.AppendLine($"        <LevelVisible value=\"{LevelVisible}\"/>");
-            xmlContent.AppendLine($"        <LevelEnabled value=\"{LevelEnabled}\"/>");
-            xmlContent.AppendLine($"        <Visibility value=\"{Visibility}\"/>");
-            xmlContent.AppendLine("      </Apparence>");
-
-            // Fermeture du composant
+            xmlContent.AppendLine($"      <ColorOn>{_ColorOn.Name}</ColorOn>");
+            xmlContent.AppendLine($"      <ColorOff>{_ColorOff.Name}</ColorOff>");
+            xmlContent.AppendLine($"      <ColorErrR>{_ColorErr.R}</ColorErrR>");
+            xmlContent.AppendLine($"      <ColorErrG>{_ColorErr.G}</ColorErrG>");
+            xmlContent.AppendLine($"      <ColorErrB>{_ColorErr.B}</ColorErrB>");
+            xmlContent.AppendLine($"      <LevelVisible>{_LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"      <LevelEnabled>{_LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"      <Visibility>{_visibility}</Visibility>");
             xmlContent.AppendLine("    </Component>");
-
-            // Retourner le contenu XML généré
             return xmlContent.ToString();
         }
 
+        public string WriteFile()
+        {
+            return "ORTHO;CMD;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Commande + ";" + _VarLink[0] + ";" + _VarLink[1] + ";" + _VarLink[2] + ";" + _VarLink[3] + ";" + _VarLink[4] + ";" + _VarLink[5] + ";" + _VarLink[6] + ";" + _VarLink[7] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+        }
         #endregion
 
         #region Control Properties

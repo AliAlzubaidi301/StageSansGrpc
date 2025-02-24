@@ -158,11 +158,10 @@ namespace StageCode.LIB
         public OrthoEdit ReadFileXML(string txt)
         {
             XElement component = XElement.Parse(txt);
-
             var appearance = component.Element("Apparence");
 
             Text = appearance.Element("Text")?.Value ?? "";
-            TextAlign = (HorizontalAlignment)(ContentAlignment)Enum.Parse(typeof(ContentAlignment), appearance.Element("TextAlign")?.Value ?? "MiddleCenter");
+          //  TextAlign = (HorizontalAlignment)(ContentAlignment)Enum.Parse(typeof(ContentAlignment), appearance.Element("TextAlign")?.Value ?? "MiddleCenter");
             Format = appearance.Element("Format")?.Value ?? "";
             BackColor = ColorTranslator.FromOle(int.Parse(appearance.Element("BackColor")?.Value ?? "0"));
             ForeColor = ColorTranslator.FromOle(int.Parse(appearance.Element("ForeColor")?.Value ?? "0"));
@@ -187,12 +186,12 @@ namespace StageCode.LIB
             );
             VarMeM = appearance.Element("VarMeM")?.Value ?? "";
             FieldType = (FieldType)Enum.Parse(typeof(FieldType), appearance.Element("FieldType")?.Value ?? "0");
-            ValMin = (appearance.Element("ValMin")?.Value ?? "0");
-            ValMax = (appearance.Element("ValMax")?.Value ?? "100");
+            ValMin = appearance.Element("ValMin")?.Value ?? "0";
+            ValMax = appearance.Element("ValMax")?.Value ?? "100";
             MaxLength = int.Parse(appearance.Element("MaxLength")?.Value ?? "255");
             PasswordChar = appearance.Element("PasswordChar")?.Value ?? "";
             TextVirtualKeyboard = appearance.Element("TextVirtualKeyboard")?.Value ?? "";
-            Det = (appearance.Element("Det")?.Value ?? "false");
+            Det = appearance.Element("Det")?.Value ?? "false";
 
             ColorOn = ColorTranslator.FromOle(int.Parse(appearance.Element("ColorOn")?.Value ?? "0"));
             ColorOff = ColorTranslator.FromOle(int.Parse(appearance.Element("ColorOff")?.Value ?? "0"));
@@ -200,15 +199,11 @@ namespace StageCode.LIB
 
             LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
             LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
-            Visibility = (appearance.Element("Visibility")?.Value ?? "true");
+            Visibility = appearance.Element("Visibility")?.Value ?? "true";
 
             return this;
         }
 
-        public string WriteFile()
-        {
-            return "ORTHO;EDIT;" + this.Text + ";" + TextAlign.ToString() + ";" + Format + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";5;" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + VarMeM + ";" + Convert.ToInt32(FieldType).ToString() + ";" + ValMin + ";" + ValMax + ";;" + MaxLength.ToString() + ";" + PasswordChar + ";" + TextVirtualKeyboard + ";" + Det + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
-        }
         public string WriteFileXML()
         {
             var xmlContent = new StringBuilder();
@@ -216,7 +211,7 @@ namespace StageCode.LIB
             xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
             xmlContent.AppendLine("      <Apparence>");
             xmlContent.AppendLine($"        <Text>{Text}</Text>");
-            xmlContent.AppendLine($"        <TextAlign>{TextAlign.ToString()}</TextAlign>");
+            xmlContent.AppendLine($"        <TextAlign>{TextAlign}</TextAlign>");
             xmlContent.AppendLine($"        <Format>{Format}</Format>");
             xmlContent.AppendLine($"        <BackColor>{ToOle(BackColor)}</BackColor>");
             xmlContent.AppendLine($"        <ForeColor>{ToOle(ForeColor)}</ForeColor>");
@@ -232,7 +227,7 @@ namespace StageCode.LIB
             xmlContent.AppendLine($"        <LocationY>{Location.Y}</LocationY>");
             xmlContent.AppendLine($"        <LocationX>{Location.X}</LocationX>");
             xmlContent.AppendLine($"        <VarMeM>{VarMeM}</VarMeM>");
-            xmlContent.AppendLine($"        <FieldType>{Convert.ToInt32(FieldType)}</FieldType>");
+            xmlContent.AppendLine($"        <FieldType>{(int)FieldType}</FieldType>");
             xmlContent.AppendLine($"        <ValMin>{ValMin}</ValMin>");
             xmlContent.AppendLine($"        <ValMax>{ValMax}</ValMax>");
             xmlContent.AppendLine($"        <MaxLength>{MaxLength}</MaxLength>");
@@ -250,6 +245,12 @@ namespace StageCode.LIB
 
             return xmlContent.ToString();
         }
+
+        public string WriteFile()
+        {
+            return "ORTHO;EDIT;" + this.Text + ";" + TextAlign.ToString() + ";" + Format + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";5;" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + VarMeM + ";" + Convert.ToInt32(FieldType).ToString() + ";" + ValMin + ";" + ValMax + ";;" + MaxLength.ToString() + ";" + PasswordChar + ";" + TextVirtualKeyboard + ";" + Det + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+        }
+
 
 
         #endregion

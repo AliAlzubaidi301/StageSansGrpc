@@ -109,42 +109,49 @@ namespace StageCode.LIB
             XElement xml = XElement.Parse(xmlText);
             Reticule reticuleControl = new Reticule();
 
-            // Parse le type et le nom de l'objet
-            reticuleControl.Name = xml.Attribute("name")?.Value;
+            // Trouver l'élément <Component> avec un type spécifique (ici "Reticule") et son nom
+            XElement componentElement = xml.Descendants("Component")
+                                           .FirstOrDefault(c => c.Attribute("type")?.Value == "Reticule");
 
-            // Parse la section <Reticule>
-            XElement? reticuleElement = xml.Element("Reticule");
-            if (reticuleElement != null)
+            if (componentElement != null)
             {
-                // Extraire les propriétés générales
-                reticuleControl.Size = new Size(
-                    int.Parse(reticuleElement.Element("SizeWidth")?.Value ?? "100"),
-                    int.Parse(reticuleElement.Element("SizeHeight")?.Value ?? "100")
-                );
-                reticuleControl.Location = new Point(
-                    int.Parse(reticuleElement.Element("LocationX")?.Value ?? "0"),
-                    int.Parse(reticuleElement.Element("LocationY")?.Value ?? "0")
-                );
-                reticuleControl.Detecteur = reticuleElement.Element("Detecteur")?.Value ?? string.Empty;
-                reticuleControl.LabX = reticuleElement.Element("LabX")?.Value ?? string.Empty;
-                reticuleControl.UnitX = reticuleElement.Element("UnitX")?.Value ?? string.Empty;
-                reticuleControl.LabY = reticuleElement.Element("LabY")?.Value ?? string.Empty;
-                reticuleControl.UnitY = reticuleElement.Element("UnitY")?.Value ?? string.Empty;
-                reticuleControl.LabS = reticuleElement.Element("LabS")?.Value ?? string.Empty;
-                reticuleControl.UnitS = reticuleElement.Element("UnitS")?.Value ?? string.Empty;
-                reticuleControl.LabW = reticuleElement.Element("LabW")?.Value ?? string.Empty;
-                reticuleControl.LevelVisible = int.Parse(reticuleElement.Element("LevelVisible")?.Value ?? "0");
-                reticuleControl.LevelEnabled = int.Parse(reticuleElement.Element("LevelEnabled")?.Value ?? "0");
-                reticuleControl.Visibility = reticuleElement.Element("Visibility")?.Value ?? "Visible";
+                // Extraire le nom du composant
+                reticuleControl.Name = componentElement.Attribute("name")?.Value;
+
+                // Extraire la section <Reticule> qui se trouve sous <Component>
+                XElement reticuleElement = componentElement.Element("Reticule");
+                if (reticuleElement != null)
+                {
+                    // Extraire les propriétés générales
+                    reticuleControl.Size = new Size(
+                        int.Parse(reticuleElement.Element("SizeWidth")?.Value ?? "100"),
+                        int.Parse(reticuleElement.Element("SizeHeight")?.Value ?? "100")
+                    );
+                    reticuleControl.Location = new Point(
+                        int.Parse(reticuleElement.Element("LocationX")?.Value ?? "0"),
+                        int.Parse(reticuleElement.Element("LocationY")?.Value ?? "0")
+                    );
+                    reticuleControl.Detecteur = reticuleElement.Element("Detecteur")?.Value ?? string.Empty;
+                    reticuleControl.LabX = reticuleElement.Element("LabX")?.Value ?? string.Empty;
+                    reticuleControl.UnitX = reticuleElement.Element("UnitX")?.Value ?? string.Empty;
+                    reticuleControl.LabY = reticuleElement.Element("LabY")?.Value ?? string.Empty;
+                    reticuleControl.UnitY = reticuleElement.Element("UnitY")?.Value ?? string.Empty;
+                    reticuleControl.LabS = reticuleElement.Element("LabS")?.Value ?? string.Empty;
+                    reticuleControl.UnitS = reticuleElement.Element("UnitS")?.Value ?? string.Empty;
+                    reticuleControl.LabW = reticuleElement.Element("LabW")?.Value ?? string.Empty;
+
+                    // Extraire les niveaux de visibilité et d'activation
+                    reticuleControl.LevelVisible = int.Parse(reticuleElement.Element("LevelVisible")?.Value ?? "0");
+                    reticuleControl.LevelEnabled = int.Parse(reticuleElement.Element("LevelEnabled")?.Value ?? "0");
+
+                    // Extraire la visibilité
+                    reticuleControl.Visibility = reticuleElement.Element("Visibility")?.Value ?? "Visible";
+                }
             }
 
             return reticuleControl;
         }
 
-        public string WriteFile()
-        {
-            return "RETICULE;" + this.Name + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Detecteur + ";" + LabX + ";" + UnitX + ";" + LabY + ";" + UnitY + ";" + LabS + ";" + UnitS + ";" + LabW + ";" + _LevelVisible.ToString() + ";" + _LevelEnabled.ToString() + ";" + Visibility;
-        }
         public string WriteFileXML()
         {
             var xmlContent = new StringBuilder();
@@ -176,6 +183,10 @@ namespace StageCode.LIB
             return xmlContent.ToString();
         }
 
+        public string WriteFile()
+        {
+            return "RETICULE;" + this.Name + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Detecteur + ";" + LabX + ";" + UnitX + ";" + LabY + ";" + UnitY + ";" + LabS + ";" + UnitS + ";" + LabW + ";" + _LevelVisible.ToString() + ";" + _LevelEnabled.ToString() + ";" + Visibility;
+        }
         #endregion
 
         #region Control Properties
