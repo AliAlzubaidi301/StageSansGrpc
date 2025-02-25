@@ -21,7 +21,7 @@ namespace Orthodyne.CoreCommunicationLayer.Controllers
         public const string COMPONENT_COMPUTE_METHOD_NAME = "authorized_compute_method";
 
         public Dictionary<long, IoController> ioControllers = new Dictionary<long, IoController>();
-        private List<IoStream> ioStreams = new List<IoStream>();
+        public List<IoStream> ioStreams = new List<IoStream>();
 
         private Dictionary<string, StreamMetadataItem> ioStreamMetadatas = new Dictionary<string, StreamMetadataItem>();
         private ModuleIoRemoteMethodInvocationService remoteMethods;
@@ -40,7 +40,9 @@ namespace Orthodyne.CoreCommunicationLayer.Controllers
         public bool SameSimpleNameForStmline { get; set; }
 
         public Dictionary<long, IoController> GetIoControllers() { return this.ioControllers; }
-        public List<IoStream> GetIoStreams() { return this.ioStreams; }
+        public List<IoStream> GetIoStreams() {
+            return this.ioStreams; 
+        }
         public Dictionary<string, StreamMetadataItem> IoStreamMetadatas { get { return this.ioStreamMetadatas; } }
         public IoController GetIoController(long idComponent)
         {

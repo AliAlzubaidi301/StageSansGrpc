@@ -354,9 +354,9 @@ namespace Orthodyne.CoreCommunicationLayer.Services
 
         }
 
-        public IIOManager.GetStreamDataTableOutput GetStreamDataTable(int idStreamComponent)
+        public GetStreamDataTableOutput GetStreamDataTable(int idStreamComponent)
         {
-            IIOManager.GetStreamDataTableOutput output = new IIOManager.GetStreamDataTableOutput();
+            GetStreamDataTableOutput output = new IIOManager.GetStreamDataTableOutput();
 
             try
             {
@@ -369,7 +369,6 @@ namespace Orthodyne.CoreCommunicationLayer.Services
                 new LoggedException(Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Version.ToString(), this.GetType().Name, MethodBase.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
                 return output;
             }
-
         }
         public IIOManager.GetStreamGroupsOutput GetStreamGroups(long idStream)
         {

@@ -45,5 +45,20 @@ namespace Orthodyne.CoreCommunicationLayer.Services
                 new LoggedException(Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Version.ToString(), this.GetType().Name, MethodBase.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
             }
         }
+
+        //public LoadFlagsElementsOutput LoadFlags(LoadFlagsElementInput input)
+        //{
+        //    LoadFlagsElementsOutput output = new LoadFlagsElementsOutput();
+        //    try
+        //    {
+        //        output = clientInterface.LoadFlagsElements(input);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        new LoggedException(Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Version.ToString(), this.GetType().Name, MethodBase.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
+        //    }
+        //    return output;
+        //}
+
     }
 }

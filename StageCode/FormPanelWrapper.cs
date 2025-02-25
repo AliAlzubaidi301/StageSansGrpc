@@ -1,4 +1,10 @@
-﻿using StageCode;
+﻿using CodeExceptionManager.Model.Objects;
+using Google.Protobuf.Collections;
+using IIOManager;
+using Orthodyne.CoreCommunicationLayer.Controllers;
+using Orthodyne.CoreCommunicationLayer.Models.IO;
+using Orthodyne.CoreCommunicationLayer.Services;
+using StageCode;
 using StageCode.LIB;
 using System;
 using System.Collections.Generic;
@@ -7,7 +13,10 @@ using System.Data.Entity.Core.Metadata.Edm;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 
@@ -23,6 +32,10 @@ public class ControlPictureBoxWrapper
     [DisplayName("Donnée OrthoCoeur")]
     public List<CheckBoxItem> OrthoCoreItem { get; } = new();
 
+    [Browsable(true), Description("Sélectionner un stream"), Editor(typeof(CheckBoxListEditor), typeof(UITypeEditor)), TypeConverter(typeof(CheckBoxItemListConverter))]
+    [DisplayName("Donnée Stream")]
+    public List<CheckBoxItem> Stream { get; } = new();
+
     public Point Location
     {
         get => PictureBox?.Location ?? new Point(5, 5);
@@ -36,6 +49,9 @@ public class ControlPictureBoxWrapper
 
         if(Forme1.ioControllers.Count >0)
         OrthoCORE();
+
+        if(Forme1.listeStrem.Count >0)
+        AddStreamsToCheckBoxList();
     }
 
     public void OrthoCORE()
@@ -70,6 +86,91 @@ public class ControlPictureBoxWrapper
             var checkbox = new CheckBoxItem { Name = tmp, Selected = false };
            
             OrthoCoreItem.Add(checkbox);
+        }
+    }
+    public void AddStreamsToCheckBoxList()
+    {
+        if(Forme1.listeStrem.Count == 0)
+        {
+            return;
+        }
+        var module = new ModuleIoController(new ModuleIoRemoteMethodInvocationService(""),new GeneralController());
+
+        module.ioStreams = Forme1.listeStrem;
+
+        List<IoStream> targetStream = module.GetIoStreams();
+
+        foreach(IoStream stream in targetStream)
+        {
+            if(!stream.IsArchive)
+            {
+                CheckBoxItem box = new CheckBoxItem();
+                box.Name = stream.ShortType;
+                box.Selected = false;
+
+                this.Stream.Add(box);
+            }
+        }
+        //module.Stream
+    }
+
+    public void ShowAllStreamsDataTable()
+    {
+        try
+        {
+            // Construire un message avec les données de tous les streams
+            StringBuilder message = new StringBuilder();
+            message.AppendLine("Données de tous les Streams :");
+            message.AppendLine();
+
+            // Récupérer les streams définis via GetDefinedStreams
+            IIOManager.GetDefinedStreamsOutput definedStreamsOutput = new ModuleIoRemoteMethodInvocationService("").GetDefinedStreams();
+
+            // Parcourir chaque stream défini
+            foreach (StreamElement stream in definedStreamsOutput.Streams)
+            {
+                int streamId = Convert.ToInt32(stream.Identifier);
+
+                // Récupérer les données du stream via GetStreamDataTable
+                RepeatedField<StreamDataTableElement> streamDataTable =
+                    new ModuleIoRemoteMethodInvocationService("").GetStreamDataTable(streamId).DataTable;
+
+                message.AppendLine($"Stream ID : {streamId}");
+                message.AppendLine($"Nom du Stream : {stream.ComponentType}");
+                message.AppendLine(stream.ShortTypeName);
+                message.AppendLine("Données du Stream :");
+
+                // Parcourir chaque élément de la table de données du stream
+                foreach (IIOManager.StreamDataTableElement dataTableItem in streamDataTable)
+                {
+                    message.AppendLine($"- Nom : {dataTableItem.DataName}");
+                    message.AppendLine($"  Unité : {dataTableItem.Unit}");
+                    message.AppendLine($"  Message d'erreur : {dataTableItem.Errormsg}");
+                    message.AppendLine($"  Priorité : {dataTableItem.Priority}");
+                    message.AppendLine($"  Type : {dataTableItem.Type}");
+                    message.AppendLine($"  ID : {dataTableItem.Id}");
+                    message.AppendLine($"  Valeur Min : {dataTableItem.Minvalue}");
+                    message.AppendLine($"  Valeur Max : {dataTableItem.Maxvalue}");
+                    message.AppendLine();
+                }
+
+                message.AppendLine("--------------------------------------------------");
+            }
+
+            // Afficher le message dans une MessageBox
+            MessageBox.Show(message.ToString(), "Données de tous les Streams", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            // Loguer l'exception si une erreur se produit
+            new LoggedException(
+                Assembly.GetExecutingAssembly().GetName().Name,
+                Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+                this.GetType().Name,
+                MethodBase.GetCurrentMethod().Name,
+                ex.Message,
+                ex.StackTrace
+            );
         }
     }
 

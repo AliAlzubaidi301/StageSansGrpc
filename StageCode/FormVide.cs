@@ -12,12 +12,18 @@ namespace OrthoDesigner
         private Point _dragStartPoint;
         private Size _resizeStartSize;
         private Point _resizeStartPoint;
-        public Label label; 
+        public Label label;
+        private Point MousePosition = new Point();
 
-        public FormVide()
+        FormWindowsResize autreForme ;
+        Panel pnlViewHost;
+
+        public FormVide(Panel panelResize)
         {
             InitializeComponent();
             this.FormBorderStyle = FormBorderStyle.None; // Enlever la bordureZ
+
+            this.pnlViewHost = panelResize;
         }
 
         private void FormVide_Load(object sender, EventArgs e)
@@ -159,10 +165,63 @@ namespace OrthoDesigner
                 Size = new Size(40, 30),
                 Location = new Point(panel2.Width - 90, 5)
             };
+
+            Form autreForme = null;
+
             btnAgrandir.Click += (s, e) =>
             {
                 this.WindowState = this.WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
                 btnAgrandir.Text = this.WindowState == FormWindowState.Maximized ? "❐" : "⬜";
+            };
+
+            btnAgrandir.MouseEnter += (s, e) =>
+            {
+                if (autreForme == null || autreForme.IsDisposed)
+                {
+                    autreForme = new FormWindowsResize(this,pnlViewHost)
+                    {
+                        Size = new Size(132, 157), // Petite taille
+                        StartPosition = FormStartPosition.Manual,
+                        BackColor = Color.FromArgb(64, 64, 64),
+                        FormBorderStyle = FormBorderStyle.None
+                    };
+
+                    // Ne pas cacher la fenêtre dès que la souris quitte
+                    autreForme.MouseLeave += (sender, args) =>
+                    {
+                        // Si la souris quitte la fenêtre ou ses contrôles, cacher la fenêtre
+                        if (!autreForme.Bounds.Contains(Cursor.Position))
+                        {
+                            bool isCursorOverControl = false;
+
+                            // Vérifie si la souris est au-dessus de l'un des contrôles
+                            foreach (Control control in autreForme.Controls)
+                            {
+                                if (control.Bounds.Contains(autreForme.PointToClient(Cursor.Position)))
+                                {
+                                    isCursorOverControl = true;
+                                    break;
+                                }
+                            }
+
+                            if (!isCursorOverControl)
+                            {
+                                autreForme.Hide();
+                            }
+                        }
+                    };
+                }
+
+                // Positionner sous le bouton
+                Point screenPosition = btnAgrandir.PointToScreen(new Point(btnAgrandir.Width / 2 - autreForme.Width / 3, btnAgrandir.Height));
+                autreForme.Location = screenPosition;
+
+                autreForme.Show();
+            };
+
+            btnAgrandir.MouseLeave += (s, e) =>
+            {
+                // Ne rien faire ici, on ne cache pas la fenêtre encore
             };
 
             Button btnReduire = new Button

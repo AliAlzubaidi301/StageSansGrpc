@@ -1,5 +1,6 @@
 ﻿using CodeExceptionManager.Controller.DatabaseEngine.Implementation;
 using CodeExceptionManager.Model.Objects;
+using Google.Protobuf.Collections;
 using Grpc.Core;
 using IIOManager;
 using OrthoDesigner;
@@ -67,6 +68,8 @@ namespace StageCode
         private static Channel grpcChannel;
         private static Methods.MethodsClient clientInterface;
         public static Dictionary<long, IoController> ioControllers = new Dictionary<long, IoController>();
+        public static List<IoStream> listeStrem = new List<IoStream>() ;
+        private object remoteMethods;
 
         #endregion
 
@@ -76,7 +79,7 @@ namespace StageCode
         {
             InitializeComponent();
 
-            forme = new FormVide();
+            forme = new FormVide(pnlViewHost);
             pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
 
             // Affichage de la forme dans le panel
@@ -853,7 +856,7 @@ namespace StageCode
         {
             pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
 
-            FormVide tmp = new FormVide();
+            FormVide tmp = new FormVide(pnlViewHost);
 
             tmp.Location = new Point(0, 0);
 
@@ -926,6 +929,9 @@ namespace StageCode
                 // Affichage de la boîte de dialogue pour le choix de sauvegarde en XML
                 DialogResult saveResult = MessageBox.Show(saveMessage, saveTitle, MessageBoxButtons.YesNo);
 
+                //ModuleGeneralConfigurationRevocationService a = new ModuleGeneralConfigurationRevocationService("","");
+                //a.LoadConfigurationElements();
+
                 if (saveResult == DialogResult.Yes)
                 {
                     ExportFormToXml();  // Sauvegarder en XML
@@ -942,7 +948,7 @@ namespace StageCode
 
             pnlViewHost.Controls.Clear();
 
-            forme = new FormVide();
+            forme = new FormVide(pnlViewHost);
 
             pnlViewHost.BorderStyle = BorderStyle.FixedSingle;
 
@@ -2590,6 +2596,7 @@ namespace StageCode
 
                 listPic.Clear();
 
+                Aligner = false;
                 return;
             }
 
@@ -2834,8 +2841,8 @@ namespace StageCode
                 {
                     ContextMenuStrip contextMenu = new ContextMenuStrip();
 
-                    contextMenu.Items.Add("aligner Horizontalement", null, Horizontale);
-                    contextMenu.Items.Add("aligner Verticalement", null, Verticale);
+                    contextMenu.Items.Add("Horizontalement", null, Horizontale);
+                    contextMenu.Items.Add("Verticalement", null, Verticale);
 
                     if (parentPictureBox != null)
                         contextMenu.Show(parentPictureBox, e.Location);
@@ -2923,7 +2930,7 @@ namespace StageCode
 
             if (listPic.Count > 1)
             {
-                foreach (var pic in pictureBoxes)
+                foreach (var pic in listPic)
                 {
                     pic.Left += deltaX;
                     pic.Top += deltaY;
@@ -2973,7 +2980,7 @@ namespace StageCode
                                 if (Math.Abs(pictureBox.Right - pic.Right) <= tolerance)
                                     g.DrawLine(pen, right1, right2);
 
-                                using (Pen pen2 = new Pen(Color.Red, 2))
+                                using (Pen pen2 = new Pen(Color.Blue, 2))
                                 {
                                     if (Math.Abs(pictureBox.Top - pic.Bottom) <= tolerance)
                                         g.DrawLine(pen2, top1, bottom2);
@@ -3192,6 +3199,15 @@ namespace StageCode
                     MessageBox.Show("Connexion reussis");
 
                     ChargerContenuOrthoCore();
+
+                    //listeStrem = GetAllStreamsDataTableIoStream();
+
+                    listeStrem = GetAllStreamsDataTable();
+
+                    if (listeStrem.Count <= 0)
+                    {
+                        MessageBox.Show("Aucun Stream trouver !");
+                    }
                 }
                 catch(Exception ex)
                 {
@@ -3494,7 +3510,94 @@ namespace StageCode
         //    return string.Empty;
         //}
 
+        public List<IoStream> GetAllStreamsDataTableIoStream()
+        {
+            List<IoStream> streamsList = new List<IoStream>();
 
+            try
+            {
+                var module = new ModuleIoController(new ModuleIoRemoteMethodInvocationService(""), new GeneralController());
+                var liste = module.GetIoStreams();
+            }
+            catch (Exception ex)
+            {
+                LogException(ex);
+            }
+
+            return streamsList;
+        }
+
+
+        public List<IoStream> GetAllStreamsDataTable()
+        {
+            List<IoStream> streamsList = new List<IoStream>();
+
+            try
+            {
+                IIOManager.GetDefinedStreamsOutput definedStreamsOutput = new ModuleIoRemoteMethodInvocationService("").GetDefinedStreams();
+
+                foreach (IIOManager.StreamElement stream in definedStreamsOutput.Streams)
+                {
+                    int streamId = Convert.ToInt32(stream.Identifier);
+                    RepeatedField<IIOManager.StreamDataTableElement> streamDataTable =
+                        new ModuleIoRemoteMethodInvocationService("").GetStreamDataTable(streamId).DataTable;
+
+                    IoStream tmpstream = new IoStream()
+                    {
+                        Id = streamId,
+                        ComponentType = stream.ComponentType,
+                        ShortType = stream.ShortTypeName,
+                        IsArchive = stream.IsArchive
+                    };
+
+                    foreach (IIOManager.StreamDataTableElement dataTableItem in streamDataTable)
+                    {
+                        IoStreamDataTableItem ioStreamDataTable = new IoStreamDataTableItem()
+                        {
+                            Name = dataTableItem.DataName,
+                            Unit = dataTableItem.Unit,
+                            ErrorMsg = dataTableItem.Errormsg,
+                            Priority = (int)dataTableItem.Priority,
+                            Type = (int)dataTableItem.Type,
+                            Id = Convert.ToInt32(dataTableItem.Id),
+                            MinValue = Convert.ToDouble(dataTableItem.Minvalue),
+                            MaxValue = Convert.ToDouble(dataTableItem.Maxvalue)
+                        };
+
+                        foreach (IIOManager.ElementProperty elementPropertyAsIdentifier in dataTableItem.PropertiesAsIdentifier)
+                        {
+                            ioStreamDataTable.GetIdentifierProperties().Add(new IoItemPropertyItem()
+                            {
+                                PropertyName = elementPropertyAsIdentifier.PropertyName,
+                                PropertyValueInString = elementPropertyAsIdentifier.ParsedToStringPropertyValue
+                            });
+                        }
+
+                        foreach (string item in dataTableItem.AuthorizedControllerTypes)
+                        {
+                            ioStreamDataTable.GetauthorizedControllerTypes().Add(item);
+                        }
+
+                        tmpstream.GetIoStreamDataTableItems().Add(ioStreamDataTable);
+                    }
+
+                    streamsList.Add(tmpstream);
+                }
+            }
+            catch (Exception ex)
+            {
+                new LoggedException(
+                    Assembly.GetExecutingAssembly().GetName().Name,
+                    Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+                    this.GetType().Name,
+                    MethodBase.GetCurrentMethod().Name,
+                    ex.Message,
+                    ex.StackTrace
+                );
+            }
+
+            return streamsList;
+        }
 
         #endregion
     }
