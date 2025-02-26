@@ -3204,6 +3204,9 @@ namespace StageCode
 
                     listeStrem = GetAllStreamsDataTable();
 
+                    var i = new ModuleGeneralConfigurationControllerOrthoDesigner(new ModuleGeneralConfigurationRevocationService(""), new GeneralController());
+                    //i.F
+
                     if (listeStrem.Count <= 0)
                     {
                         MessageBox.Show("Aucun Stream trouver !");
@@ -3484,7 +3487,7 @@ namespace StageCode
                     module.DEFAULT_CORE_IP = DEFAULT_CORE_IP;
                     module.PORT_NUMBER = PORT_NUMBER;
 
-                    var b = new ModuleIoController(module, new GeneralController());
+                    var b = new ModuleIoControllerOrthoDesigner(module, new GeneralController());
                     b.RefreshControllers();
 
                     ioControllers = b.ioControllers;
@@ -3549,7 +3552,7 @@ namespace StageCode
 
             try
             {
-                var module = new ModuleIoController(new ModuleIoRemoteMethodInvocationService(""), new GeneralController());
+                var module = new ModuleIoControllerOrthoDesigner(new ModuleIoRemoteMethodInvocationService(""), new GeneralController());
                 var liste = module.GetIoStreams();
             }
             catch (Exception ex)

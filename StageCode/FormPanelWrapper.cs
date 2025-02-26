@@ -94,7 +94,7 @@ public class ControlPictureBoxWrapper
         {
             return;
         }
-        var module = new ModuleIoController(new ModuleIoRemoteMethodInvocationService(""),new GeneralController());
+        var module = new ModuleIoControllerOrthoDesigner(new ModuleIoRemoteMethodInvocationService(""),new GeneralController());
 
         module.ioStreams = Forme1.listeStrem;
 

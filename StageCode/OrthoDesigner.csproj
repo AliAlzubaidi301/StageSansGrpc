@@ -68,6 +68,9 @@
     <Reference Include="OrthoDILib">
       <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoDILib.dll</HintPath>
     </Reference>
+    <Reference Include="Orthodyne.CoreCommunicationLayer">
+      <HintPath>Z:\CommunicationLayer\Orthodyne.CoreCommunicationLayer.dll</HintPath>
+    </Reference>
     <Reference Include="OrthoEditLib">
       <HintPath>..\..\StageDocRecue\DesignerSynoptic\DesignerSynoptic\bin\dll\OrthoEditLib.dll</HintPath>
     </Reference>

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Orthodyne.CoreCommunicationLayer.Controllers
 {
-    public class ModuleIoController
+    public class ModuleIoControllerOrthoDesigner
     {
         public const string TYPE_PROPERTY_NAME = "ComponentTypeName";
         public const string COMPONENT_NAME_TYPE_NAME = "ComponentName";
@@ -96,7 +96,7 @@ namespace Orthodyne.CoreCommunicationLayer.Controllers
         }
         */
 
-        internal ModuleIoController(ModuleIoRemoteMethodInvocationService remoteMethods, GeneralController generalController)
+        internal ModuleIoControllerOrthoDesigner(ModuleIoRemoteMethodInvocationService remoteMethods, GeneralController generalController)
         {
             try
             {

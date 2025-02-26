@@ -26,7 +26,7 @@ namespace Orthodyne.CoreCommunicationLayer.Controllers
         private ModuleSchedulerRemoteMethodInvocationService schedulerRemoteMethodInvocationService = null;
         private ModuleGeneralConfigurationRevocationService generalConfigurationRemoteInvocationService = null;
 
-        private ModuleIoController moduleIoController;
+        private ModuleIoControllerOrthoDesigner moduleIoController;
         private ModuleJobController moduleJobController;
         private ModuleAccessController moduleAccessController;
         private ModuleAnalysisController moduleAnalysisController;
@@ -36,11 +36,11 @@ namespace Orthodyne.CoreCommunicationLayer.Controllers
         private ModuleRequestController moduleRequestController;
         private ModuleAuditTrailController moduleAuditTrailController;
         private ModuleSchedulerController moduleSchedulerController;
-        private ModuleGeneralConfigurationController moduleGeneralConfigurationController;
+        private ModuleGeneralConfigurationControllerOrthoDesigner moduleGeneralConfigurationController;
 
         public bool IsCoreAvalaible { get; set; }
 
-        public ModuleGeneralConfigurationController ModuleGeneralConfigurationController
+        public ModuleGeneralConfigurationControllerOrthoDesigner ModuleGeneralConfigurationController
         {
             get
             {
@@ -62,7 +62,7 @@ namespace Orthodyne.CoreCommunicationLayer.Controllers
                 return this.moduleJobController;
             }
         }
-        public ModuleIoController ModuleIoController
+        public ModuleIoControllerOrthoDesigner ModuleIoController
         {
             get
             {
@@ -156,10 +156,10 @@ namespace Orthodyne.CoreCommunicationLayer.Controllers
         {
             try
             {
-                moduleGeneralConfigurationController = new ModuleGeneralConfigurationController(generalConfigurationRemoteInvocationService, this);
+                moduleGeneralConfigurationController = new ModuleGeneralConfigurationControllerOrthoDesigner(generalConfigurationRemoteInvocationService, this);
                 moduleAlarmController = new ModuleAlarmController(alarmRemoteMethodInvocationService, this);
                 moduleAnalysisController = new ModuleAnalysisController(analysisRemoteMethodInvocationService, this);
-                moduleIoController = new ModuleIoController(ioRemoteMethodInvocationService, this);
+                moduleIoController = new ModuleIoControllerOrthoDesigner(ioRemoteMethodInvocationService, this);
                 moduleJobController = new ModuleJobController(jobRemoteMethodInvocationService, this);
                 moduleAccessController = new ModuleAccessController(accessRemoteMethodInvocationService, this);
                 moduleTranslationController = new ModuleTranslationController(translationRemoteMethodInvocationService, this);
