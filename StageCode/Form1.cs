@@ -3350,29 +3350,62 @@ namespace StageCode
         #region PropertyGrid1
         private void propertyGrid1_PropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
         {
-            PropertyGrid pr = sender as PropertyGrid;
+            PropertyGrid? pr = sender as PropertyGrid;
 
-            if (pr != null)
+            if (pr != null && pr.SelectedObject is ControlPictureBoxWrapper selectedControl)
             {
-                var selectedObject = pr.SelectedObject;
-
-                // Vérifie si l'objet sélectionné est de type ControlPictureBoxWrapper
-                if (selectedObject is ControlPictureBoxWrapper tmp)
-                {
-                    tmp.AfficherSelection();
-                }
+                selectedControl.AfficherSelection();
+            }
+            else
+            {
+                return; // Sortir immédiatement si selectedControl est nul
             }
 
-            if (sender is Control objet)
+            Control? control = null;
+
+            foreach (FormVide form in pnlViewHost.Controls.OfType<FormVide>())
             {
-                PictureBox? pic = objet.Parent as PictureBox;
-                if (pic != null)
+                foreach (PictureBox pictureBox in form.panel1.Controls.OfType<PictureBox>())
                 {
-                    pic.Size = new Size(objet.Size.Width + 10, objet.Size.Height + 10);
+                    if (pictureBox.Controls.Count > 0 && pictureBox.Controls[0].Name == this.ControlSélectionner)
+                    {
+                        control = pictureBox.Controls[0];
+                        break;
+                    }
+                }
+                if (control != null) break;
+            }
+
+            // Si aucun contrôle n'est trouvé, sortir de la méthode
+            if (control == null) return;
+
+            foreach (var i in listeControle)
+            {
+                if (i.Control != null
+                    && i.Control.GetType() == selectedControl.Control.GetType()
+                    && i.Stream.Count == selectedControl.Stream.Count)
+                {
+                    for (int z = 0; z < i.Stream.Count; z++)
+                    {
+                        i.Stream[z].Selected = selectedControl.Stream[z].Selected;
+                    }
+
+                    // Concaténer tous les noms sélectionnés avec une virgule
+                    if (i.Control is OrthoDI orthoDI)
+                    {
+                        orthoDI.IoStream = string.Join(",", i.Stream.Where(s => s.Selected).Select(s => s.Name));
+                    }
+                    if (i.Control is OrthoRel Rel)
+                    {
+                        Rel.IoStream = string.Join(",", i.Stream.Where(s => s.Selected).Select(s => s.Name));
+                    }
+                    if (i.Control is OrthoDI AD)
+                    {
+                        AD.IoStream = string.Join(",", i.Stream.Where(s => s.Selected).Select(s => s.Name));
+                    }
                 }
             }
         }
-
 
         private void lstToolbox_SelectedIndexChanged(object sender, EventArgs e)
         {

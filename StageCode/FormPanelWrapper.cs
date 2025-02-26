@@ -255,9 +255,22 @@ public class ControlPictureBoxWrapper
             }
         }
     }
-
-
 }
+
+public class CheckBoxItem
+{
+    public static string A = "Bonjour";
+
+    [DisplayName(nameof(A))]
+    public string Name { get; set; }
+
+    [Category("Options"), Description("Cochez cette option")]
+    public bool Selected { get; set; }
+
+    public override string ToString() => Name; // Permet l'affichage du Name directement
+}
+
+// ✅ Éditeur de liste de CheckBoxItem
 
 public class CheckBoxItemListConverter : ExpandableObjectConverter
 {
@@ -296,20 +309,6 @@ public class CheckBoxItemPropertyDescriptor : PropertyDescriptor
 }
 
 // ✅ Classe CheckBoxItem
-public class CheckBoxItem
-{
-    public static string A = "Bonjour";
-
-    [DisplayName(nameof(A))]
-    public string Name { get; set; }
-
-    [Category("Options"), Description("Cochez cette option")]
-    public bool Selected { get; set; }
-
-    public override string ToString() => Name; // Permet l'affichage du Name directement
-}
-
-// ✅ Éditeur de liste de CheckBoxItem
 public class CheckBoxListEditor : UITypeEditor
 {
     public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) => UITypeEditorEditStyle.DropDown;
@@ -326,8 +325,6 @@ public class CheckBoxListEditor : UITypeEditor
         return value;
     }
 }
-
-
 
 public class FormPanelWrapper
 {

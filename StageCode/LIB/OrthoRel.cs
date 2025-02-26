@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic;
+using Orthodyne.CoreCommunicationLayer.Models.IO;
 using StageCode.LIB;
 using StageCode.Other;
 using System;
@@ -40,6 +41,7 @@ namespace StageCode.LIB
         private string _captionValues = "OrthoRelay";
         private string _visibility = "1";
         public string SimpleNames = "";
+        private String _ioStream;
 
 
         /// <summary>
@@ -135,17 +137,25 @@ namespace StageCode.LIB
             }
             return ColorTranslator.ToOle(Datain).ToString();
         }
-
-        #region Read/Write on .syn file
-
         // Ajout de SimpleName dans la classe
         private string SimpleName = "";
+        private bool _Flage;
+
+        public bool Flage
+        {
+            get => _Flage;
+            set => _Flage = value;
+        }
+
+
 
         public string SimpleNam
         {
             get { return SimpleName; }
             set { SimpleName = value; }
         }
+
+        #region Read/Write on .syn file
 
         public OrthoRel ReadFileXML(string xmlText)
         {
@@ -229,6 +239,8 @@ namespace StageCode.LIB
             // Récupérer la valeur SimpleName
             orthoRelControl.SimpleName = componentElement.Attribute("name")?.Value ?? string.Empty;
 
+            orthoRelControl.Flage = bool.Parse(xml.Element("Flag")?.Value ?? "False");
+            orthoRelControl.IoStream = xml.Element("IOStream")?.Value ?? "";
             return orthoRelControl;
         }
 
@@ -298,13 +310,15 @@ namespace StageCode.LIB
 
             // Assigner SimpleName depuis les données du fichier
             SimpleName = splitPvirgule[1];
+            Flage = bool.Parse(splitPvirgule[35]);  // Adjust index based on position in the array
+            IoStream = splitPvirgule[36];  // Adjust index based on position
 
             return this;
         }
 
         public string WriteFile()
         {
-            return "ORTHO;REL;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Variable + ";" + Convert.ToInt32((int)RelaisMode).ToString() + ";;" + TextOff + ";" + TextOn + ";" + _VL[5] + ";" + _VL[6] + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility + ";" + SimpleName;
+            return "ORTHO;REL;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Variable + ";" + Convert.ToInt32((int)RelaisMode).ToString() + ";;" + TextOff + ";" + TextOn + ";" + _VL[5] + ";" + _VL[6] + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility + ";" + SimpleName + ";" +Flage.ToString() + ";" + IoStream ;
         }
 
         public string WriteFileXML()
@@ -354,6 +368,8 @@ namespace StageCode.LIB
 
             // Ajouter SimpleName
             xmlContent.AppendLine($"    <SimpleName>{SimpleName}</SimpleName>");
+            xmlContent.AppendLine($"      <Flag>{Flage}</Flag>");
+            xmlContent.AppendLine($"      <IOStream>{IoStream}</IOStream>");
 
             return xmlContent.ToString();
         }
@@ -1103,6 +1119,11 @@ namespace StageCode.LIB
         public Type GType()
         {
             return GetType();
+        }
+        public String IoStream
+        {
+            get { return _ioStream; }
+            set { _ioStream = value; }
         }
     }
 }
