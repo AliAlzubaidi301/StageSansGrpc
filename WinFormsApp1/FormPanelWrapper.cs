@@ -1,4 +1,9 @@
 ﻿using CodeExceptionManager.Model.Objects;
+using Google.Protobuf.Collections;
+using IIOManager;
+using Orthodyne.CoreCommunicationLayer.Controllers;
+using Orthodyne.CoreCommunicationLayer.Models.IO;
+using Orthodyne.CoreCommunicationLayer.Services;
 using StageCode;
 using StageCode.LIB;
 using System;
@@ -41,11 +46,11 @@ public class ControlPictureBoxWrapper
         PictureBox = pictureBox ?? throw new ArgumentNullException(nameof(pictureBox));
         Control = control ?? throw new ArgumentNullException(nameof(control));
 
-        //if(Forme1.ioControllers.Count >0)
-        //OrthoCORE();
+        if (Forme1.ioControllers.Count > 0)
+            OrthoCORE();
 
-        //if(Forme1.listeStrem.Count >0)
-        //AddStreamsToCheckBoxList();
+        if (Forme1.listeStrem.Count > 0)
+            AddStreamsToCheckBoxList();
     }
 
     public void OrthoCORE()
@@ -84,120 +89,120 @@ public class ControlPictureBoxWrapper
     }
     public void AddStreamsToCheckBoxList()
     {
-        //if(Forme1.listeStrem.Count == 0)
-        //{
-        //    return;
-        //}
-        //var module = new ModuleIoControllerOrthoDesigner(new ModuleIoRemoteMethodInvocationService(""),new GeneralController());
+        if (Forme1.listeStrem.Count == 0)
+        {
+            return;
+        }
+        var module = new ModuleIoControllerOrthoDesigner(new ModuleIoRemoteMethodInvocationService(""),  new GeneralController(""));
 
-        //module.ioStreams = Forme1.listeStrem;
+        Forme1.listeStrem = module.GetIoStreams() ;
 
-        //List<IoStream> targetStream = module.GetIoStreams();
+        List<IoStream> targetStream = module.GetIoStreams();
 
-        //foreach(IoStream stream in targetStream)
-        //{
-        //    if(!stream.IsArchive)
-        //    {
-        //        CheckBoxItem box = new CheckBoxItem();
-        //        box.Name = stream.ShortType;
-        //        box.Selected = false;
+        foreach (IoStream stream in targetStream)
+        {
+            if (!stream.IsArchive)
+            {
+                CheckBoxItem box = new CheckBoxItem();
+                box.Name = stream.ShortType;
+                box.Selected = false;
 
-        //        this.Stream.Add(box);
-        //    }
-        //}
-        ////module.Stream
+                this.Stream.Add(box);
+            }
+        }
+        //module.Stream
     }
 
     public void ShowAllStreamsDataTable()
     {
-        //try
-        //{
-        //    // Construire un message avec les données de tous les streams
-        //    StringBuilder message = new StringBuilder();
-        //    message.AppendLine("Données de tous les Streams :");
-        //    message.AppendLine();
+        try
+        {
+            // Construire un message avec les données de tous les streams
+            StringBuilder message = new StringBuilder();
+            message.AppendLine("Données de tous les Streams :");
+            message.AppendLine();
 
-        //    // Récupérer les streams définis via GetDefinedStreams
-        //    IIOManager.GetDefinedStreamsOutput definedStreamsOutput = new ModuleIoRemoteMethodInvocationService("").GetDefinedStreams();
+            // Récupérer les streams définis via GetDefinedStreams
+            GetDefinedStreamsOutput definedStreamsOutput = new ModuleIoRemoteMethodInvocationService("").GetDefinedStreams();
 
-        //    // Parcourir chaque stream défini
-        //    foreach (StreamElement stream in definedStreamsOutput.Streams)
-        //    {
-        //        int streamId = Convert.ToInt32(stream.Identifier);
+            // Parcourir chaque stream défini
+            foreach (StreamElement stream in definedStreamsOutput.Streams)
+            {
+                int streamId = Convert.ToInt32(stream.Identifier);
 
-        //        // Récupérer les données du stream via GetStreamDataTable
-        //        RepeatedField<StreamDataTableElement> streamDataTable =
-        //            new ModuleIoRemoteMethodInvocationService("").GetStreamDataTable(streamId).DataTable;
+                // Récupérer les données du stream via GetStreamDataTable
+                RepeatedField<StreamDataTableElement> streamDataTable =
+                    new ModuleIoRemoteMethodInvocationService("").GetStreamDataTable(streamId).DataTable;
 
-        //        message.AppendLine($"Stream ID : {streamId}");
-        //        message.AppendLine($"Nom du Stream : {stream.ComponentType}");
-        //        message.AppendLine(stream.ShortTypeName);
-        //        message.AppendLine("Données du Stream :");
+                message.AppendLine($"Stream ID : {streamId}");
+                message.AppendLine($"Nom du Stream : {stream.ComponentType}");
+                message.AppendLine(stream.ShortTypeName);
+                message.AppendLine("Données du Stream :");
 
-        //        // Parcourir chaque élément de la table de données du stream
-        //        foreach (IIOManager.StreamDataTableElement dataTableItem in streamDataTable)
-        //        {
-        //            message.AppendLine($"- Nom : {dataTableItem.DataName}");
-        //            message.AppendLine($"  Unité : {dataTableItem.Unit}");
-        //            message.AppendLine($"  Message d'erreur : {dataTableItem.Errormsg}");
-        //            message.AppendLine($"  Priorité : {dataTableItem.Priority}");
-        //            message.AppendLine($"  Type : {dataTableItem.Type}");
-        //            message.AppendLine($"  ID : {dataTableItem.Id}");
-        //            message.AppendLine($"  Valeur Min : {dataTableItem.Minvalue}");
-        //            message.AppendLine($"  Valeur Max : {dataTableItem.Maxvalue}");
-        //            message.AppendLine();
-        //        }
+                // Parcourir chaque élément de la table de données du stream
+                foreach (StreamDataTableElement dataTableItem in streamDataTable)
+                {
+                    message.AppendLine($"- Nom : {dataTableItem.DataName}");
+                    message.AppendLine($"  Unité : {dataTableItem.Unit}");
+                    message.AppendLine($"  Message d'erreur : {dataTableItem.Errormsg}");
+                    message.AppendLine($"  Priorité : {dataTableItem.Priority}");
+                    message.AppendLine($"  Type : {dataTableItem.Type}");
+                    message.AppendLine($"  ID : {dataTableItem.Id}");
+                    message.AppendLine($"  Valeur Min : {dataTableItem.Minvalue}");
+                    message.AppendLine($"  Valeur Max : {dataTableItem.Maxvalue}");
+                    message.AppendLine();
+                }
 
-        //        message.AppendLine("--------------------------------------------------");
-        //    }
+                message.AppendLine("--------------------------------------------------");
+            }
 
-        //    // Afficher le message dans une MessageBox
-        //    MessageBox.Show(message.ToString(), "Données de tous les Streams", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //}
-        //catch (Exception ex)
-        //{
-        //    // Loguer l'exception si une erreur se produit
-        //    new LoggedException(
-        //        Assembly.GetExecutingAssembly().GetName().Name,
-        //        Assembly.GetExecutingAssembly().GetName().Version.ToString(),
-        //        this.GetType().Name,
-        //        MethodBase.GetCurrentMethod().Name,
-        //        ex.Message,
-        //        ex.StackTrace
-        //    );
-        //}
+            // Afficher le message dans une MessageBox
+            MessageBox.Show(message.ToString(), "Données de tous les Streams", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            // Loguer l'exception si une erreur se produit
+            new LoggedException(
+                Assembly.GetExecutingAssembly().GetName().Name,
+                Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+                this.GetType().Name,
+                MethodBase.GetCurrentMethod().Name,
+                ex.Message,
+                ex.StackTrace
+            );
+        }
     }
 
     public List<string> TrierOrthoCoeurParGrpc(string typeFiltre)
     {
         List<string> listes = new List<string>();
 
-        //var liste = Forme1.ioControllers.Keys.ToList();
+        var liste = Forme1.ioControllers.Keys.ToList();
 
-        //foreach (var tmpKey in liste)
-        //{
-        //    var controller = Forme1.ioControllers[tmpKey];
-        //    string type = "";
+        foreach (var tmpKey in liste)
+        {
+            var controller = Forme1.ioControllers[tmpKey];
+            string type = "";
 
-        //    for (int i = 0; i < controller.FullName.Length; i++)
-        //    {
-        //        if (controller.FullName[i] == '(')
-        //        {
-        //            for (int j = i + 1; j < controller.FullName.Length; j++)
-        //            {
-        //                if (controller.FullName[j] == ')')
-        //                    break;
-        //                type += controller.FullName[j];
-        //            }
-        //            break;
-        //        }
-        //    }
+            for (int i = 0; i < controller.FullName.Length; i++)
+            {
+                if (controller.FullName[i] == '(')
+                {
+                    for (int j = i + 1; j < controller.FullName.Length; j++)
+                    {
+                        if (controller.FullName[j] == ')')
+                            break;
+                        type += controller.FullName[j];
+                    }
+                    break;
+                }
+            }
 
-        //    if (type == typeFiltre)
-        //    {
-        //        listes.Add(controller.SimpleNameNewValue); 
-        //    }
-        //}
+            if (type == typeFiltre)
+            {
+                listes.Add(controller.SimpleNameNewValue);
+            }
+        }
 
         return listes;
     }

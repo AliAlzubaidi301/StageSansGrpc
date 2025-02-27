@@ -9,8 +9,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.6.1" />
+    <PackageReference Include="Grpc" Version="1.18.0" />
+    <PackageReference Include="Grpc.Core" Version="1.18.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="CodeExceptionManager">
       <HintPath>..\..\..\..\Downloads\CodeExceptionManager.dll</HintPath>
+    </Reference>
+    <Reference Include="GeneralConfigurationManagerInterface">
+      <HintPath>..\..\..\MODE DES BITS\Orthodyne.CoreCommunicationLayer\Orthodyne.CoreCommunicationLayer\GeneralConfigurationManagerInterface.dll</HintPath>
+    </Reference>
+    <Reference Include="IOManagerInterface">
+      <HintPath>Z:\ModuleGeneralConfiguration\GeneralconfigurationManager\IOManagerInterface.dll</HintPath>
+    </Reference>
+    <Reference Include="Orthodyne.Common.Configuration">
+      <HintPath>Z:\ModuleGeneralConfiguration\GeneralconfigurationManager\Orthodyne.Common.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Orthodyne.CoreCommunicationLayer">
+      <HintPath>Z:\CommunicationLayer\Orthodyne.CoreCommunicationLayer.dll</HintPath>
     </Reference>
   </ItemGroup>
 

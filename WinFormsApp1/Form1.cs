@@ -1,14 +1,23 @@
 ﻿using CodeExceptionManager.Controller.DatabaseEngine.Implementation;
 using CodeExceptionManager.Model.Objects;
+using Google.Protobuf.Collections;
+using Grpc.Core;
+using IGeneralConfigurationManager;
+using IIOManager;
+using Microsoft.Data.Sqlite;
 using OrthoDesigner;
 using OrthoDesigner.LIB;
 using OrthoDesigner.LIB___Copier;
 using OrthoDesigner.Other;
+using Orthodyne.CoreCommunicationLayer.Controllers;
+using Orthodyne.CoreCommunicationLayer.Models.IO;
+using Orthodyne.CoreCommunicationLayer.Services;
 using StageCode.LIB;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml.Linq;
+using Methods = IGeneralConfigurationManager.Methods;
 
 namespace StageCode
 {
@@ -53,14 +62,14 @@ namespace StageCode
 
         #region Attribut GRPC
 
-        //private string PORT_NUMBER = "50099";
-        //private string DEFAULT_CORE_IP = "10.1.6.11";
-        //private static string applicationGuid = "TROP GALERE GRPC";
-        //private static Channel grpcChannel;
-        //private static Methods.MethodsClient clientInterface;
-        //public static Dictionary<long, IoController> ioControllers = new Dictionary<long, IoController>();
-        //public static List<IoStream> listeStrem = new List<IoStream>() ;
-        //private object remoteMethods;
+        private string PORT_NUMBER = "50099";
+        private string DEFAULT_CORE_IP = "10.1.6.11";
+        private static string applicationGuid = "TROP GALERE GRPC";
+        private static Channel grpcChannel;
+        private static Methods.MethodsClient clientInterface;
+        public static Dictionary<long, IoController> ioControllers = new Dictionary<long, IoController>();
+        public static List<IoStream> listeStrem = new List<IoStream>();
+        private object remoteMethods;
 
         #endregion
 
@@ -152,7 +161,7 @@ namespace StageCode
             //    string dbPath = @"C:\Users\Alial\Desktop\Developpement\Tools\OrthoDesigner\StageCode\bin\Debug\Datas\Databases\ErrorLogs.db";
             //    string connectionString = $"Data Source={dbPath};Version=3;";
 
-            //    using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+            //    using (SqliteConnection connection = new SQLiteConnection(connectionString))
             //    {
             //        connection.Open();
 
@@ -3105,123 +3114,253 @@ namespace StageCode
         #endregion
 
         #region Logo Click
+
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            //if (toolStripMenuItem2.Image != null)
-            //{
-            //    bool AncienConnecter = FormeIPEtPORT.connecter;
+            if (toolStripMenuItem2.Image != null)
+            {
+                bool AncienConnecter = FormeIPEtPORT.connecter;
 
-            //    if (FormeIPEtPORT.connecter)
-            //    {
-            //        this.imageTmpLogo.Image = toolStripMenuItem1.Image;
-            //        toolStripMenuItem1.Image = toolStripMenuItem2.Image;
-            //        toolStripMenuItem2.Image = imageTmpLogo.Image;
+                if (FormeIPEtPORT.connecter)
+                {
+                    this.imageTmpLogo.Image = toolStripMenuItem1.Image;
+                    toolStripMenuItem1.Image = toolStripMenuItem2.Image;
+                    toolStripMenuItem2.Image = imageTmpLogo.Image;
 
-            //        if (!AncienConnecter)
-            //        {
-            //            toolStripMenuItem1.Tag = "Deconnexion";
-            //        }
-            //        else
-            //        {
-            //            toolStripMenuItem1.Tag = "Conexion";
-            //            FormeIPEtPORT.ip = "";
-            //            this.btnIP.Text = FormeIPEtPORT.ip.ToString();
-            //            // Vérifie si SelectedObject est bien du type ControlPictureBoxWrapper
-            //            if (propertyGrid1.SelectedObject is ControlPictureBoxWrapper tmp)
-            //            {
-            //                // Trouve l'élément dans la liste en fonction du contrôle sélectionné
-            //                var controlWrapper = this.listeControle.Find(item => item.Control == tmp.Control);
+                    if (!AncienConnecter)
+                    {
+                        toolStripMenuItem1.Tag = "Deconnexion";
+                    }
+                    else
+                    {
+                        toolStripMenuItem1.Tag = "Conexion";
+                        FormeIPEtPORT.ip = "";
+                        this.btnIP.Text = FormeIPEtPORT.ip.ToString();
+                        // Vérifie si SelectedObject est bien du type ControlPictureBoxWrapper
+                        if (propertyGrid1.SelectedObject is ControlPictureBoxWrapper tmp)
+                        {
+                            // Trouve l'élément dans la liste en fonction du contrôle sélectionné
+                            var controlWrapper = this.listeControle.Find(item => item.Control == tmp.Control);
 
-            //                if (controlWrapper != null)
-            //                {
-            //                    // Crée une nouvelle instance de ControlPictureBoxWrapper avec le PictureBox et le Control
-            //                    var tmp2 = new ControlPictureBoxWrapper(tmp.PictureBox, tmp.Control);
+                            if (controlWrapper != null)
+                            {
+                                // Crée une nouvelle instance de ControlPictureBoxWrapper avec le PictureBox et le Control
+                                var tmp2 = new ControlPictureBoxWrapper(tmp.PictureBox, tmp.Control);
 
-            //                    // Retire l'élément existant de la liste
-            //                    listeControle.Remove(controlWrapper);
+                                // Retire l'élément existant de la liste
+                                listeControle.Remove(controlWrapper);
 
-            //                    // Ajoute la nouvelle instance à la liste
-            //                    listeControle.Add(tmp2);
+                                // Ajoute la nouvelle instance à la liste
+                                listeControle.Add(tmp2);
 
-            //                    // Met à jour l'objet sélectionné dans le PropertyGrid
-            //                    propertyGrid1.SelectedObject = tmp2;
-            //                }
-            //            }
-            //        }
+                                // Met à jour l'objet sélectionné dans le PropertyGrid
+                                propertyGrid1.SelectedObject = tmp2;
+                            }
+                        }
+                    }
 
-            //        FormeIPEtPORT.connecter = !FormeIPEtPORT.connecter;
+                    FormeIPEtPORT.connecter = !FormeIPEtPORT.connecter;
 
-            //        return;
-            //    }
+                    return;
+                }
 
-            //    formePortAndIP.ShowDialog();
+                formePortAndIP.ShowDialog();
 
-            //    if (AncienConnecter != FormeIPEtPORT.connecter)
-            //    {
-            //        this.imageTmpLogo.Image = toolStripMenuItem1.Image;
-            //        toolStripMenuItem1.Image = toolStripMenuItem2.Image;
-            //        toolStripMenuItem2.Image = imageTmpLogo.Image;
+                if (AncienConnecter != FormeIPEtPORT.connecter)
+                {
+                    this.imageTmpLogo.Image = toolStripMenuItem1.Image;
+                    toolStripMenuItem1.Image = toolStripMenuItem2.Image;
+                    toolStripMenuItem2.Image = imageTmpLogo.Image;
 
-            //        if (!AncienConnecter)
-            //        {
-            //            toolStripMenuItem1.Tag = "Deconnexion";
-            //        }
-            //        else
-            //        {
-            //            toolStripMenuItem1.Tag = "Conexion";
-            //            FormeIPEtPORT.ip = "";
-            //        }
+                    if (!AncienConnecter)
+                    {
+                        toolStripMenuItem1.Tag = "Deconnexion";
+                    }
+                    else
+                    {
+                        toolStripMenuItem1.Tag = "Conexion";
+                        FormeIPEtPORT.ip = "";
+                    }
 
-            //        this.btnIP.Text = FormeIPEtPORT.ip.ToString();
-            //    }
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Aucune image de fond définie sur toolStripMenuItem2.");
-            //}
+                    this.btnIP.Text = FormeIPEtPORT.ip.ToString();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Aucune image de fond définie sur toolStripMenuItem2.");
+            }
 
-            //if(FormeIPEtPORT.connecter)
-            //{
-            //    DEFAULT_CORE_IP = FormeIPEtPORT.ip;
-            //    PORT_NUMBER = formePortAndIP.portNumbers;
+            if (FormeIPEtPORT.connecter)
+            {
+                DEFAULT_CORE_IP = FormeIPEtPORT.ip;
+                PORT_NUMBER = formePortAndIP.portNumbers;
 
-            //    try
-            //    {
-            //        grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, ChannelCredentials.Insecure);
-            //        clientInterface = new Methods.MethodsClient(grpcChannel);
+                try
+                {
+                    grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, ChannelCredentials.Insecure);
+                    clientInterface = new Methods.MethodsClient(grpcChannel);
 
-            //        MessageBox.Show("Connexion reussis");
+                    MessageBox.Show("Connexion reussis");
 
-            //        ChargerContenuOrthoCore();
+                    ChargerContenuOrthoCore();
 
-            //        //listeStrem = GetAllStreamsDataTableIoStream();
+                    //listeStrem = GetAllStreamsDataTableIoStream();
 
-            //        listeStrem = GetAllStreamsDataTable();
+                    listeStrem = GetAllStreamsDataTable();
 
-            //        var i = new ModuleGeneralConfigurationControllerOrthoDesigner(new ModuleGeneralConfigurationRevocationService(""), new GeneralController());
-            //        //i.F
+                    var i = new ModuleGeneralConfigurationControllerOrthoDesigner(new ModuleGeneralConfigurationRevocationService("",this.DEFAULT_CORE_IP), new GeneralController("",this.DEFAULT_CORE_IP));
+                    var liste = i.LoadFlags();
 
-            //        if (listeStrem.Count <= 0)
-            //        {
-            //            MessageBox.Show("Aucun Stream trouver !");
-            //        }
-            //    }
-            //    catch(Exception ex)
-            //    {
-            //        LogException(ex);
-            //    }
-            //}
-            //else
-            //{
-            //    DEFAULT_CORE_IP = "";
-            //    PORT_NUMBER = "";
+                    if (listeStrem.Count <= 0)
+                    {
+                        MessageBox.Show("Aucun Stream trouver !");
+                    }
 
-            //    grpcChannel?.ShutdownAsync().Wait();
+                    foreach(var list in liste)
+                    {
+                        MessageBox.Show(list.Name.ToString());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogException(ex);
+                }
+            }
+            else
+            {
+                DEFAULT_CORE_IP = "";
+                PORT_NUMBER = "";
 
-            //    Forme1.ioControllers.Clear();
-            //}
-        
+                grpcChannel?.ShutdownAsync().Wait();
+
+                Forme1.ioControllers.Clear();
+            }
         }
+
+        //private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        //{
+        //    if (toolStripMenuItem2.Image != null)
+        //    {
+        //        bool AncienConnecter = FormeIPEtPORT.connecter;
+
+        //        if (FormeIPEtPORT.connecter)
+        //        {
+        //            this.imageTmpLogo.Image = toolStripMenuItem1.Image;
+        //            toolStripMenuItem1.Image = toolStripMenuItem2.Image;
+        //            toolStripMenuItem2.Image = imageTmpLogo.Image;
+
+        //            if (!AncienConnecter)
+        //            {
+        //                toolStripMenuItem1.Tag = "Deconnexion";
+        //            }
+        //            else
+        //            {
+        //                toolStripMenuItem1.Tag = "Conexion";
+        //                FormeIPEtPORT.ip = "";
+        //                this.btnIP.Text = FormeIPEtPORT.ip.ToString();
+        //                // Vérifie si SelectedObject est bien du type ControlPictureBoxWrapper
+        //                if (propertyGrid1.SelectedObject is ControlPictureBoxWrapper tmp)
+        //                {
+        //                    // Trouve l'élément dans la liste en fonction du contrôle sélectionné
+        //                    var controlWrapper = this.listeControle.Find(item => item.Control == tmp.Control);
+
+        //                    if (controlWrapper != null)
+        //                    {
+        //                        // Crée une nouvelle instance de ControlPictureBoxWrapper avec le PictureBox et le Control
+        //                        var tmp2 = new ControlPictureBoxWrapper(tmp.PictureBox, tmp.Control);
+
+        //                        // Retire l'élément existant de la liste
+        //                        listeControle.Remove(controlWrapper);
+
+        //                        // Ajoute la nouvelle instance à la liste
+        //                        listeControle.Add(tmp2);
+
+        //                        // Met à jour l'objet sélectionné dans le PropertyGrid
+        //                        propertyGrid1.SelectedObject = tmp2;
+        //                    }
+        //                }
+        //            }
+
+        //            FormeIPEtPORT.connecter = !FormeIPEtPORT.connecter;
+
+        //            return;
+        //        }
+
+        //        formePortAndIP.ShowDialog();
+
+        //        if (AncienConnecter != FormeIPEtPORT.connecter)
+        //        {
+        //            this.imageTmpLogo.Image = toolStripMenuItem1.Image;
+        //            toolStripMenuItem1.Image = toolStripMenuItem2.Image;
+        //            toolStripMenuItem2.Image = imageTmpLogo.Image;
+
+        //            if (!AncienConnecter)
+        //            {
+        //                toolStripMenuItem1.Tag = "Deconnexion";
+        //            }
+        //            else
+        //            {
+        //                toolStripMenuItem1.Tag = "Conexion";
+        //                FormeIPEtPORT.ip = "";
+        //            }
+
+        //            this.btnIP.Text = FormeIPEtPORT.ip.ToString();
+        //        }
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("Aucune image de fond définie sur toolStripMenuItem2.");
+        //    }
+
+        //    if (FormeIPEtPORT.connecter)
+        //    {
+        //        DEFAULT_CORE_IP = FormeIPEtPORT.ip;
+        //        PORT_NUMBER = formePortAndIP.portNumbers;
+
+        //        try
+        //        {
+        //            grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, Grpc.Core.ChannelCredentials.Insecure);
+        //            clientInterface = new Methods.MethodsClient(grpcChannel);
+
+        //            MessageBox.Show("Connexion reussis");
+
+        //            ChargerContenuOrthoCore();
+
+        //           // listeStrem = GetAllStreamsDataTableIoStream();
+
+        //            listeStrem = GetAllStreamsDataTable();
+
+        //            var i = new ModuleGeneralConfigurationControllerOrthoDesigner(new ModuleGeneralConfigurationRevocationService(""), new GeneralController(""));
+        //            ////i.F
+        //            ///
+        //            var listeFlag = i.LoadFlags();
+
+        //            foreach(var flag in listeFlag)
+        //            {
+        //                MessageBox.Show(flag.Id.ToString());
+        //            }
+
+        //            if (listeStrem.Count <= 0)
+        //            {
+        //                MessageBox.Show("Aucun Stream trouver !");
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            LogException(ex);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        DEFAULT_CORE_IP = "";
+        //        PORT_NUMBER = "";
+
+        //        grpcChannel?.ShutdownAsync().Wait();
+
+        //        Forme1.ioControllers.Clear();
+        //    }
+
+        //}
 
         private void SavecLogoClick(object sender, EventArgs e)
         {
@@ -3237,6 +3376,7 @@ namespace StageCode
         {
             openToolStripMenuItem1_Click(sender, e);
         }
+        
         private void SaveALL_Click(object sender, EventArgs e)
         {
             string saveMessage = "";
@@ -3472,32 +3612,32 @@ namespace StageCode
 
         public void ChargerContenuOrthoCore()
         {
-            //try
-            //{
-            //    ioControllers.Clear();
+            try
+            {
+                ioControllers.Clear();
 
-            //    Task.Run(() =>
-            //    {
-            //        var module = new ModuleIoRemoteMethodInvocationService("");
-            //        module.DEFAULT_CORE_IP = DEFAULT_CORE_IP;
-            //        module.PORT_NUMBER = PORT_NUMBER;
+                Task.Run(() =>
+                {
+                    var module = new ModuleIoRemoteMethodInvocationService("", DEFAULT_CORE_IP);
+                    //module.DEFAULT_CORE_IP = DEFAULT_CORE_IP;
+                    //module.PORT_NUMBER = PORT_NUMBER;
 
-            //        var b = new ModuleIoControllerOrthoDesigner(module, new GeneralController());
-            //        b.RefreshControllers();
+                    var b = new ModuleIoControllerOrthoDesigner(module, new GeneralController(""));
+                    b.RefreshControllers();
 
-            //        ioControllers = b.ioControllers;
+                    ioControllers = b.GetIoControllers();
 
 
-            //        if (ioControllers.Count == 0)
-            //        {
-            //            MessageBox.Show("Aucun controllers");
-            //        }
-            //    });
-            //}
-            //catch (Exception ex)
-            //{
-            //    LogException(ex); 
-            //}
+                    if (ioControllers.Count == 0)
+                    {
+                        MessageBox.Show("Aucun controllers");
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                LogException(ex);
+            }
         }
 
         //public static List<string> AfficherContenuListeGRPCParType(string typeFiltre)
@@ -3506,13 +3646,13 @@ namespace StageCode
 
         //    try
         //    {
-        //        grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, ChannelCredentials.Insecure);
+        //        grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, Grpc.Core.ChannelCredentials.Insecure);
         //        clientInterface = new Methods.MethodsClient(grpcChannel);
 
         //        var b = new ModuleIoController(new ModuleIoRemoteMethodInvocationService(""), new GeneralController());
         //        b.RefreshControllers();
 
-        //        ioControllers = b.ioControllers;
+        //        ioControllers = b.GetIoControllers();
 
         //        listes = ioControllers
         //            .Where(kv => ExtraireTypeDepuisNom(kv.Value.FullName) == typeFiltre)
@@ -3527,109 +3667,110 @@ namespace StageCode
         //    return listes;
         //}
 
-        //// Méthode pour extraire le type entre parenthèses dans le nom complet
-        //private static string ExtraireTypeDepuisNom(string fullName)
-        //{
-        //    int debut = fullName.IndexOf('(');
-        //    int fin = fullName.IndexOf(')');
+        // Méthode pour extraire le type entre parenthèses dans le nom complet
+        private static string ExtraireTypeDepuisNom(string fullName)
+        {
+            int debut = fullName.IndexOf('(');
+            int fin = fullName.IndexOf(')');
 
-        //    if (debut >= 0 && fin > debut)
-        //    {
-        //        return fullName.Substring(debut + 1, fin - debut - 1);
-        //    }
+            if (debut >= 0 && fin > debut)
+            {
+                return fullName.Substring(debut + 1, fin - debut - 1);
+            }
 
-        //    return string.Empty;
-        //}
+            return string.Empty;
+        }
 
-        //public List<IoStream> GetAllStreamsDataTableIoStream()
-        //{
-        //    List<IoStream> streamsList = new List<IoStream>();
+        public List<IoStream> GetAllStreamsDataTableIoStream()
+        {
+            List<IoStream> streamsList = new List<IoStream>();
 
-        //    try
-        //    {
-        //        var module = new ModuleIoControllerOrthoDesigner(new ModuleIoRemoteMethodInvocationService(""), new GeneralController());
-        //        var liste = module.GetIoStreams();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        LogException(ex);
-        //    }
+            try
+            {
+                var module = new ModuleIoControllerOrthoDesigner(new ModuleIoRemoteMethodInvocationService("",DEFAULT_CORE_IP), new GeneralController("",DEFAULT_CORE_IP));
+                var liste = module.GetIoStreams();
+            }
+            catch (Exception ex)
+            {
+                LogException(ex);
+            }
 
-        //    return streamsList;
-        //}
+            return streamsList;
+        }
 
 
-        //public List<IoStream> GetAllStreamsDataTable()
-        //{
-        //    List<IoStream> streamsList = new List<IoStream>();
+        public List<IoStream> GetAllStreamsDataTable()
+        {
+            List<IoStream> streamsList = new List<IoStream>();
 
-        //    try
-        //    {
-        //        IIOManager.GetDefinedStreamsOutput definedStreamsOutput = new ModuleIoRemoteMethodInvocationService("").GetDefinedStreams();
+            try
+            {
+                GetDefinedStreamsOutput definedStreamsOutput = new ModuleIoRemoteMethodInvocationService("", this.DEFAULT_CORE_IP).GetDefinedStreams();
 
-        //        foreach (IIOManager.StreamElement stream in definedStreamsOutput.Streams)
-        //        {
-        //            int streamId = Convert.ToInt32(stream.Identifier);
-        //            RepeatedField<IIOManager.StreamDataTableElement> streamDataTable =
-        //                new ModuleIoRemoteMethodInvocationService("").GetStreamDataTable(streamId).DataTable;
+                foreach (StreamElement stream in definedStreamsOutput.Streams)
+                {
+                    int streamId = Convert.ToInt32(stream.Identifier);
+                    RepeatedField<StreamDataTableElement> streamDataTable =
+                        new ModuleIoRemoteMethodInvocationService("", this.DEFAULT_CORE_IP).GetStreamDataTable(streamId).DataTable;
 
-        //            IoStream tmpstream = new IoStream()
-        //            {
-        //                Id = streamId,
-        //                ComponentType = stream.ComponentType,
-        //                ShortType = stream.ShortTypeName,
-        //                IsArchive = stream.IsArchive
-        //            };
+                    IoStream tmpstream = new IoStream()
+                    {
+                        Id = streamId,
+                        ComponentType = stream.ComponentType,
+                        ShortType = stream.ShortTypeName,
+                        IsArchive = stream.IsArchive
+                    };
 
-        //            foreach (IIOManager.StreamDataTableElement dataTableItem in streamDataTable)
-        //            {
-        //                IoStreamDataTableItem ioStreamDataTable = new IoStreamDataTableItem()
-        //                {
-        //                    Name = dataTableItem.DataName,
-        //                    Unit = dataTableItem.Unit,
-        //                    ErrorMsg = dataTableItem.Errormsg,
-        //                    Priority = (int)dataTableItem.Priority,
-        //                    Type = (int)dataTableItem.Type,
-        //                    Id = Convert.ToInt32(dataTableItem.Id),
-        //                    MinValue = Convert.ToDouble(dataTableItem.Minvalue),
-        //                    MaxValue = Convert.ToDouble(dataTableItem.Maxvalue)
-        //                };
+                    foreach (StreamDataTableElement dataTableItem in streamDataTable)
+                    {
+                        IoStreamDataTableItem ioStreamDataTable = new IoStreamDataTableItem()
+                        {
+                            Name = dataTableItem.DataName,
+                            Unit = dataTableItem.Unit,
+                            ErrorMsg = dataTableItem.Errormsg,
+                            Priority = (int)dataTableItem.Priority,
+                            Type = (int)dataTableItem.Type,
+                            Id = Convert.ToInt32(dataTableItem.Id),
+                            MinValue = Convert.ToDouble(dataTableItem.Minvalue),
+                            MaxValue = Convert.ToDouble(dataTableItem.Maxvalue)
+                        };
 
-        //                foreach (IIOManager.ElementProperty elementPropertyAsIdentifier in dataTableItem.PropertiesAsIdentifier)
-        //                {
-        //                    ioStreamDataTable.GetIdentifierProperties().Add(new IoItemPropertyItem()
-        //                    {
-        //                        PropertyName = elementPropertyAsIdentifier.PropertyName,
-        //                        PropertyValueInString = elementPropertyAsIdentifier.ParsedToStringPropertyValue
-        //                    });
-        //                }
+                        foreach (IIOManager.ElementProperty elementPropertyAsIdentifier in dataTableItem.PropertiesAsIdentifier)
+                        {
+                            ioStreamDataTable.GetIdentifierProperties().Add(new IoItemPropertyItem()
+                            {
+                                PropertyName = elementPropertyAsIdentifier.PropertyName,
+                                PropertyValueInString = elementPropertyAsIdentifier.ParsedToStringPropertyValue
+                            });
+                        }
 
-        //                foreach (string item in dataTableItem.AuthorizedControllerTypes)
-        //                {
-        //                    ioStreamDataTable.GetauthorizedControllerTypes().Add(item);
-        //                }
+                        foreach (string item in dataTableItem.AuthorizedControllerTypes)
+                        {
+                            ioStreamDataTable.GetauthorizedControllerTypes().Add(item);
+                        }
 
-        //                tmpstream.GetIoStreamDataTableItems().Add(ioStreamDataTable);
-        //            }
+                        tmpstream.GetIoStreamDataTableItems().Add(ioStreamDataTable);
+                    }
 
-        //            streamsList.Add(tmpstream);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        new LoggedException(
-        //            Assembly.GetExecutingAssembly().GetName().Name,
-        //            Assembly.GetExecutingAssembly().GetName().Version.ToString(),
-        //            this.GetType().Name,
-        //            MethodBase.GetCurrentMethod().Name,
-        //            ex.Message,
-        //            ex.StackTrace
-        //        );
-        //    }
+                    streamsList.Add(tmpstream);
+                }
+            }
+            catch (Exception ex)
+            {
+                new LoggedException(
+                    Assembly.GetExecutingAssembly().GetName().Name,
+                    Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+                    this.GetType().Name,
+                    MethodBase.GetCurrentMethod().Name,
+                    ex.Message,
+                    ex.StackTrace
+                );
+            }
 
-        //    return streamsList;
-        //}
+            return streamsList;
+        }
 
         #endregion
     }
+
 }
