@@ -1,6 +1,7 @@
 ﻿using CodeExceptionManager.Model.Objects;
 using Google.Protobuf.Collections;
 using IIOManager;
+using OrthoDesigner;
 using Orthodyne.CoreCommunicationLayer.Controllers;
 using Orthodyne.CoreCommunicationLayer.Models.IO;
 using Orthodyne.CoreCommunicationLayer.Services;
@@ -46,11 +47,14 @@ public class ControlPictureBoxWrapper
         PictureBox = pictureBox ?? throw new ArgumentNullException(nameof(pictureBox));
         Control = control ?? throw new ArgumentNullException(nameof(control));
 
-        if (Forme1.ioControllers.Count > 0)
-            OrthoCORE();
+        Task.Run(() =>
+        {
+            if (Forme1.ioControllers.Count > 0)
+                OrthoCORE();
 
-        if (Forme1.listeStrem.Count > 0)
-            AddStreamsToCheckBoxList();
+            if (Forme1.listeStrem.Count > 0)
+                AddStreamsToCheckBoxList();
+        });
     }
 
     public void OrthoCORE()
@@ -93,9 +97,9 @@ public class ControlPictureBoxWrapper
         {
             return;
         }
-        var module = new ModuleIoControllerOrthoDesigner(new ModuleIoRemoteMethodInvocationService(""),  new GeneralController(""));
+        var module = new ModuleIoControllerOrthoDesigner(new ModuleIoRemoteMethodInvocationService("",FormeIPEtPORT.ip),  new GeneralController("",FormeIPEtPORT.ip));
 
-        Forme1.listeStrem = module.GetIoStreams() ;
+        module.ioStreams = Forme1.listeStrem;
 
         List<IoStream> targetStream = module.GetIoStreams();
 

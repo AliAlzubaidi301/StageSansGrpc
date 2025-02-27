@@ -3202,24 +3202,26 @@ namespace StageCode
 
                     MessageBox.Show("Connexion reussis");
 
-                    ChargerContenuOrthoCore();
-
-                    //listeStrem = GetAllStreamsDataTableIoStream();
-
-                    listeStrem = GetAllStreamsDataTable();
-
-                    var i = new ModuleGeneralConfigurationControllerOrthoDesigner(new ModuleGeneralConfigurationRevocationService("",this.DEFAULT_CORE_IP), new GeneralController("",this.DEFAULT_CORE_IP));
-                    var liste = i.LoadFlags();
-
-                    if (listeStrem.Count <= 0)
+                    Task.Run(() =>
                     {
-                        MessageBox.Show("Aucun Stream trouver !");
-                    }
+                        ChargerContenuOrthoCore();
 
-                    foreach(var list in liste)
-                    {
-                        MessageBox.Show(list.Name.ToString());
-                    }
+                        listeStrem = GetAllStreamsDataTableIoStream();
+
+                        listeStrem = GetAllStreamsDataTable();
+                        var i = new ModuleGeneralConfigurationControllerOrthoDesigner(new ModuleGeneralConfigurationRevocationService("", this.DEFAULT_CORE_IP), new GeneralController("", this.DEFAULT_CORE_IP));
+                        var liste = i.LoadFlags();
+
+                        if (listeStrem.Count <= 0)
+                        {
+                            MessageBox.Show("Aucun Stream trouver !");
+                        }
+
+                        foreach (var list in liste)
+                        {
+                            MessageBox.Show(list.Name.ToString());
+                        }
+                    });
                 }
                 catch (Exception ex)
                 {
