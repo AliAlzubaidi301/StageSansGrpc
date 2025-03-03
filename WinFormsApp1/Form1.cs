@@ -1,8 +1,10 @@
-﻿using CodeExceptionManager.Model.Objects;
+﻿using CodeExceptionManager.Controller.DatabaseEngine.Implementation;
+using CodeExceptionManager.Model.Objects;
 using Google.Protobuf.Collections;
 using Grpc.Core;
 using IGeneralConfigurationManager;
 using IIOManager;
+using Microsoft.Data.Sqlite;
 using OrthoDesigner;
 using OrthoDesigner.LIB;
 using OrthoDesigner.LIB___Copier;
@@ -158,42 +160,7 @@ namespace StageCode
         #region Exception
         public void LogException(Exception ex)
         {
-            //SQLite sQ = new SQLite();
-            //sQ.Connect();
-
-            //if (sQ.ConnexionStatus)
-            //{
-            //    new LoggedException(Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Version.ToString(), this.GetType().Name, MethodBase.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
-
-            //    string dbPath = @"C:\Users\Alial\Desktop\Developpement\Tools\OrthoDesigner\StageCode\bin\Debug\Datas\Databases\ErrorLogs.db";
-            //    string connectionString = $"Data Source={dbPath};Version=3;";
-
-            //    using (SqliteConnection connection = new SQLiteConnection(connectionString))
-            //    {
-            //        connection.Open();
-
-            //        string query = @"INSERT INTO Exceptions (Date, AssemblyName, AssemblyVersion, ClassName, MethodName, ErrorMessage, ErrorStackTrace)
-            //                     VALUES (@Date, @AssemblyName, @AssemblyVersion, @ClassName, @MethodName, @ErrorMessage, @ErrorStackTrace)";
-
-            //        using (SQLiteCommand command = new SQLiteCommand(query, connection))
-            //        {
-            //            command.Parameters.AddWithValue("@Date", DateTime.Now);
-            //            command.Parameters.AddWithValue("@AssemblyName", Assembly.GetExecutingAssembly().GetName().Name);
-            //            command.Parameters.AddWithValue("@AssemblyVersion", Assembly.GetExecutingAssembly().GetName().Version.ToString());
-            //            command.Parameters.AddWithValue("@ClassName", this.GetType().Name);
-            //            command.Parameters.AddWithValue("@MethodName", MethodBase.GetCurrentMethod().Name);
-            //            command.Parameters.AddWithValue("@ErrorMessage", ex.Message);
-            //            command.Parameters.AddWithValue("@ErrorStackTrace", ex.StackTrace);
-
-            //            command.ExecuteNonQuery();
-            //        }
-            //    }
-            //}
-
-            //sQ.Disconnect();
-
-          //  new LoggedException(Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Version.ToString(), this.GetType().Name, MethodBase.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
-
+            new LoggedException(Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Version.ToString(), this.GetType().Name, MethodBase.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
         }
         #endregion
 
