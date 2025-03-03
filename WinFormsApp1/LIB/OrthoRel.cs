@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 using System.Xml.Linq;
 using static StageCode.LIB.OrthoAD;
 using static StageCode.Other.Langs;
@@ -39,9 +40,31 @@ namespace StageCode.LIB
         private ModeRelais _ModeRelais;
         private string _captionValues = "OrthoRelay";
         private string _visibility = "1";
-        public string SimpleNames = "";
+
+        private string _simpleName;
+        private string _flag;
         private String _ioStream;
 
+        public string SimpleName
+        {
+            get
+            {
+                return _simpleName;
+            }
+            set { _simpleName = value; }
+        }
+
+        public string Flage
+        {
+            get { return _flag; }
+            set { _flag = value; }
+        }
+
+        public String IoStream
+        {
+            get { return _ioStream; }
+            set { _ioStream = value; }
+        }
 
         /// <summary>
         /// Param non utilisé mais visible au cas où
@@ -136,24 +159,9 @@ namespace StageCode.LIB
             }
             return ColorTranslator.ToOle(Datain).ToString();
         }
-        // Ajout de SimpleName dans la classe
-        private string SimpleName = "";
-        private bool _Flage;
+        #region Read/Write on .syn file
 
-        public bool Flage
-        {
-            get => _Flage;
-            set => _Flage = value;
-        }
-
-
-
-        public string SimpleNam
-        {
-            get { return SimpleName; }
-            set { SimpleName = value; }
-        }
-
+        // Méthode pour lire un fichier XML et en extraire les données
         #region Read/Write on .syn file
 
         public OrthoRel ReadFileXML(string xmlText)
@@ -161,28 +169,22 @@ namespace StageCode.LIB
             XElement xml = XElement.Parse(xmlText);
             OrthoRel orthoRelControl = new OrthoRel();
 
-            // Naviguer jusqu'à l'élément <Controls> et ensuite <Component>
-            XElement componentElement = xml.Element("Controls")?.Element("Component");
-            if (componentElement == null) return orthoRelControl;  // Si l'élément Component n'existe pas, retourner l'objet courant
 
-            // Vérifier que le type est bien "OrthoRel" (si nécessaire)
-            if (componentElement.Attribute("type")?.Value != "OrthoRel") return orthoRelControl;
-
-            // Accéder à l'élément <Apparence>
-            XElement appearance = componentElement.Element("Apparence");
-            if (appearance == null) return orthoRelControl;
+            // Accéder à l'élément <Apparence> à l'intérieur de <Component>
+            XElement appearance = xml.Element("Apparence");
+            if (appearance == null) return orthoRelControl; // Si <Apparence> n'existe pas, retourner l'objet courant
 
             // Extraire les propriétés générales
             orthoRelControl.Caption = appearance.Element("Caption")?.Value ?? string.Empty;
-            orthoRelControl.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(appearance.Element("TextAlign")?.Value ?? "MiddleCenter"));
-            orthoRelControl.Precision = appearance.Element("Precision")?.Value ?? "0";
-            orthoRelControl.BackColor = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("BackColor")?.Value ?? "0"));
-            orthoRelControl.ForeColor = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ForeColor")?.Value ?? "0"));
+            orthoRelControl.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(appearance.Element("TextAlign")?.Value ?? "2"));
+            orthoRelControl.Precision = appearance.Element("Precision")?.Value ?? string.Empty;
+            orthoRelControl.BackColor = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("BackColor")?.Value ?? "-1"));
+            orthoRelControl.ForeColor = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ForeColor")?.Value ?? "-2147483630"));
 
             // Extraire les propriétés de la police
             orthoRelControl.Font = new Font(
-                appearance.Element("FontName")?.Value ?? "Arial",
-                float.Parse(appearance.Element("FontSize")?.Value ?? "12"),
+                appearance.Element("FontName")?.Value ?? "Segoe UI",
+                float.Parse(appearance.Element("FontSize")?.Value ?? "9"),
                 FontStyle.Regular
             );
             if (bool.TryParse(appearance.Element("FontBold")?.Value, out bool fontBold) && fontBold)
@@ -203,15 +205,15 @@ namespace StageCode.LIB
             }
 
             // Extraire les autres propriétés
-            orthoRelControl.TypeDesign = (TDesign)int.Parse(appearance.Element("TypeDesign")?.Value ?? "0");
-            orthoRelControl.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "1");
+            orthoRelControl.TypeDesign = (TDesign)int.Parse(appearance.Element("TypeDesign")?.Value ?? "1");
+            orthoRelControl.BorderWidth = int.Parse(appearance.Element("BorderWidth")?.Value ?? "0");
             orthoRelControl.Size = new Size(
-                int.Parse(appearance.Element("SizeWidth")?.Value ?? "100"),
-                int.Parse(appearance.Element("SizeHeight")?.Value ?? "100")
+                int.Parse(appearance.Element("SizeWidth")?.Value ?? "150"),
+                int.Parse(appearance.Element("SizeHeight")?.Value ?? "150")
             );
             orthoRelControl.Location = new Point(
-                int.Parse(appearance.Element("LocationX")?.Value ?? "0"),
-                int.Parse(appearance.Element("LocationY")?.Value ?? "0")
+                int.Parse(appearance.Element("LocationX")?.Value ?? "244"),
+                int.Parse(appearance.Element("LocationY")?.Value ?? "132")
             );
             orthoRelControl.Variable = appearance.Element("Variable")?.Value ?? string.Empty;
             orthoRelControl.RelaisMode = (ModeRelais)int.Parse(appearance.Element("RelaisMode")?.Value ?? "0");
@@ -219,30 +221,84 @@ namespace StageCode.LIB
             orthoRelControl.TextOn = appearance.Element("TextOn")?.Value ?? string.Empty;
 
             // Extraire les valeurs VL
-            var vlElements = appearance.Elements().Where(e => e.Name.ToString().StartsWith("VL"));
-            orthoRelControl._VL = new string[vlElements.Count()];
-            foreach (var vl in vlElements)
-            {
-                int index = int.Parse(vl.Name.ToString().Replace("VL", ""));
-                orthoRelControl._VL[index] = vl.Value;
-            }
+            orthoRelControl._VL[5] = appearance.Element("VL5")?.Value ?? string.Empty;
+            orthoRelControl._VL[6] = appearance.Element("VL6")?.Value ?? string.Empty;
+            orthoRelControl._VL[7] = appearance.Element("VL7")?.Value ?? string.Empty;
+            orthoRelControl._VL[8] = appearance.Element("VL8")?.Value ?? string.Empty;
 
             // Extraire les couleurs et niveaux
-            orthoRelControl.ColorOn = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorOn")?.Value ?? "0"));
-            orthoRelControl.ColorOff = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorOff")?.Value ?? "0"));
-            orthoRelControl.ColorErr = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorErr")?.Value ?? "0"));
+            orthoRelControl.ColorOn = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorOn")?.Value ?? "65280"));
+            orthoRelControl.ColorOff = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorOff")?.Value ?? "255"));
+            orthoRelControl.ColorErr = System.Drawing.Color.FromArgb(int.Parse(appearance.Element("ColorErr")?.Value ?? "12632271"));
             orthoRelControl.LevelVisible = int.Parse(appearance.Element("LevelVisible")?.Value ?? "0");
             orthoRelControl.LevelEnabled = int.Parse(appearance.Element("LevelEnabled")?.Value ?? "0");
-            orthoRelControl.Visibility = appearance.Element("Visibility")?.Value ?? "Visible";
+            orthoRelControl.Visibility = appearance.Element("Visibility")?.Value ?? "1";
 
             // Récupérer la valeur SimpleName
-            orthoRelControl.SimpleName = componentElement.Attribute("name")?.Value ?? string.Empty;
+            orthoRelControl.SimpleName = appearance.Element("SimpleName")?.Value ?? string.Empty;
 
-            orthoRelControl.Flage = bool.Parse(xml.Element("Flag")?.Value ?? "False");
-            orthoRelControl.IoStream = xml.Element("IOStream")?.Value ?? "";
+            orthoRelControl.Flage = appearance.Element("Flag")?.Value ?? string.Empty;
+            orthoRelControl.IoStream = appearance.Element("IOStream")?.Value ?? string.Empty;
+
             return orthoRelControl;
         }
+        // Méthode pour écrire un fichier XML avec les données
+        public string WriteFileXML()
+        {
+            var xmlContent = new StringBuilder();
 
+            xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
+            xmlContent.AppendLine("      <Apparence>");
+
+            // Propriétés
+            xmlContent.AppendLine($"        <Caption>{Caption}</Caption>");
+            xmlContent.AppendLine($"        <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(TextAlign)}</TextAlign>");
+            xmlContent.AppendLine($"        <Precision>{Precision}</Precision>");
+            xmlContent.AppendLine($"        <BackColor>{ToOle(BackColor)}</BackColor>");
+            xmlContent.AppendLine($"        <ForeColor>{ToOle(ForeColor)}</ForeColor>");
+            xmlContent.AppendLine($"        <FontName>{Font.Name}</FontName>");
+            xmlContent.AppendLine($"        <FontSize>{Font.Size}</FontSize>");
+            xmlContent.AppendLine($"        <FontStrikeout>{Font.Strikeout}</FontStrikeout>");
+            xmlContent.AppendLine($"        <FontUnderline>{Font.Underline}</FontUnderline>");
+            xmlContent.AppendLine($"        <FontBold>{Font.Bold}</FontBold>");
+            xmlContent.AppendLine($"        <FontItalic>{Font.Italic}</FontItalic>");
+            xmlContent.AppendLine($"        <TypeDesign>{Convert.ToInt32(TypeDesign)}</TypeDesign>");
+            xmlContent.AppendLine($"        <BorderWidth>{BorderWidth}</BorderWidth>");
+            xmlContent.AppendLine($"        <SizeHeight>{Size.Height}</SizeHeight>");
+            xmlContent.AppendLine($"        <SizeWidth>{Size.Width}</SizeWidth>");
+            xmlContent.AppendLine($"        <LocationY>{Location.Y}</LocationY>");
+            xmlContent.AppendLine($"        <LocationX>{Location.X}</LocationX>");
+            xmlContent.AppendLine($"        <Variable>{Variable}</Variable>");
+            xmlContent.AppendLine($"        <RelaisMode>{Convert.ToInt32((int)RelaisMode)}</RelaisMode>");
+            xmlContent.AppendLine($"        <TextOff>{TextOff}</TextOff>");
+            xmlContent.AppendLine($"        <TextOn>{TextOn}</TextOn>");
+
+            // Valeurs _VL
+            for (int i = 5; i < _VL.Length; i++)
+            {
+                xmlContent.AppendLine($"        <VL{i}>{_VL[i]}</VL{i}>");
+            }
+
+            xmlContent.AppendLine($"        <ColorOn>{ToOle(ColorOn)}</ColorOn>");
+            xmlContent.AppendLine($"        <ColorOff>{ToOle(ColorOff)}</ColorOff>");
+            xmlContent.AppendLine($"        <ColorErr>{ToOle(ColorErr)}</ColorErr>");
+            xmlContent.AppendLine($"        <LevelVisible>{LevelVisible}</LevelVisible>");
+            xmlContent.AppendLine($"        <LevelEnabled>{LevelEnabled}</LevelEnabled>");
+            xmlContent.AppendLine($"        <Visibility>{Visibility}</Visibility>");
+
+            // Ajouter SimpleName
+            xmlContent.AppendLine($"    <SimpleName>{SimpleName}</SimpleName>");
+            xmlContent.AppendLine($"      <Flag>{Flage}</Flag>");
+            xmlContent.AppendLine($"      <IOStream>{IoStream}</IOStream>");
+            xmlContent.AppendLine("      </Apparence>");
+            xmlContent.AppendLine("    </Component>");
+
+            return xmlContent.ToString();
+        }
+
+        #endregion
+
+        // Méthode pour lire un fichier texte et en extraire les données
         public object ReadFile(string[] splitPvirgule, string comment, string file, bool FromCopy)
         {
             var StyleText = new FontStyle();
@@ -269,7 +325,6 @@ namespace StageCode.LIB
             this.Name = splitPvirgule[1] + "_" + splitPvirgule[2];
             Caption = splitPvirgule[2];
             Precision = splitPvirgule[4];
-            //Font = new Font(splitPvirgule[7], float.Parse(splitPvirgule[8]), StyleText);
             this.Text = splitPvirgule[2];
             BackColor = FromOle(splitPvirgule[5]);
             ForeColor = FromOle(splitPvirgule[6]);
@@ -308,73 +363,30 @@ namespace StageCode.LIB
             }
 
             // Assigner SimpleName depuis les données du fichier
-            SimpleName = splitPvirgule[1];
-            Flage = bool.Parse(splitPvirgule[35]);  // Adjust index based on position in the array
-            IoStream = splitPvirgule[36];  // Adjust index based on position
+            if (splitPvirgule.Length >= 35)
+            {
+                SimpleName = splitPvirgule[34];  // Nom simple depuis l'index 1
+                Flage = splitPvirgule[35];
+                IoStream = splitPvirgule[36];
+            }
+            else
+            {
+                // Si les éléments sont manquants, affectez des valeurs par défaut ou gérez l'erreur comme vous le souhaitez.
+                SimpleName = string.Empty;
+                Flage = string.Empty;
+                IoStream = string.Empty;
+            }
 
             return this;
         }
 
+        // Méthode pour écrire un fichier texte avec les données
         public string WriteFile()
         {
-            return "ORTHO;REL;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Variable + ";" + Convert.ToInt32((int)RelaisMode).ToString() + ";;" + TextOff + ";" + TextOn + ";" + _VL[5] + ";" + _VL[6] + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility + ";" + SimpleName + ";" +Flage.ToString() + ";" + IoStream ;
-        }
-
-        public string WriteFileXML()
-        {
-            var xmlContent = new StringBuilder();
-
-            xmlContent.AppendLine($"    <Component type=\"{this.GetType().Name}\" name=\"{this.Name}\">");
-            xmlContent.AppendLine("      <Apparence>");
-
-            // Properties
-            xmlContent.AppendLine($"        <Caption>{Caption}</Caption>");
-            xmlContent.AppendLine($"        <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(TextAlign)}</TextAlign>");
-            xmlContent.AppendLine($"        <Precision>{Precision}</Precision>");
-            xmlContent.AppendLine($"        <BackColor>{ToOle(BackColor)}</BackColor>");
-            xmlContent.AppendLine($"        <ForeColor>{ToOle(ForeColor)}</ForeColor>");
-            xmlContent.AppendLine($"        <FontName>{Font.Name}</FontName>");
-            xmlContent.AppendLine($"        <FontSize>{Font.Size}</FontSize>");
-            xmlContent.AppendLine($"        <FontStrikeout>{Font.Strikeout}</FontStrikeout>");
-            xmlContent.AppendLine($"        <FontUnderline>{Font.Underline}</FontUnderline>");
-            xmlContent.AppendLine($"        <FontBold>{Font.Bold}</FontBold>");
-            xmlContent.AppendLine($"        <FontItalic>{Font.Italic}</FontItalic>");
-            xmlContent.AppendLine($"        <TypeDesign>{Convert.ToInt32(TypeDesign)}</TypeDesign>");
-            xmlContent.AppendLine($"        <BorderWidth>{BorderWidth}</BorderWidth>");
-            xmlContent.AppendLine($"        <SizeHeight>{Size.Height}</SizeHeight>");
-            xmlContent.AppendLine($"        <SizeWidth>{Size.Width}</SizeWidth>");
-            xmlContent.AppendLine($"        <LocationY>{Location.Y}</LocationY>");
-            xmlContent.AppendLine($"        <LocationX>{Location.X}</LocationX>");
-            xmlContent.AppendLine($"        <Variable>{Variable}</Variable>");
-            xmlContent.AppendLine($"        <RelaisMode>{Convert.ToInt32((int)RelaisMode)}</RelaisMode>");
-            xmlContent.AppendLine($"        <TextOff>{TextOff}</TextOff>");
-            xmlContent.AppendLine($"        <TextOn>{TextOn}</TextOn>");
-
-            // _VL values
-            for (int i = 5; i < _VL.Length; i++)
-            {
-                xmlContent.AppendLine($"        <VL{i}>{_VL[i]}</VL{i}>");
-            }
-
-            xmlContent.AppendLine($"        <ColorOn>{ToOle(ColorOn)}</ColorOn>");
-            xmlContent.AppendLine($"        <ColorOff>{ToOle(ColorOff)}</ColorOff>");
-            xmlContent.AppendLine($"        <ColorErr>{ToOle(ColorErr)}</ColorErr>");
-            xmlContent.AppendLine($"        <LevelVisible>{LevelVisible}</LevelVisible>");
-            xmlContent.AppendLine($"        <LevelEnabled>{LevelEnabled}</LevelEnabled>");
-            xmlContent.AppendLine($"        <Visibility>{Visibility}</Visibility>");
-            xmlContent.AppendLine("      </Apparence>");
-            xmlContent.AppendLine("    </Component>");
-
-            // Ajouter SimpleName
-            xmlContent.AppendLine($"    <SimpleName>{SimpleName}</SimpleName>");
-            xmlContent.AppendLine($"      <Flag>{Flage}</Flag>");
-            xmlContent.AppendLine($"      <IOStream>{IoStream}</IOStream>");
-
-            return xmlContent.ToString();
+            return "ORTHO;REL;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Variable + ";" + Convert.ToInt32((int)RelaisMode).ToString() + ";;" + TextOff + ";" + TextOn + ";" + _VL[5] + ";" + _VL[6] + ";" + _VL[7] + ";" + _VL[8] + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility + ";" + SimpleName + ";" + Flage.ToString() + ";" + IoStream;
         }
 
         #endregion
-
 
         #region Children Properties
         [Category("Apparence")]
@@ -1118,11 +1130,6 @@ namespace StageCode.LIB
         public Type GType()
         {
             return GetType();
-        }
-        public String IoStream
-        {
-            get { return _ioStream; }
-            set { _ioStream = value; }
         }
     }
 }

@@ -56,9 +56,9 @@ namespace StageCode.LIB
 
 
         // Déclaration des champs privés
-        private string _simpleName;
-        private bool _flage;
-        private String _ioStream;
+        private string _simpleName = "Az";
+        private string _flage="A";
+        private String _ioStream="A";
 
         #region "Accesseurs"
 
@@ -70,7 +70,7 @@ namespace StageCode.LIB
         }
 
         // Propriété pour Flage
-        public bool Flage
+        public string Flage
         {
             get { return _flage; }
             set { _flage = value; }
@@ -205,17 +205,25 @@ namespace StageCode.LIB
             LevelEnabled = int.Parse(splitPvirgule[32]);
             this.comment = comment;
 
-            // Add SimpleName, Flag, and IoStream
-            SimpleName = splitPvirgule[34];  // Adjust based on your array position
-            Flage = bool.Parse(splitPvirgule[35]);  // Adjust index based on position in the array
-            IoStream = splitPvirgule[36];  // Adjust index based on position
-
-            if (splitPvirgule.Length >= 37)
+            if (splitPvirgule.Length >= 33)
             {
-                Visibility = splitPvirgule[37];
+                Visibility = splitPvirgule[33];
             }
 
-            return this;
+            if (splitPvirgule.Length >= 34)
+            {
+                SimpleName = splitPvirgule[34];
+                Flage = splitPvirgule[35];  // Adjust index based on position in the array
+                IoStream = splitPvirgule[36];  // Adjust index based on position
+            }
+            else
+            {
+                SimpleName = "";
+                Flage = "";
+                IoStream = "";
+            }
+
+                return this;
         }
 
         public static OrthoDI ReadFileXML(string xmlText)
@@ -275,7 +283,7 @@ namespace StageCode.LIB
 
             // Read SimpleName, Flag, and IoStream
             orthoCombo.SimpleName = xml.Element("SimpleName")?.Value ?? "";
-            orthoCombo.Flage = bool.Parse(xml.Element("Flag")?.Value ?? "False");
+            orthoCombo.Flage = (xml.Element("Flag")?.Value ?? string.Empty);
             orthoCombo.IoStream = xml.Element("IOStream")?.Value ?? "";
 
             return orthoCombo;
@@ -333,6 +341,7 @@ namespace StageCode.LIB
 
             return xmlContent.ToString();
         }
+       
         #endregion
 
         #region Control Properties

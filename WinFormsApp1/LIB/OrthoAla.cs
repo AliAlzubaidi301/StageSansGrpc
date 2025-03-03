@@ -44,6 +44,30 @@ namespace StageCode.LIB
 
         public event EventHandler VisibilityChanging;
         public event EventHandler VisibilityChanged;
+
+        private string _simpleName;
+        private string _flag;
+        private String _ioStream;
+        public string SimpleName
+        {
+            get
+            {
+                return _simpleName;
+            }
+            set { _simpleName = value; }
+        }
+
+        public string Flage
+        {
+            get { return _flag; }
+            set { _flag = value; }
+        }
+
+        public String IoStream
+        {
+            get { return _ioStream; }
+            set { _ioStream = value; }
+        }
         public OrthoAla()
         {
             // Initialisation de l'interface graphique
@@ -150,6 +174,7 @@ namespace StageCode.LIB
 
             var StyleText = FontStyle.Regular;
 
+            // Vérification et ajout du style de texte
             if (bool.TryParse(splitPvirgule[9], out bool isStrikeout) && isStrikeout)
             {
                 StyleText |= FontStyle.Strikeout;
@@ -167,10 +192,12 @@ namespace StageCode.LIB
                 StyleText |= FontStyle.Italic;
             }
 
+            // Affectation des valeurs
             Name = $"{splitPvirgule[1]}_{splitPvirgule[2]}";
             Caption = splitPvirgule[2];
             Precision = splitPvirgule[4];
 
+            // Définition de la police de caractère avec gestion des exceptions
             if (float.TryParse(splitPvirgule[8], NumberStyles.Float, CultureInfo.InvariantCulture, out float fontSize))
             {
                 Font = new Font(splitPvirgule[7], fontSize, StyleText);
@@ -179,21 +206,25 @@ namespace StageCode.LIB
             BackColor = FromOle(splitPvirgule[5]);
             ForeColor = FromOle(splitPvirgule[6]);
 
+            // Traitement du type de design
             if (Enum.TryParse(splitPvirgule[13], out TDesign typeDesign))
             {
                 TypeDesign = typeDesign;
             }
 
+            // Traitement de la largeur du bord
             if (int.TryParse(splitPvirgule[14], out int borderWidth))
             {
                 BorderWidth = borderWidth;
             }
 
+            // Traitement de la taille
             if (int.TryParse(splitPvirgule[16], out int width) && int.TryParse(splitPvirgule[15], out int height))
             {
                 Size = new Size(width, height);
             }
 
+            // Traitement de la position
             if (int.TryParse(splitPvirgule[18], out int x) && int.TryParse(splitPvirgule[17], out int y))
             {
                 Location = FromCopy ? new Point(x + 10, y + 10) : new Point(x, y);
@@ -204,6 +235,7 @@ namespace StageCode.LIB
             VarLink2 = splitPvirgule[20];
             NomFichier = splitPvirgule[21];
 
+            // Affectation des variables VL
             _VL[3] = splitPvirgule[22];
             _VL[4] = splitPvirgule[23];
             _VL[5] = splitPvirgule[24];
@@ -212,10 +244,12 @@ namespace StageCode.LIB
             Commande = splitPvirgule[26];
             VarLink9 = splitPvirgule[27];
 
+            // Couleurs
             ColorOn = FromOle(splitPvirgule[28]);
             ColorOff = FromOle(splitPvirgule[29]);
             ColorErr = FromOle(splitPvirgule[30]);
 
+            // Traitement des niveaux de visibilité et d'activation
             if (int.TryParse(splitPvirgule[31], out int levelVisible))
             {
                 LevelVisible = levelVisible;
@@ -226,9 +260,18 @@ namespace StageCode.LIB
                 LevelEnabled = levelEnabled;
             }
 
+            // Traitement de la visibilité
             if (splitPvirgule.Length >= 34)
             {
                 Visibility = splitPvirgule[33];
+            }
+
+            // Traitement des éléments optionnels
+            if (splitPvirgule.Length >= 35)
+            {
+                _simpleName = splitPvirgule[34];
+                _flag = splitPvirgule[35];
+                _ioStream = splitPvirgule[36];
             }
 
             return this;
@@ -303,6 +346,13 @@ namespace StageCode.LIB
                     orthoAlaControl.LevelVisible = int.TryParse(properties.Element("LevelVisible")?.Value, out int lvlVisible) ? lvlVisible : 0;
                     orthoAlaControl.LevelEnabled = int.TryParse(properties.Element("LevelEnabled")?.Value, out int lvlEnabled) ? lvlEnabled : 0;
                     orthoAlaControl.Visibility = properties.Element("Visibility")?.Value ?? "Visible";
+
+                    orthoAlaControl.SimpleName = properties.Element("SimpleName")?.Value;
+                    string flageValue = properties.Element("Flage")?.Value ?? string.Empty;
+                    orthoAlaControl.Flage = flageValue;
+
+                    string ioStreamData = properties.Element("IoStream")?.Value ?? string.Empty;
+                    orthoAlaControl.IoStream = ioStreamData.ToString();  // Par exemple
                 }
 
                 return orthoAlaControl;
@@ -352,6 +402,9 @@ namespace StageCode.LIB
             xmlContent.AppendLine($"        <LevelEnabled>{LevelEnabled}</LevelEnabled>");
             xmlContent.AppendLine($"        <Visibility>{Visibility}</Visibility>");
 
+            xmlContent.AppendLine($"        <SimpleName>{this._simpleName}</SimpleName>");
+            xmlContent.AppendLine($"        <Flage>{this._flag}</Flage>");
+            xmlContent.AppendLine($"        <IoStream>{this._ioStream}</IoStream>");
             xmlContent.AppendLine("      </Apparence>");
             xmlContent.AppendLine("    </Component>");
 
@@ -396,7 +449,7 @@ namespace StageCode.LIB
 
         public string WriteFile()
         {
-            return "ORTHO;ALA;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Etat + ";" + VarLink2 + ";" + NomFichier + ";" + _VL[3] + ";" + _VL[4] + ";" + _VL[5] + ";" + _VL[6] + ";" + Commande + ";" + VarLink9 + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility;
+            return "ORTHO;ALA;" + Caption + ";" + ContentAlignment_Parser.Get_ValueToWrite(TextAlign).ToString() + ";" + Precision + ";" + ToOle(BackColor).ToString() + ";" + ToOle(ForeColor).ToString() + ";" + Font.Name.ToString() + ";" + Font.Size.ToString() + ";" + Font.Strikeout.ToString() + ";" + Font.Underline.ToString() + ";" + Font.Bold.ToString() + ";" + Font.Italic.ToString() + ";" + Convert.ToInt32(TypeDesign).ToString() + ";" + BorderWidth.ToString() + ";" + this.Size.Height.ToString() + ";" + this.Size.Width.ToString() + ";" + this.Location.Y.ToString() + ";" + this.Location.X.ToString() + ";" + Etat + ";" + VarLink2 + ";" + NomFichier + ";" + _VL[3] + ";" + _VL[4] + ";" + _VL[5] + ";" + _VL[6] + ";" + Commande + ";" + VarLink9 + ";" + ToOle(ColorOn).ToString() + ";" + ToOle(ColorOff).ToString() + ";" + ToOle(ColorErr).ToString() + ";" + LevelVisible.ToString() + ";" + LevelEnabled.ToString() + ";" + Visibility +";" +_simpleName + ";" + _flag + ";" + _ioStream;           // Ajout de IoStream;
         }
 
         #endregion

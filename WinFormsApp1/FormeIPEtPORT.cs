@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Orthodyne.CoreCommunicationLayer.Controllers;
+using StageCode;
+using System;
 using System.Drawing;
 using System.Net.NetworkInformation;
 using System.Windows.Forms;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace OrthoDesigner
 {
@@ -20,22 +21,22 @@ namespace OrthoDesigner
         private float maxSpeed = 10;
         private float damping = 0.50f;
         public static bool connecter = false;
-        public static string ip=""; 
+        public static string ip = "";
         public string portNumbers = "";
 
-        public object FormeIPEtPort { get; private set; }
+        // Variable de langue
+        public static int Langue = 1; // 1 = English, 2 = Chinese, 3 = German, 4 = French, 5 = Lithuanian
 
         public FormeIPEtPORT()
         {
             InitializeComponent();
             InitializeCustomComponents();
-
-            this.MouseEnter += (s, e) => timer.Stop();
-            this.Opacity = 0;
         }
 
         private void FormeIPEtPORT_Load(object sender, EventArgs e)
         {
+            Langue = Forme1.Langue;
+            SetLanguage(); // Met à jour les textes en fonction de la langue
             Location = new Point(this.Location.X, -this.Height);
             timer.Tick += Timer_Tick;
             timer.Interval = 15;
@@ -151,7 +152,7 @@ namespace OrthoDesigner
                 TextAlign = HorizontalAlignment.Center
             };
 
-            if(a.PlaceholderText== "Entrez le numéro de port")
+            if (a.PlaceholderText == "Entrez le numéro de port")
             {
                 a.Width = 270;
             }
@@ -173,7 +174,7 @@ namespace OrthoDesigner
 
             if (string.IsNullOrEmpty(txt.Text))
             {
-                return; 
+                return;
             }
 
             int value;
@@ -196,7 +197,6 @@ namespace OrthoDesigner
             }
         }
 
-
         private void TxtPort_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
@@ -213,7 +213,7 @@ namespace OrthoDesigner
 
             if (string.IsNullOrEmpty(port) || !int.TryParse(port, out int portNumber) || portNumber <= 0 || portNumber > 65535)
             {
-                MessageBox.Show("Veuillez entrer une IP valide et un port entre 1 et 65535.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(GetMessage("ErreurPort"), GetMessage("Erreur"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -224,23 +224,120 @@ namespace OrthoDesigner
                     PingReply reply = await ping.SendPingAsync(IP, 1000);
                     if (reply.Status == IPStatus.Success)
                     {
-                        //MessageBox.Show($"Connexion à {IP}:{portNumber} réussie !", "Succès", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
                         connecter = true;
                         this.portNumbers = portNumber.ToString();
+
                         this.Close();
                     }
                     else
                     {
                         connecter = false;
-
-                        MessageBox.Show($"Impossible de joindre l'adresse IP : {IP}.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(string.Format(GetMessage("ErreurPing"), IP), GetMessage("Erreur"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
+
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors du ping : {ex.Message}", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format(GetMessage("ErreurPingException"), ex.Message), GetMessage("Erreur"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void SetLanguage()
+        {
+            switch (Langue)
+            {
+                case 1: // English
+                    lblTitle.Text = "Please enter connection information";
+                    lblIP.Text = "IP Address:";
+                    lblPort.Text = "Port Number:";
+                    btnSubmit.Text = "Connect";
+                    break;
+                case 2: // Chinese
+                    lblTitle.Text = "请输入连接信息";
+                    lblIP.Text = "IP 地址：";
+                    lblPort.Text = "端口号：";
+                    btnSubmit.Text = "连接";
+                    break;
+                case 3: // German
+                    lblTitle.Text = "Bitte geben Sie die Verbindungsinformationen ein";
+                    lblIP.Text = "IP-Adresse:";
+                    lblPort.Text = "Portnummer:";
+                    btnSubmit.Text = "Verbinden";
+                    break;
+                case 4: // French
+                    lblTitle.Text = "Veuillez entrer les informations de connexion";
+                    lblIP.Text = "Adresse IP :";
+                    lblPort.Text = "Numéro de port :";
+                    btnSubmit.Text = "Se connecter";
+                    break;
+                case 5: // Lithuanian
+                    lblTitle.Text = "Įveskite prisijungimo informaciją";
+                    lblIP.Text = "IP adresas:";
+                    lblPort.Text = "Prievado numeris:";
+                    btnSubmit.Text = "Prisijungti";
+                    break;
+                default:
+                    lblTitle.Text = "Veuillez entrer les informations de connexion";
+                    lblIP.Text = "Adresse IP :";
+                    lblPort.Text = "Numéro de port :";
+                    btnSubmit.Text = "Se connecter";
+                    break;
+            }
+        }
+
+        // Méthode pour obtenir le texte en fonction de la langue
+        private string GetMessage(string key)
+        {
+            switch (Langue)
+            {
+                case 1: // English
+                    switch (key)
+                    {
+                        case "Erreur": return "Error";
+                        case "ErreurPort": return "Please enter a valid IP and port between 1 and 65535.";
+                        case "ErreurPing": return "Unable to reach IP address: {0}.";
+                        case "ErreurPingException": return "Error during ping: {0}";
+                        default: return "";
+                    }
+                case 2: // Chinese
+                    switch (key)
+                    {
+                        case "Erreur": return "错误";
+                        case "ErreurPort": return "请输入有效的IP和端口号，范围在1到65535之间。";
+                        case "ErreurPing": return "无法访问IP地址：{0}。";
+                        case "ErreurPingException": return "ping 错误：{0}";
+                        default: return "";
+                    }
+                case 3: // German
+                    switch (key)
+                    {
+                        case "Erreur": return "Fehler";
+                        case "ErreurPort": return "Bitte geben Sie eine gültige IP und einen Port zwischen 1 und 65535 ein.";
+                        case "ErreurPing": return "IP-Adresse kann nicht erreicht werden: {0}.";
+                        case "ErreurPingException": return "Fehler beim Ping: {0}";
+                        default: return "";
+                    }
+                case 4: // French
+                    switch (key)
+                    {
+                        case "Erreur": return "Erreur";
+                        case "ErreurPort": return "Veuillez entrer une IP valide et un port entre 1 et 65535.";
+                        case "ErreurPing": return "Impossible de joindre l'adresse IP : {0}.";
+                        case "ErreurPingException": return "Erreur lors du ping : {0}";
+                        default: return "";
+                    }
+                case 5: // Lithuanian
+                    switch (key)
+                    {
+                        case "Erreur": return "Klaida";
+                        case "ErreurPort": return "Įveskite galiojantį IP ir prievado numerį nuo 1 iki 65535.";
+                        case "ErreurPing": return "Nepavyko pasiekti IP adreso: {0}.";
+                        case "ErreurPingException": return "Ping klaida: {0}";
+                        default: return "";
+                    }
+                default:
+                    return "";
             }
         }
     }

@@ -28,108 +28,80 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormWindowsResize));
-            pictureBox1 = new PictureBox();
-            pictureBox2 = new PictureBox();
-            pictureBox3 = new PictureBox();
-            pictureBox4 = new PictureBox();
-            pictureBox5 = new PictureBox();
-            pictureBox6 = new PictureBox();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox4).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox5).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox6).BeginInit();
+            panel1 = new Panel();
+            panel2 = new Panel();
+            panel3 = new Panel();
+            panel4 = new Panel();
+            panel5 = new Panel();
+            panel6 = new Panel();
             SuspendLayout();
             // 
-            // pictureBox1
+            // panel1
             // 
-            pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
-            pictureBox1.Location = new Point(12, 12);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(50, 55);
-            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox1.TabIndex = 0;
-            pictureBox1.TabStop = false;
+            panel1.Location = new Point(16, 12);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(46, 55);
+            panel1.TabIndex = 6;
             // 
-            // pictureBox2
+            // panel2
             // 
-            pictureBox2.Image = (Image)resources.GetObject("pictureBox2.Image");
-            pictureBox2.Location = new Point(68, 12);
-            pictureBox2.Name = "pictureBox2";
-            pictureBox2.Size = new Size(50, 55);
-            pictureBox2.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox2.TabIndex = 1;
-            pictureBox2.TabStop = false;
+            panel2.Location = new Point(74, 12);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(46, 55);
+            panel2.TabIndex = 7;
             // 
-            // pictureBox3
+            // panel3
             // 
-            pictureBox3.Image = (Image)resources.GetObject("pictureBox3.Image");
-            pictureBox3.Location = new Point(12, 83);
-            pictureBox3.Name = "pictureBox3";
-            pictureBox3.Size = new Size(50, 32);
-            pictureBox3.TabIndex = 2;
-            pictureBox3.TabStop = false;
+            panel3.Location = new Point(16, 83);
+            panel3.Name = "panel3";
+            panel3.Size = new Size(46, 32);
+            panel3.TabIndex = 7;
             // 
-            // pictureBox4
+            // panel4
             // 
-            pictureBox4.Image = (Image)resources.GetObject("pictureBox4.Image");
-            pictureBox4.Location = new Point(68, 83);
-            pictureBox4.Name = "pictureBox4";
-            pictureBox4.Size = new Size(50, 32);
-            pictureBox4.TabIndex = 3;
-            pictureBox4.TabStop = false;
+            panel4.Location = new Point(74, 83);
+            panel4.Name = "panel4";
+            panel4.Size = new Size(46, 32);
+            panel4.TabIndex = 8;
             // 
-            // pictureBox5
+            // panel5
             // 
-            pictureBox5.Image = (Image)resources.GetObject("pictureBox5.Image");
-            pictureBox5.Location = new Point(12, 121);
-            pictureBox5.Name = "pictureBox5";
-            pictureBox5.Size = new Size(50, 32);
-            pictureBox5.TabIndex = 4;
-            pictureBox5.TabStop = false;
+            panel5.Location = new Point(16, 121);
+            panel5.Name = "panel5";
+            panel5.Size = new Size(46, 32);
+            panel5.TabIndex = 8;
             // 
-            // pictureBox6
+            // panel6
             // 
-            pictureBox6.Image = (Image)resources.GetObject("pictureBox6.Image");
-            pictureBox6.Location = new Point(68, 121);
-            pictureBox6.Name = "pictureBox6";
-            pictureBox6.Size = new Size(50, 32);
-            pictureBox6.TabIndex = 5;
-            pictureBox6.TabStop = false;
+            panel6.Location = new Point(74, 121);
+            panel6.Name = "panel6";
+            panel6.Size = new Size(46, 32);
+            panel6.TabIndex = 8;
             // 
             // FormWindowsResize
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(132, 165);
-            Controls.Add(pictureBox6);
-            Controls.Add(pictureBox5);
-            Controls.Add(pictureBox4);
-            Controls.Add(pictureBox3);
-            Controls.Add(pictureBox2);
-            Controls.Add(pictureBox1);
+            Controls.Add(panel6);
+            Controls.Add(panel5);
+            Controls.Add(panel4);
+            Controls.Add(panel3);
+            Controls.Add(panel2);
+            Controls.Add(panel1);
             FormBorderStyle = FormBorderStyle.None;
             Name = "FormWindowsResize";
             Text = "FormWindowsResize";
             Load += FormWindowsResize_Load;
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox4).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox5).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox6).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
-
-        private PictureBox pictureBox1;
-        private PictureBox pictureBox2;
-        private PictureBox pictureBox3;
-        private PictureBox pictureBox4;
-        private PictureBox pictureBox5;
-        private PictureBox pictureBox6;
+        private Panel panel1;
+        private Panel panel2;
+        private Panel panel3;
+        private Panel panel4;
+        private Panel panel5;
+        private Panel panel6;
     }
 }

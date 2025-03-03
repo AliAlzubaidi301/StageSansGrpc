@@ -45,18 +45,22 @@ namespace StageCode.LIB
         private string _visibility = "1";
 
         private string _simpleName;
-        private bool _flag;
+        private string _flag;
         private String _ioStream;
 
         #region "Nouveau Accesseurs"
 
         public string SimpleName
         {
-            get { return _simpleName; }
-            set { _simpleName = value; }
+            get 
+            { 
+                return _simpleName; 
+            }
+            set { 
+                _simpleName = value; }
         }
 
-        public bool Flage
+        public string Flage
         {
             get { return _flag; }
             set { _flag = value; }
@@ -154,9 +158,6 @@ namespace StageCode.LIB
             string? type = xml.Attribute("type")?.Value;
             OrthoADControl.Name = xml.Attribute("name")?.Value;
 
-            // Récupérer le champ SimpleName depuis le XML (exemple)
-            OrthoADControl.SimpleName = xml.Attribute("SimpleName")?.Value;
-
             // Parse the <Apparence> section
             XElement? appearance = xml.Element("Apparence");
             if (appearance != null)
@@ -166,17 +167,17 @@ namespace StageCode.LIB
                 OrthoADControl.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(appearance.Element("TextAlign")?.Value ?? "0"));
                 OrthoADControl.Format = appearance.Element("Format")?.Value ?? string.Empty;
 
-                // Exemple pour récupérer Flage depuis l'élément XML (exemple)
-                bool flageValue = bool.TryParse(appearance.Element("Flage")?.Value, out var result) ? result : false;
-                OrthoADControl.Flage = flageValue;
-
-                // Récupérer un IoStream depuis l'élément XML (exemple pour utilisation)
-                string ioStreamData = appearance.Element("IoStream")?.Value ?? string.Empty;
-                OrthoADControl.IoStream = ioStreamData.ToString();  // Par exemple
-
                 // Récupérer d'autres éléments comme dans votre code original
                 OrthoADControl.BackColor = FromOlInve(appearance.Element("BackColor")?.Value);
                 OrthoADControl.ForeColor = FromOlInve(appearance.Element("ForeColor")?.Value);
+
+                string SimpleName = appearance.Element("SimpleName")?.Value ?? string.Empty;
+                OrthoADControl.SimpleName = SimpleName;
+                string flageValue = appearance.Element("Flage")?.Value ?? string.Empty;
+                OrthoADControl.Flage = flageValue;
+
+                string ioStreamData = appearance.Element("IoStream")?.Value ?? string.Empty;
+                OrthoADControl.IoStream = ioStreamData.ToString();  // Par exemple
             }
 
             return OrthoADControl;
@@ -192,9 +193,6 @@ namespace StageCode.LIB
 
             // Section Apparence
             xmlContent.AppendLine("      <Apparence>");
-            xmlContent.AppendLine($"        <SimpleName>{this.SimpleName}</SimpleName>");  // Ajout de SimpleName
-            xmlContent.AppendLine($"        <Flage>{this.Flage}</Flage>");  // Ajout de Flage
-            xmlContent.AppendLine($"        <IoStream>{this.IoStream}</IoStream>");  // Conversion de IoStream en base64
             xmlContent.AppendLine($"        <Caption>{Caption}</Caption>");
             xmlContent.AppendLine($"        <TextAlign>{ContentAlignment_Parser.Get_ValueToWrite(this.TextAlign)}</TextAlign>");
             xmlContent.AppendLine($"        <Format>{Format}</Format>");
@@ -227,6 +225,12 @@ namespace StageCode.LIB
             xmlContent.AppendLine($"        <LevelVisible>{this.LevelVisible}</LevelVisible>");
             xmlContent.AppendLine($"        <LevelEnabled>{this.LevelEnabled}</LevelEnabled>");
             xmlContent.AppendLine($"        <Visibility>{this.Visibility}</Visibility>");
+
+            // Ajout des variables SimpleName, Flage et IoStream
+            xmlContent.AppendLine($"        <SimpleName>{this._simpleName}</SimpleName>");
+            xmlContent.AppendLine($"        <Flage>{this._flag}</Flage>");
+            xmlContent.AppendLine($"        <IoStream>{this._ioStream}</IoStream>");
+
             xmlContent.AppendLine("      </Apparence>");
 
             // Fermeture du composant
@@ -241,7 +245,6 @@ namespace StageCode.LIB
             var StyleText = new FontStyle();
             this.TextAlign = ContentAlignment_Parser.Get_Alignment(int.Parse(splitPvirgule[3]));
 
-            // Handle font style parsing for strikeout, underline, bold, and italic
             if (bool.TryParse(splitPvirgule[9], out bool isStrikeout) && isStrikeout)
             {
                 StyleText |= FontStyle.Strikeout;
@@ -267,21 +270,18 @@ namespace StageCode.LIB
             this.BackColor = FromOle(splitPvirgule[5]);
             this.ForeColor = FromOle(splitPvirgule[6]);
 
-            // Parsing TypeDesign enumeration safely
             if (Enum.TryParse<TDesign>(splitPvirgule[13], out TDesign typeDesignResult))
             {
-                TypeDesign = typeDesignResult;  // Successful conversion
+                TypeDesign = typeDesignResult;
             }
             else
             {
-                TypeDesign = TDesign.Bouton;  // Default value if conversion fails
+                TypeDesign = TDesign.Bouton;
             }
 
-            // Set properties from the split values
             this.BorderWidth = int.Parse(splitPvirgule[14]);
             this.Size = new Size(int.Parse(splitPvirgule[16]), int.Parse(splitPvirgule[15]));
 
-            // Handle location offset based on FromCopy flag
             if (FromCopy)
             {
                 this.Location = new Point(int.Parse(splitPvirgule[18]) + 10, int.Parse(splitPvirgule[17]) + 10);
@@ -291,7 +291,6 @@ namespace StageCode.LIB
                 this.Location = new Point(int.Parse(splitPvirgule[18]), int.Parse(splitPvirgule[17]));
             }
 
-            // Additional properties
             this.VarText = splitPvirgule[19];
             this.VarBackColor = splitPvirgule[20];
             this.VarForeColor = splitPvirgule[21];
@@ -300,27 +299,33 @@ namespace StageCode.LIB
             this.VarValMin = splitPvirgule[24];
             this.VarTextMin = splitPvirgule[25];
 
-            // VL7 and VL8
             _VL[7] = splitPvirgule[26];
             _VL[8] = splitPvirgule[27];
 
-            // State colors
             this.ColorOn = FromOle(splitPvirgule[28]);
             this.ColorOff = FromOle(splitPvirgule[29]);
             this.ColorErr = FromOle(splitPvirgule[30]);
 
-            // Level visibility and enabled
             this.LevelVisible = int.Parse(splitPvirgule[31]);
             this.LevelEnabled = int.Parse(splitPvirgule[32]);
 
-            // Visibility setting
             if (splitPvirgule.Length >= 34)
             {
                 this.Visibility = splitPvirgule[33];
             }
 
+            // Lecture des trois dernières variables si elles existent
+            if (splitPvirgule.Length >= 37)
+            {
+                _simpleName = splitPvirgule[34];
+                _flag = splitPvirgule[35];
+                _ioStream = splitPvirgule[36];
+            }
+
             return this;
         }
+
+
         public string WriteFile()
         {
             return "ORTHO;AD;"
@@ -355,7 +360,10 @@ namespace StageCode.LIB
                 + ToOle(ColorErr).ToString() + ";"
                 + LevelVisible.ToString() + ";"
                 + LevelEnabled.ToString() + ";"
-                + Visibility;
+                + Visibility + ";"
+                + _simpleName + ";"    // Ajout de SimpleName
+                + _flag + ";"          // Ajout de Flage
+                + _ioStream;           // Ajout de IoStream
         }
 
         private static Color FromOlInve(string oleColor)

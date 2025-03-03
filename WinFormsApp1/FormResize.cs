@@ -1,5 +1,4 @@
-﻿using StageCode.Other;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -160,7 +159,11 @@ namespace StageCode
             this.label5.Text = forme.Width.ToString();
             this.label6.Text = forme.Height.ToString();
 
-            ChangeLanguage(); 
+            // Adding placeholder text to textboxes
+            this.textBox1.PlaceholderText = "Enter width";
+            this.textBox2.PlaceholderText = "Enter height";
+
+            ChangeLanguage();
         }
 
         private void btnResize_Click(object sender, EventArgs e)
@@ -172,19 +175,49 @@ namespace StageCode
         {
             if (!int.TryParse(textBox1.Text, out int newWidth) || newWidth <= 0)
             {
-                MessageBox.Show("Veuillez entrer une largeur valide (nombre positif).", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowErrorMessage("Veuillez entrer une largeur valide (nombre positif).");
                 return;
             }
 
             if (!int.TryParse(textBox2.Text, out int newHeight) || newHeight <= 0)
             {
-                MessageBox.Show("Veuillez entrer une hauteur valide (nombre positif).", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ShowErrorMessage("Veuillez entrer une hauteur valide (nombre positif).");
                 return;
             }
 
             forme.Size = new Size(newWidth, newHeight);
 
             Close();
+        }
+
+        // Method to handle error messages in multiple languages
+        private void ShowErrorMessage(string message)
+        {
+            string errorMessage = message;
+
+            // Adjusting the error message based on language
+            switch (Forme1.Langue)
+            {
+                case 1: // English
+                    errorMessage = "Please enter a valid positive number.";
+                    break;
+                case 2: // Chinese
+                    errorMessage = "请输入有效的正数。";
+                    break;
+                case 3: // German
+                    errorMessage = "Bitte geben Sie eine gültige positive Zahl ein.";
+                    break;
+                case 4: // French (already set as default)
+                    break;
+                case 5: // Lithuanian
+                    errorMessage = "Prašome įvesti galiojantį teigiamą skaičių.";
+                    break;
+                default:
+                    errorMessage = "Please enter a valid positive number.";
+                    break;
+            }
+
+            MessageBox.Show(errorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

@@ -180,7 +180,7 @@ namespace OrthoDesigner
                 {
                     autreForme = new FormWindowsResize(this,pnlViewHost)
                     {
-                        Size = new Size(132, 157), // Petite taille
+                        Size = new Size(132, 170), // Petite taille
                         StartPosition = FormStartPosition.Manual,
                         BackColor = Color.FromArgb(64, 64, 64),
                         FormBorderStyle = FormBorderStyle.None

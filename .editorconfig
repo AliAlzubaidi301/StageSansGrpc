@@ -1,0 +1,31 @@
+﻿[*.cs]
+
+# CS8622: La nullabilité des types référence dans le type du paramètre ne correspond pas au délégué cible (probablement en raison des attributs de nullabilité).
+dotnet_diagnostic.CS8622.severity = none
+
+# CS8601: Existence possible d'une assignation de référence null.
+dotnet_diagnostic.CS8601.severity = none
+
+# CS8618: Un champ non-nullable doit contenir une valeur non-null lors de la fermeture du constructeur. Envisagez de déclarer le champ comme nullable.
+dotnet_diagnostic.CS8618.severity = none
+
+# CS8602: Déréférencement d'une éventuelle référence null.
+dotnet_diagnostic.CS8602.severity = none
+
+# CS8765: La nullabilité de type du paramètre ne correspond pas au membre substitué (probablement en raison des attributs de nullabilité).
+dotnet_diagnostic.CS8765.severity = none
+
+# IDE0027: Utiliser un corps d'expression pour un accesseur
+dotnet_diagnostic.IDE0027.severity = none
+
+# CS0108: Un membre masque un membre hérité ; le mot clé new est manquant
+dotnet_diagnostic.CS0108.severity = none
+
+# CS8625: Impossible de convertir un littéral ayant une valeur null en type référence non-nullable.
+dotnet_diagnostic.CS8625.severity = none
+
+# CS0114: Un membre masque un membre hérité ; le mot clé override est manquant
+dotnet_diagnostic.CS0114.severity = none
+
+# SYSLIB0011: Le type ou le membre est obsolète
+dotnet_diagnostic.SYSLIB0011.severity = none

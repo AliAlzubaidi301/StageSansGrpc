@@ -1,15 +1,14 @@
-﻿using CodeExceptionManager.Controller.DatabaseEngine.Implementation;
-using CodeExceptionManager.Model.Objects;
+﻿using CodeExceptionManager.Model.Objects;
 using Google.Protobuf.Collections;
 using Grpc.Core;
 using IGeneralConfigurationManager;
 using IIOManager;
-using Microsoft.Data.Sqlite;
 using OrthoDesigner;
 using OrthoDesigner.LIB;
 using OrthoDesigner.LIB___Copier;
 using OrthoDesigner.Other;
 using Orthodyne.CoreCommunicationLayer.Controllers;
+using Orthodyne.CoreCommunicationLayer.Models.GeneralConfiguration;
 using Orthodyne.CoreCommunicationLayer.Models.IO;
 using Orthodyne.CoreCommunicationLayer.Services;
 using StageCode.LIB;
@@ -17,18 +16,23 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml.Linq;
-using Methods = IGeneralConfigurationManager.Methods;
 
 namespace StageCode
 {
     public partial class Forme1 : Form
     {
         #region Attribut
+
+        // forme pour indiquer l'IP et le port
         FormeIPEtPORT formePortAndIP = new FormeIPEtPORT();
 
+        // variable pour la langue
         public static int Langue = 1; // 1 = English, 2 = Chinese, 3 = German, 4 = French, 5 = Lithuanian
+
+        // variable qui fera réfèrence du forme actuelle pour le forme formeResize pour le redimensionnement
         private Forme1 frm;
 
+        // le forme vide qui contiendra les PictureBox et les controles
         public static FormVide forme;
         private bool peutViderListe = false;
 
@@ -48,6 +52,7 @@ namespace StageCode
         private List<PictureBox> listPic = new List<PictureBox>();
         private ContextMenuStrip contextMenu = new ContextMenuStrip();
 
+        // le logo connexion et deconnexion
         private ToolStripMenuItem imageTmpLogo;
 
         private List<ControlPictureBoxWrapper> listeControle = new List<ControlPictureBoxWrapper>();
@@ -66,9 +71,11 @@ namespace StageCode
         private string DEFAULT_CORE_IP = "10.1.6.11";
         private static string applicationGuid = "TROP GALERE GRPC";
         private static Channel grpcChannel;
-        private static Methods.MethodsClient clientInterface;
+        private static IGeneralConfigurationManager.Methods.MethodsClient clientInterface;
         public static Dictionary<long, IoController> ioControllers = new Dictionary<long, IoController>();
         public static List<IoStream> listeStrem = new List<IoStream>();
+        public static List<FlagItem> listeFlag = new List<FlagItem>();
+
         private object remoteMethods;
 
         #endregion
@@ -185,7 +192,7 @@ namespace StageCode
 
             //sQ.Disconnect();
 
-            new LoggedException(Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Version.ToString(), this.GetType().Name, MethodBase.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
+          //  new LoggedException(Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Version.ToString(), this.GetType().Name, MethodBase.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
 
         }
         #endregion
@@ -504,6 +511,15 @@ namespace StageCode
             {
                 forme.panel1.Controls.Remove(pic);
                 pic.Dispose();
+
+                foreach(var i in listeControle)
+                {
+                    if(i.PictureBox == pic)
+                    {
+                        listeControle.Remove(i);
+                        break;
+                    }
+                }
             }
             else
             {
@@ -1189,6 +1205,8 @@ namespace StageCode
                         charger_fichierTXT(file.FileName);
                     }
 
+
+
                     ChemainOuvert = file.FileName;
 
                     string fileName = file.FileName;
@@ -1196,6 +1214,7 @@ namespace StageCode
                     string fileNameWithoutPath = System.IO.Path.GetFileName(fileName);
 
                     forme.label.Text = fileNameWithoutPath;
+
                 }
 
             }
@@ -2055,7 +2074,7 @@ namespace StageCode
 
                                 // Ajouter le PictureBox au panel
                                 forme.panel1.Controls.Add(pb);
-                            }
+                            }        
                         }
                         else if (string.IsNullOrWhiteSpace(ligne)) // Incrémenter le compteur pour les lignes vides
                         {
@@ -2429,7 +2448,7 @@ namespace StageCode
 
             if (tmp == "")
             {
-                tmp = forme.Text + ".syno";
+                tmp = forme.Text + ".syn";
             }
 
             if (saveResult == DialogResult.Yes)
@@ -2798,13 +2817,71 @@ namespace StageCode
                 {
                     // Ajouter seulement si le contrôle n'existe pas encore dans la liste
                     tmp = new ControlPictureBoxWrapper(pic, controle);
+                    
                     listeControle.Add(tmp);
+
+                    propertyGrid1.SelectedObject = tmp;
+                    propertyGrid1.ExpandAllGridItems();
+
+                    ControlPictureBoxWrapper? check = propertyGrid1.SelectedObject as ControlPictureBoxWrapper;
+
+                    if (check != null && check.Control != null)
+                    {
+                        Control ctrl = check.Control;
+
+                        // Récupération des valeurs des propriétés si elles existent
+                        string texteFlag = ctrl.GetType().GetProperty("Flage")?.GetValue(ctrl)?.ToString() ?? "";
+                        string texteStream = ctrl.GetType().GetProperty("IoStream")?.GetValue(ctrl)?.ToString() ?? "";
+                        string texteOrthoCore = ctrl.GetType().GetProperty("SimpleName")?.GetValue(ctrl)?.ToString() ?? "";
+
+                        foreach (var i2 in check.OrthoCoreItem)
+                        {
+                            if (texteOrthoCore.Contains(i2.Name))
+                            {
+                                i2.Selected = true;
+                            }
+                        }
+                        foreach (var i2 in check.Flags)
+                        {
+                            if (texteFlag.Contains(i2.Name))
+                            {
+                                i2.Selected = true;
+                            }
+                        }
+                        foreach (var i2 in check.Stream)
+                        {
+                            if (texteStream.Contains(i2.Name))
+                            {
+                                i2.Selected = true;
+                            }
+                        }
+                    }
+
+
+                    //foreach (var t in tmp.Flags)
+                    //{
+                    //    foreach (var propertyName in propertiesToCheck)
+                    //    {
+                    //        if (property != null && property.PropertyType == typeof(string))
+                    //        {
+                    //            string? propertyValue = property.GetValue(controle) as string;
+                    //            if (!string.IsNullOrEmpty(propertyValue) && propertyValue.Contains(t.Name))
+                    //            {
+                                    
+                    //            }
+                    //        }
+                    //    }
+                    //}
+
                 }
 
                 if (tmp != null)
                 {
                     propertyGrid1.SelectedObject = tmp;
                     propertyGrid1.ExpandAllGridItems();
+
+
+                    
                 }
             }
         }
@@ -3115,7 +3192,7 @@ namespace StageCode
 
         #region Logo Click
 
-        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        private void ConnexionLogo(object sender, EventArgs e)
         {
             if (toolStripMenuItem2.Image != null)
             {
@@ -3136,6 +3213,7 @@ namespace StageCode
                         toolStripMenuItem1.Tag = "Conexion";
                         FormeIPEtPORT.ip = "";
                         this.btnIP.Text = FormeIPEtPORT.ip.ToString();
+
                         // Vérifie si SelectedObject est bien du type ControlPictureBoxWrapper
                         if (propertyGrid1.SelectedObject is ControlPictureBoxWrapper tmp)
                         {
@@ -3160,7 +3238,6 @@ namespace StageCode
                     }
 
                     FormeIPEtPORT.connecter = !FormeIPEtPORT.connecter;
-
                     return;
                 }
 
@@ -3187,7 +3264,8 @@ namespace StageCode
             }
             else
             {
-                MessageBox.Show("Aucune image de fond définie sur toolStripMenuItem2.");
+                string message = GetMessage("NoBackgroundImage");
+                MessageBox.Show(message);
             }
 
             if (FormeIPEtPORT.connecter)
@@ -3197,29 +3275,46 @@ namespace StageCode
 
                 try
                 {
-                    grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, ChannelCredentials.Insecure);
-                    clientInterface = new Methods.MethodsClient(grpcChannel);
+                    //grpcChannel = new Channel(DEFAULT_CORE_IP + ":" + PORT_NUMBER, ChannelCredentials.Insecure);
+                    //clientInterface = new Methods.MethodsClient(grpcChannel);
 
-                    MessageBox.Show("Connexion reussis");
+
+                    listeControle.Clear();
 
                     Task.Run(() =>
                     {
-                        ChargerContenuOrthoCore();
-
-                        listeStrem = GetAllStreamsDataTableIoStream();
-
-                        listeStrem = GetAllStreamsDataTable();
-                        var i = new ModuleGeneralConfigurationControllerOrthoDesigner(new ModuleGeneralConfigurationRevocationService("", this.DEFAULT_CORE_IP), new GeneralController("", this.DEFAULT_CORE_IP));
-                        var liste = i.LoadFlags();
-
-                        if (listeStrem.Count <= 0)
+                        try
                         {
-                            MessageBox.Show("Aucun Stream trouver !");
+                            GeneralController generalController = new GeneralController("", this.DEFAULT_CORE_IP);
+                            generalController.ModuleAccessController.CheckRunningCore();
+
+                            ChargerContenuOrthoCore();
+
+                            listeStrem = GetAllStreamsDataTableIoStream();
+
+                            listeStrem = GetAllStreamsDataTable();
+                            var i = new ModuleGeneralConfigurationControllerOrthoDesigner(new ModuleGeneralConfigurationRevocationService("", this.DEFAULT_CORE_IP), new GeneralController("", this.DEFAULT_CORE_IP));
+                            listeFlag = i.LoadFlags();
+
+                            string connectionMessage = GetMessage("SuccessfulConnection");
+                            listeControle.Clear();
+                            MessageBox.Show(connectionMessage);
+
+                            string streamMessage = GetMessage("NoStreamFound");
+                            if (listeStrem.Count <= 0)
+                            {
+                                MessageBox.Show(streamMessage);
+                            }
+
+                            string flagMessage = GetMessage("NoFlagFound");
+                            if (listeFlag.Count < 0)
+                            {
+                                MessageBox.Show(flagMessage);
+                            }
                         }
-
-                        foreach (var list in liste)
+                        catch (Exception ex)
                         {
-                            MessageBox.Show(list.Name.ToString());
+                            MessageBox.Show(ex.Message);
                         }
                     });
                 }
@@ -3233,10 +3328,75 @@ namespace StageCode
                 DEFAULT_CORE_IP = "";
                 PORT_NUMBER = "";
 
-                grpcChannel?.ShutdownAsync().Wait();
+               // grpcChannel?.ShutdownAsync().Wait();
 
-                Forme1.ioControllers.Clear();
+              //  Forme1.ioControllers.Clear();
             }
+        }
+
+        // Fonction générale pour obtenir les messages en fonction du type de message et de la langue
+        private string GetMessage(string messageType)
+        {
+            string message = string.Empty;
+
+            switch (Langue)
+            {
+                case 1: // English
+                    message = messageType switch
+                    {
+                        "NoBackgroundImage" => "No background image set on toolStripMenuItem2.",
+                        "SuccessfulConnection" => "Connection successful.",
+                        "NoStreamFound" => "No stream found!",
+                        "NoFlagFound" => "No flag found!",
+                        _ => "Unknown message type"
+                    };
+                    break;
+                case 2: // Chinese
+                    message = messageType switch
+                    {
+                        "NoBackgroundImage" => "未在toolStripMenuItem2上设置背景图片。",
+                        "SuccessfulConnection" => "连接成功",
+                        "NoStreamFound" => "没有找到流!",
+                        "NoFlagFound" => "没有找到旗帜!",
+                        _ => "未知的消息类型"
+                    };
+                    break;
+                case 3: // German
+                    message = messageType switch
+                    {
+                        "NoBackgroundImage" => "Kein Hintergrundbild auf toolStripMenuItem2 gesetzt.",
+                        "SuccessfulConnection" => "Verbindung erfolgreich",
+                        "NoStreamFound" => "Kein Stream gefunden!",
+                        "NoFlagFound" => "Keine Flagge gefunden!",
+                        _ => "Unbekannter Nachrichtentyp"
+                    };
+                    break;
+                case 4: // French
+                    message = messageType switch
+                    {
+                        "NoBackgroundImage" => "Aucune image de fond définie sur toolStripMenuItem2.",
+                        "SuccessfulConnection" => "Connexion réussie",
+                        "NoStreamFound" => "Aucun Stream trouvé !",
+                        "NoFlagFound" => "Aucun Flag trouvé !",
+                        _ => "Type de message inconnu"
+                    };
+                    break;
+                case 5: // Lithuanian
+                    message = messageType switch
+                    {
+                        "NoBackgroundImage" => "Įrankių juostoje nėra nustatyta fono nuotrauka.",
+                        "SuccessfulConnection" => "Prisijungimas sėkmingas",
+                        "NoStreamFound" => "Nerasta jokių srautų!",
+                        "NoFlagFound" => "Nerasta jokių vėliavų!",
+                        _ => "Nežinomas pranešimo tipas"
+                    };
+                    break;
+                default:
+                    message = "Unknown message type";
+                    break;
+            }
+
+            return message;
         }
 
         //private void toolStripMenuItem1_Click(object sender, EventArgs e)
@@ -3490,62 +3650,95 @@ namespace StageCode
         #region PropertyGrid1
         private void propertyGrid1_PropertyValueChanged(object sender, PropertyValueChangedEventArgs e)
         {
-            PropertyGrid? pr = sender as PropertyGrid;
+            if (sender is not PropertyGrid pr || pr.SelectedObject is not ControlPictureBoxWrapper selectedControl)
+                return;
 
-            if (pr != null && pr.SelectedObject is ControlPictureBoxWrapper selectedControl)
+            selectedControl.AfficherSelection();
+            Control? control = selectedControl.Control;
+
+            if (control == null) return;
+
+            foreach (var i in listeControle.Where(i => i.Control?.GetType() == selectedControl.Control.GetType()))
             {
-                selectedControl.AfficherSelection();
+                for (int z = 0; z < i.Stream.Count; z++)
+                {
+                    i.Stream[z].Selected = selectedControl.Stream[z].Selected;
+                }
+            }
+
+            if (propertyGrid1.SelectedObject is not ControlPictureBoxWrapper check || check.Control == null)
+                return;
+
+            Dictionary<string, string> propertiesToUpdate = new()
+            {
+                { "Flage", string.Join(",", check.Flags.Where(i => i.Selected).Select(i => i.Name)) },
+                { "IoStream", string.Join(",", check.Stream.Where(i => i.Selected).Select(i => i.Name)) },
+                { "SimpleName", string.Join(",", check.OrthoCoreItem.Where(i => i.Selected).Select(i => i.Name)) }
+            };
+
+            foreach (var (propertyName, value) in propertiesToUpdate)
+            {
+                var property = check.Control.GetType().GetProperty(propertyName);
+                if (property?.CanWrite == true && property.PropertyType == typeof(string))
+                {
+                    property.SetValue(check.Control, value);
+                }
+            }
+
+            foreach (var i in check.OrthoCoreItem) i.Selected = propertiesToUpdate["SimpleName"].Contains(i.Name);
+            foreach (var i in check.Flags) i.Selected = propertiesToUpdate["Flage"].Contains(i.Name);
+            foreach (var i in check.Stream) i.Selected = propertiesToUpdate["IoStream"].Contains(i.Name);
+
+            //// Vérifier si le contrôle est un PictureBox et si sa visibilité est 0
+
+            //var property2 = check.Control.GetType().GetProperty("Visibility");
+            //MessageBox.Show(property2.GetType().ToString());
+
+            //if (property2 == null || property2.PropertyType != typeof(int))
+            //    return;
+
+            //int visibilityValue = (int)property2.GetValue(check.Control);
+
+            //if (control is PictureBox pictureBox && visibilityValue == 0)
+            //{
+            //    DrawCrossOnPictureBox(pictureBox);
+            //}
+
+            string i2 = (string)control.GetType().GetProperty("Visibility").GetValue(control);
+            int tmp = Convert.ToInt32(i2);
+
+            var t = propertyGrid1.SelectedObject as ControlPictureBoxWrapper;
+
+            if (tmp == 0)
+            {
+                DrawCrossOnControl(t.Control);
             }
             else
             {
-                return; // Sortir immédiatement si selectedControl est nul
-            }
+                using Graphics g = t.Control.CreateGraphics();
 
-            Control? control = null;
-
-            foreach (FormVide form in pnlViewHost.Controls.OfType<FormVide>())
-            {
-                foreach (PictureBox pictureBox in form.panel1.Controls.OfType<PictureBox>())
-                {
-                    if (pictureBox.Controls.Count > 0 && pictureBox.Controls[0].Name == this.ControlSélectionner)
-                    {
-                        control = pictureBox.Controls[0];
-                        break;
-                    }
-                }
-                if (control != null) break;
-            }
-
-            // Si aucun contrôle n'est trouvé, sortir de la méthode
-            if (control == null) return;
-
-            foreach (var i in listeControle)
-            {
-                if (i.Control != null
-                    && i.Control.GetType() == selectedControl.Control.GetType()
-                    && i.Stream.Count == selectedControl.Stream.Count)
-                {
-                    for (int z = 0; z < i.Stream.Count; z++)
-                    {
-                        i.Stream[z].Selected = selectedControl.Stream[z].Selected;
-                    }
-
-                    // Concaténer tous les noms sélectionnés avec une virgule
-                    if (i.Control is OrthoDI orthoDI)
-                    {
-                        orthoDI.IoStream = string.Join(",", i.Stream.Where(s => s.Selected).Select(s => s.Name));
-                    }
-                    if (i.Control is OrthoRel Rel)
-                    {
-                        Rel.IoStream = string.Join(",", i.Stream.Where(s => s.Selected).Select(s => s.Name));
-                    }
-                    if (i.Control is OrthoDI AD)
-                    {
-                        AD.IoStream = string.Join(",", i.Stream.Where(s => s.Selected).Select(s => s.Name));
-                    }
-                }
+                g.Clear(t.Control.BackColor);
             }
         }
+
+        private void DrawCrossOnControl(Control control)
+        {
+            using Graphics g = control.CreateGraphics();
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias; // Améliore la qualité du dessin
+
+            using Pen pen = new Pen(Color.Red, 3);
+
+            int x1 = 0, y1 = 0;
+            int x2 = control.Width, y2 = control.Height;
+
+            // Dessiner la croix
+            g.DrawLine(pen, x1, y1, x2, y2);
+            g.DrawLine(pen, x2, y1, x1, y2);
+
+            // Dessiner le cadre rouge autour du contrôle
+            g.DrawRectangle(pen, 0, 0, control.Width - 1, control.Height - 1);
+        }
+
 
         private void lstToolbox_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -3621,14 +3814,14 @@ namespace StageCode
                 Task.Run(() =>
                 {
                     var module = new ModuleIoRemoteMethodInvocationService("", DEFAULT_CORE_IP);
+
                     //module.DEFAULT_CORE_IP = DEFAULT_CORE_IP;
                     //module.PORT_NUMBER = PORT_NUMBER;
 
-                    var b = new ModuleIoControllerOrthoDesigner(module, new GeneralController(""));
+                    var b = new ModuleIoControllerOrthoDesigner(module, new GeneralController("", this.DEFAULT_CORE_IP));
                     b.RefreshControllers();
 
                     ioControllers = b.GetIoControllers();
-
 
                     if (ioControllers.Count == 0)
                     {
@@ -3669,7 +3862,7 @@ namespace StageCode
         //    return listes;
         //}
 
-        // Méthode pour extraire le type entre parenthèses dans le nom complet
+        //Méthode pour extraire le type entre parenthèses dans le nom complet
         private static string ExtraireTypeDepuisNom(string fullName)
         {
             int debut = fullName.IndexOf('(');
@@ -3689,7 +3882,7 @@ namespace StageCode
 
             try
             {
-                var module = new ModuleIoControllerOrthoDesigner(new ModuleIoRemoteMethodInvocationService("",DEFAULT_CORE_IP), new GeneralController("",DEFAULT_CORE_IP));
+                var module = new ModuleIoControllerOrthoDesigner(new ModuleIoRemoteMethodInvocationService("", DEFAULT_CORE_IP), new GeneralController("", DEFAULT_CORE_IP));
                 var liste = module.GetIoStreams();
             }
             catch (Exception ex)
@@ -3774,5 +3967,4 @@ namespace StageCode
 
         #endregion
     }
-
 }
