@@ -2855,6 +2855,7 @@ namespace StageCode
 
         #endregion
 
+        //
         #region AlignerItem
         private void Control_MouseClick(object? sender, MouseEventArgs e)
         {
