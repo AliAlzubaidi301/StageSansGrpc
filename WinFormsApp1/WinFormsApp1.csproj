@@ -16,11 +16,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="AlarmManager">
+      <HintPath>Z:\ModuleGeneralConfiguration\GeneralconfigurationManager\AlarmManager.dll</HintPath>
+    </Reference>
+    <Reference Include="AlarmManagerInterface">
+      <HintPath>Z:\ModuleGeneralConfiguration\GeneralconfigurationManager\AlarmManagerInterface.dll</HintPath>
+    </Reference>
     <Reference Include="CodeExceptionManager">
-      <HintPath>..\..\..\..\Downloads\CodeExceptionManager.dll</HintPath>
+      <HintPath>Z:\ModuleGeneralConfiguration\GeneralconfigurationManager\CodeExceptionManager.dll</HintPath>
     </Reference>
     <Reference Include="GeneralConfigurationManagerInterface">
-      <HintPath>..\..\..\MODE DES BITS\Orthodyne.CoreCommunicationLayer\Orthodyne.CoreCommunicationLayer\GeneralConfigurationManagerInterface.dll</HintPath>
+      <HintPath>Z:\ModuleGeneralConfiguration\GrpcInterface\GeneralConfigurationManagerInterface.dll</HintPath>
     </Reference>
     <Reference Include="IOManagerInterface">
       <HintPath>Z:\ModuleGeneralConfiguration\GeneralconfigurationManager\IOManagerInterface.dll</HintPath>
